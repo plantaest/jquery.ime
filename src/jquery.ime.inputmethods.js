@@ -1102,6 +1102,18 @@
 			name: 'Vèneto',
 			source: 'rules/vec/vec-GVU.js'
 		},
+		'vi-telex': {
+			name: 'Vietnamese Telex',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-viqr': {
+			name: 'Vietnamese VIQR',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-vni': {
+			name: 'Vietnamese VNI',
+			source: 'rules/vi/vi.js'
+		},
 		'wlx-tilde': {
 			name: 'Waale tilde',
 			source: 'rules/wlx/wlx-tilde.js'
@@ -1949,6 +1961,10 @@
 		vec: {
 			autonym: 'Vèneto',
 			inputmethods: [ 'vec-GVU' ]
+		},
+		vi: {
+			autonym: 'Tiếng Việt',
+			inputmethods: [ 'vi-vni', 'vi-telex', 'vi-viqr' ]
 		},
 		wlx: {
 			autonym: 'Waale',

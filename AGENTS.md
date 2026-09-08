@@ -10,32 +10,48 @@ The target input methods are:
 * Telex
 * VIQR
 
-All three input methods should share one Vietnamese composition engine.
+All three must share one Vietnamese composition engine.
 
-VNI is the preferred input method for examples and implementation discussion when only one method-specific example is needed.
+VNI is the preferred method for examples and early implementation work when only one method-specific path is needed.
 
-## Project status
+## Current status
 
-VIWP.IME is currently being developed on top of the existing jQuery.IME repository.
+The current branch contains the Phase 1 jQuery.IME integration scaffold:
 
-The upstream jQuery.IME test suite was green before Vietnamese-specific implementation began.
+* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, and `vi-viqr`.
+* The three input methods share one Vietnamese rule source.
+* Functional `patterns` rules can call a shared engine boundary.
+* The current engine is a pass-through placeholder and does not implement production Vietnamese behavior yet.
 
-Do not assume that Vietnamese production code already exists unless it is present in the current branch.
+Do not assume Vietnamese production behavior exists unless it is present in the current branch and covered by tests.
 
 ## Required reading
 
-Before changing Vietnamese-specific behavior or architecture, read:
+Before changing Vietnamese-specific behavior, architecture, or tests, read:
 
 * `docs/vi/README.md`
-* `docs/vi/terminology.md`
 * `docs/vi/requirements.md`
-* `docs/vi/orthographic-model.md`
 * `docs/vi/architecture.md`
+* `docs/vi/orthographic-model.md`
 * `docs/vi/testing.md`
+* `docs/vi/terminology.md`
 
 These documents define the intended project model.
 
-When implementation and documentation disagree, do not silently choose one. Identify the discrepancy and resolve it explicitly.
+When implementation and documentation disagree, do not silently choose one. Identify the discrepancy, update the right document, and keep the code and tests aligned.
+
+## Revised phase plan
+
+The active plan is:
+
+* Phase 0 – baseline and project specification.
+* Phase 1 – jQuery.IME integration spike.
+* Phase 2 – shared engine vertical slice with VNI.
+* Phase 3 – complete shared Vietnamese behavior.
+* Phase 4 – Telex and VIQR adapters.
+* Phase 5 – coverage, playground, and upstream hardening.
+
+The next implementation work should normally be Phase 2: a small VNI vertical slice through the shared engine.
 
 ## Architectural constraints
 
@@ -51,13 +67,13 @@ Conceptually:
 VNI 1
 Telex s
 VIQR '
-    ↓
+    ->
 APPLY_TONE(ACUTE)
 ```
 
-Parsing, tone placement, vowel-diacritic handling, Unicode rendering, `qu`, `gi`, and other Vietnamese orthographic logic should be shared.
+Parsing, tone placement, vowel-diacritic handling, Unicode rendering, `qu`, `gi`, and other Vietnamese orthographic logic must be shared.
 
-### Keep the Vietnamese engine independent from jQuery.IME where practical
+### Keep the engine host-independent
 
 Core Vietnamese logic should not depend directly on:
 
@@ -67,15 +83,15 @@ Core Vietnamese logic should not depend directly on:
 * caret manipulation;
 * editable-element handling.
 
-jQuery.IME should remain responsible for host integration.
+jQuery.IME remains responsible for host integration.
 
-The Vietnamese engine should be directly testable without simulating browser input where practical.
+The Vietnamese engine should be directly testable without simulating browser input wherever practical.
 
 ### Prefer semantic transformations
 
 Represent Vietnamese operations semantically.
 
-Examples include:
+Examples:
 
 * applying a tone;
 * removing a tone;
@@ -84,7 +100,7 @@ Examples include:
 
 Do not model Vietnamese behavior primarily as direct character substitutions.
 
-### Do not build a large ordered regex grammar
+### Avoid large ordered regex grammars
 
 Regular expressions are allowed for small, local tasks.
 
@@ -92,33 +108,33 @@ Do not encode Vietnamese orthographic semantics as a large ordered list of overl
 
 If parsing is ambiguous, resolve the ambiguity explicitly through the orthographic model.
 
-### Rendered text is the primary source of truth
+### Use rendered text as the main state
 
-Prefer reconstructing the current Vietnamese composition state from the rendered text near the caret.
+Prefer reconstructing the current Vietnamese composition state from rendered text near the caret.
 
-Do not rely on a persistent raw-keystroke history unless a specific behavior demonstrably requires it.
+Do not rely on persistent raw-keystroke history unless a specific behavior demonstrably requires it.
 
 jQuery.IME `context` should not become the primary Vietnamese composition state.
 
-### Tone is semantic
+### Treat tone semantically
 
 Tone must be modeled independently from the Unicode character that currently carries the visible tone mark.
 
 Do not implement tone relocation as a fundamental semantic operation.
 
-Instead:
+Use this model instead:
 
 ```text
 parse current structure
-→ preserve semantic tone
-→ change structure
-→ recalculate tone placement
-→ render
+-> preserve semantic tone
+-> change structure
+-> recalculate tone placement
+-> render
 ```
 
-### Distinguish complete and intermediate states
+### Distinguish state types
 
-The parser must be able to distinguish:
+The parser must distinguish:
 
 * complete Vietnamese orthographic syllables;
 * valid intermediate composition states;
@@ -126,27 +142,25 @@ The parser must be able to distinguish:
 
 Do not reject a composition merely because its current surface form is not valid final Vietnamese orthography.
 
-### Keep structural validity separate from lexical validity
+### Keep structural and lexical validity separate
 
 VIWP.IME is not a Vietnamese dictionary or lexical spell checker.
 
 Do not introduce a dictionary dependency merely to determine ordinary Vietnamese composition behavior.
 
-## Vietnamese terminology
+## Terminology
 
-Use the canonical terminology defined in:
+Use the canonical terminology in `docs/vi/terminology.md`.
 
-`docs/vi/terminology.md`
-
-In particular:
+Important terms:
 
 * use `tone`, not `accent`;
 * use `tone mark` for the visible mark;
 * use `vowel diacritic` for circumflex, breve, and horn;
-* use `nucleus`, `onset`, `rime`, and `coda` according to the project model;
+* use `nucleus`, `onset`, `rime`, and `ending` according to the project model;
 * use `traditional tone placement` and `reformed tone placement`, not `old style` and `new style`.
 
-Do not introduce new competing terminology without updating the terminology document.
+Do not introduce competing terminology without updating `docs/vi/terminology.md`.
 
 ## Tone placement
 
@@ -172,8 +186,6 @@ Do not hard-code tone-placement policy inside VNI, Telex, or VIQR adapters.
 
 Avoid modifying jQuery.IME core.
 
-Do not modify core code merely to make Vietnamese implementation easier.
-
 A core change should only be considered when:
 
 1. a concrete Vietnamese requirement cannot be implemented correctly through existing extension mechanisms;
@@ -185,23 +197,27 @@ If a core limitation is discovered, report it rather than immediately working ar
 
 ## Packaging
 
-The exact source-file layout of the shared Vietnamese engine is not frozen yet.
+The Phase 1 spike confirmed that the smallest upstream-compatible packaging is one shared Vietnamese rule source:
 
-Before introducing a final packaging structure, inspect:
+```text
+rules/vi/vi.js
+```
 
-* current jQuery.IME rule-loading conventions;
-* dependency/reuse mechanisms;
-* build behavior;
-* test loading;
-* upstream style.
+with metadata entries for:
 
-Prefer the smallest upstream-compatible structure that preserves the shared-engine boundary.
+```text
+vi-vni
+vi-telex
+vi-viqr
+```
+
+all pointing to that source.
+
+Keep this packaging until tests or implementation size prove that a split is worth the additional loader complexity.
 
 ## Testing rules
 
 Read `docs/vi/testing.md` before changing test infrastructure.
-
-### Test at the lowest useful layer
 
 Use pure engine tests for:
 
@@ -213,11 +229,11 @@ Use pure engine tests for:
 * rendering;
 * validation.
 
-Use jQuery.IME integration fixtures for the host boundary and complete typing sequences.
+Use jQuery.IME integration fixtures for the host boundary and representative complete typing sequences.
 
 Do not run large grammar corpora through simulated DOM typing when direct engine tests are sufficient.
 
-### Write regression tests
+### Regression tests
 
 A confirmed bug should receive a deterministic automated regression test.
 
@@ -225,17 +241,17 @@ Prefer the smallest test that reproduces the actual failure.
 
 ### Preserve upstream tests
 
-Before considering a substantial change complete, relevant Vietnamese tests must pass.
+Before a substantial change is considered complete, run focused Vietnamese tests.
 
-Before a major push, milestone, or upstream review, run the complete upstream suite:
+Before milestones, upstream review, or broad integration changes, run the full relevant repository suite:
 
 ```bash
-npx grunt --force
+npx grunt test
 ```
 
-The full suite is a regression gate, not necessarily the inner development loop.
+If full lint/default tasks fail because of unrelated pre-existing issues, keep touched-file lint clean and document the broader failure.
 
-### Do not weaken tests to make code pass
+### Do not weaken tests
 
 Do not:
 
@@ -243,16 +259,16 @@ Do not:
 * skip failing upstream tests without explanation;
 * relax Vietnamese requirements merely because the current implementation is difficult.
 
-If a test and the specification genuinely disagree, identify the specification issue explicitly.
+If a test and the specification genuinely disagree, identify the specification issue explicitly and update the relevant doc.
 
 ## Implementation workflow
 
-For non-trivial tasks:
+For non-trivial work:
 
-1. read the relevant project documentation;
-2. inspect the existing jQuery.IME implementation;
-3. identify the smallest affected architectural layer;
-4. add or update tests;
+1. read the relevant `docs/vi` files;
+2. inspect current jQuery.IME conventions before changing architecture;
+3. identify the smallest affected layer;
+4. add or update focused tests;
 5. implement the behavior;
 6. run focused tests;
 7. inspect the diff for unrelated changes;
@@ -260,42 +276,27 @@ For non-trivial tasks:
 
 Do not rewrite unrelated jQuery.IME code while implementing Vietnamese support.
 
-## Documentation maintenance
-
-Update documentation when an implementation decision changes the documented architecture or behavior.
-
-Use:
-
-* `requirements.md` for user-visible behavior;
-* `orthographic-model.md` for Vietnamese structural rules;
-* `architecture.md` for software boundaries;
-* `testing.md` for testing strategy.
-
-Do not place major architectural decisions only in source-code comments.
-
-For significant decisions with multiple plausible alternatives, consider adding a record under:
-
-```text
-docs/vi/decisions/
-```
-
-## Coding-agent behavior
-
-When a requirement is unclear:
-
-* inspect the project documentation first;
-* inspect existing jQuery.IME conventions;
-* do not invent Vietnamese orthographic rules;
-* do not assume behavior from another Vietnamese IME unless the task explicitly asks for compatibility research;
-* report unresolved ambiguity when it affects correctness.
-
 When asked only to analyze or plan, do not modify files.
 
 When asked to implement a scoped task, stay within that scope unless a blocking dependency requires a small additional change.
 
+## Documentation maintenance
+
+Update documentation when an implementation decision changes documented architecture or behavior.
+
+Use:
+
+* `requirements.md` for user-visible behavior;
+* `orthographic-model.md` for Vietnamese written structure;
+* `architecture.md` for software boundaries;
+* `testing.md` for testing strategy and commands;
+* `terminology.md` for names.
+
+Do not place major architectural decisions only in source-code comments.
+
 ## Upstream mindset
 
-Assume that the final implementation will be reviewed by jQuery.IME maintainers who may not know Vietnamese.
+Assume the final implementation will be reviewed by jQuery.IME maintainers who may not know Vietnamese.
 
 Prefer:
 
@@ -306,4 +307,4 @@ Prefer:
 * documented behavior;
 * minimal core impact.
 
-The implementation should be understandable from the code and project documentation without requiring knowledge of historical Vietnamese input-method implementations.
+The implementation should be understandable from code, tests, and documentation without requiring knowledge of historical Vietnamese input-method implementations.
