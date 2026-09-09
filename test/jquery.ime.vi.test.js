@@ -172,6 +172,36 @@
 		);
 	} );
 
+	QUnit.module( 'VIWP.IME – Parser', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'Vietnamese parser identifies onset, rime, and checked endings', ( assert ) => {
+		var parsedQuoc = $.ime.vi.parseCandidate( 'quoc' ),
+			parsedGieng = $.ime.vi.parseCandidate( 'gieng' ),
+			parsedKhuay = $.ime.vi.parseCandidate( 'khuay' ),
+			parsedHuya = $.ime.vi.parseCandidate( 'huya' ),
+			parsedMat = $.ime.vi.parseCandidate( 'mat' );
+
+		assert.strictEqual( parsedQuoc.structure.onset, 'qu', 'qu is represented as a special onset' );
+		assert.strictEqual( parsedQuoc.structure.rime, 'oc', 'The u in qu is not part of the rime' );
+		assert.strictEqual( parsedQuoc.structure.toneTargetIndex, 2, 'quoc places tone on o' );
+
+		assert.strictEqual( parsedGieng.structure.onset, 'gi', 'gi is represented as a special onset before another vowel' );
+		assert.strictEqual( parsedGieng.structure.rime, 'eng', 'The i in gi is not part of the rime before another vowel' );
+		assert.strictEqual( parsedGieng.structure.toneTargetIndex, 2, 'gieng places tone on e' );
+
+		assert.strictEqual( parsedKhuay.structure.onset, 'kh', 'kh is parsed as a multi-letter onset' );
+		assert.strictEqual( parsedKhuay.structure.rime, 'uay', 'khuay keeps the medial and off-glide inside the rime' );
+		assert.strictEqual( parsedKhuay.structure.toneTargetIndex, 3, 'khuay places tone on a' );
+
+		assert.strictEqual( parsedHuya.structure.rime, 'uya', 'huya keeps the rare uya rime together' );
+		assert.strictEqual( parsedHuya.structure.toneTargetIndex, 2, 'huya places tone on y' );
+
+		assert.strictEqual( parsedMat.structure.ending, 't', 'mat has a t ending' );
+		assert.true( parsedMat.structure.checked, 'mat is recognized as a checked syllable' );
+	} );
+
 	QUnit.module( 'VIWP.IME – Transform', {
 		before: loadVietnameseSource
 	} );
@@ -221,6 +251,16 @@
 				output: 'â'
 			},
 			'REMOVE_TONE preserves the vowel diacritic'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'tường', {
+				type: commandType.REMOVE_TONE
+			} ),
+			{
+				handled: true,
+				output: 'tương'
+			},
+			'REMOVE_TONE preserves a complex vowel nucleus'
 		);
 	} );
 
@@ -294,6 +334,106 @@
 			},
 			'HORN applies to the uo precursor as ươ'
 		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huo', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.HORN
+			} ),
+			{
+				handled: true,
+				output: 'huơ'
+			},
+			'HORN on open uo applies to o as uơ'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'lôo', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				literal: '6',
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'lôô'
+			},
+			'CIRCUMFLEX applies to another eligible vowel before using repeated-key escape'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huốp', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.HORN
+			} ),
+			{
+				handled: true,
+				output: 'hướp'
+			},
+			'HORN changes uô to ươ while preserving tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hướp', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'huốp'
+			},
+			'CIRCUMFLEX changes ươ to uô while preserving tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'thay', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'thây'
+			},
+			'CIRCUMFLEX applies to the nucleus before an off-glide'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'khuay', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'khuây'
+			},
+			'CIRCUMFLEX applies to a after a medial u'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'quoc', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'quôc'
+			},
+			'CIRCUMFLEX ignores the u in qu and applies to o'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'gieng', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'giêng'
+			},
+			'CIRCUMFLEX ignores the i in gi and applies to e'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'tháy', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'thấy'
+			},
+			'CIRCUMFLEX after a tone command preserves and repositions tone'
+		);
 	} );
 
 	QUnit.test( 'Vietnamese engine handles d-stroke and initial fallback behavior', ( assert ) => {
@@ -318,6 +458,37 @@
 				output: 'Đ'
 			},
 			'd-stroke applies to uppercase D'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'dac', {
+				type: commandType.APPLY_D_STROKE
+			} ),
+			{
+				handled: true,
+				output: 'đac'
+			},
+			'd-stroke applies to the candidate onset after rime material'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'Dac', {
+				type: commandType.APPLY_D_STROKE
+			} ),
+			{
+				handled: true,
+				output: 'Đac'
+			},
+			'd-stroke preserves uppercase onset after rime material'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'đác', {
+				type: commandType.APPLY_D_STROKE,
+				literal: '9'
+			} ),
+			{
+				handled: true,
+				output: 'dác9'
+			},
+			'repeated d-stroke key escapes after the full candidate is already rendered'
 		);
 		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'bc', {
@@ -358,6 +529,175 @@
 		);
 	} );
 
+	QUnit.module( 'VIWP.IME – Tone placement', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'Vietnamese engine resolves Phase 3 tone-placement regressions', ( assert ) => {
+		var tone = $.ime.vi.Tone,
+			commandType = $.ime.vi.CommandType;
+
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'coi', {
+				type: commandType.APPLY_TONE,
+				tone: tone.TILDE
+			} ),
+			{
+				handled: true,
+				output: 'cõi'
+			},
+			'oi places tone on o, not i'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'kheo', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'khéo'
+			},
+			'eo places tone on e, not o'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'thây', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'thấy'
+			},
+			'ây places tone on â, not y'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'khuây', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'khuấy'
+			},
+			'uây places tone on â, not y'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoan', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			} ),
+			{
+				handled: true,
+				output: 'hoàn'
+			},
+			'oa plus ending places tone on a'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huy', {
+				type: commandType.APPLY_TONE,
+				tone: tone.HOOK
+			} ),
+			{
+				handled: true,
+				output: 'hủy'
+			},
+			'Open uy keeps traditional tone placement on u'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huynh', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			} ),
+			{
+				handled: true,
+				output: 'huỳnh'
+			},
+			'uy plus ending places tone on y'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huya', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'huýa'
+			},
+			'uya places tone on y'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'THÂY', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'THẤY'
+			},
+			'Uppercase candidates keep case while resolving tone placement'
+		);
+	} );
+
+	QUnit.test( 'Vietnamese engine handles qu, gi, and checked-tone structure', ( assert ) => {
+		var tone = $.ime.vi.Tone,
+			commandType = $.ime.vi.CommandType;
+
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'quôc', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'quốc'
+			},
+			'quốc places tone on ô'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'giêng', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'giếng'
+			},
+			'giếng places tone on ê'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'mat', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'mát'
+			},
+			'Checked syllables accept acute tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'mat', {
+				type: commandType.APPLY_TONE,
+				tone: tone.DOT
+			} ),
+			{
+				handled: true,
+				output: 'mạt'
+			},
+			'Checked syllables accept dot tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'mat', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			} ),
+			{
+				handled: false
+			},
+			'Checked syllables reject incompatible tone commands conservatively'
+		);
+	} );
+
 	QUnit.module( 'VIWP.IME – Adapter', {
 		before: loadVietnameseSource
 	} );
@@ -388,12 +728,143 @@
 			'Adapter routes VNI d-stroke commands through the shared engine'
 		);
 		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'dac9', '' ),
+			{
+				noop: false,
+				output: 'đac'
+			},
+			'Adapter routes VNI d-stroke commands after rime material'
+		);
+		assert.deepEqual(
 			$.ime.inputmethods[ 'vi-vni' ].patterns( 'bc1', '' ),
 			{
 				noop: true,
 				output: 'bc1'
 			},
 			'Adapter passes through commands the vertical-slice engine cannot handle'
+		);
+	} );
+
+	QUnit.test( 'VNI adapter supports Phase 3 typing behavior and repeated-key escape', ( assert ) => {
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'coi4', '' ),
+			{
+				noop: false,
+				output: 'cõi'
+			},
+			'VNI oi tone placement reaches the engine'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'kheo1', '' ),
+			{
+				noop: false,
+				output: 'khéo'
+			},
+			'VNI eo tone placement reaches the engine'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'thay6', '' ),
+			{
+				noop: false,
+				output: 'thây'
+			},
+			'VNI circumflex can target a before y'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'thây1', '' ),
+			{
+				noop: false,
+				output: 'thấy'
+			},
+			'VNI tone after vowel-diacritic command keeps the tone target'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'huo7', '' ),
+			{
+				noop: false,
+				output: 'huơ'
+			},
+			'VNI horn on open uo keeps u unmarked'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'lôo6', '' ),
+			{
+				noop: false,
+				output: 'lôô'
+			},
+			'VNI repeated circumflex applies to another eligible vowel before escaping'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'huốp7', '' ),
+			{
+				noop: false,
+				output: 'hướp'
+			},
+			'VNI horn changes rendered uô to ươ'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'hướp6', '' ),
+			{
+				noop: false,
+				output: 'huốp'
+			},
+			'VNI circumflex changes rendered ươ to uô'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'huya1', '' ),
+			{
+				noop: false,
+				output: 'huýa'
+			},
+			'VNI tone placement handles the rare uya rime'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'quoc6', '' ),
+			{
+				noop: false,
+				output: 'quôc'
+			},
+			'VNI circumflex ignores the u in qu'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'giêng1', '' ),
+			{
+				noop: false,
+				output: 'giếng'
+			},
+			'VNI tone ignores the i in gi before another vowel'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'á1', '' ),
+			{
+				noop: false,
+				output: 'a1'
+			},
+			'Repeating a tone key escapes to literal VNI input'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'â6', '' ),
+			{
+				noop: false,
+				output: 'a6'
+			},
+			'Repeating a vowel-diacritic key escapes to literal VNI input'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'đ9', '' ),
+			{
+				noop: false,
+				output: 'd9'
+			},
+			'Repeating d-stroke key escapes to literal VNI input'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'đác9', '' ),
+			{
+				noop: false,
+				output: 'dác9'
+			},
+			'Repeating d-stroke key escapes after a full rendered candidate'
 		);
 	} );
 }( jQuery ) );

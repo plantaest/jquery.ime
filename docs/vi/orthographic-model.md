@@ -139,7 +139,39 @@ uô
 ươ
 ```
 
+Open `uơ` is distinct from `ươ`. The VNI sequence `huo7` should render `huơ`, not `hươ`, because the horn command applies to `o` alone when the rime is exactly `uo`.
+
+When an ending follows, `uo` can act as an unmarked precursor for the complex families:
+
+```text
+huop6 -> huôp
+huop7 -> hươp
+```
+
+The engine also supports the narrow family switch between rendered `uô` and `ươ` while preserving tone:
+
+```text
+hướp6 -> huốp
+huốp7 -> hướp
+```
+
+Rare `uya` is modeled as a `uy`-based rime whose tone target is `y`:
+
+```text
+huya1 -> huýa
+```
+
+Extended `oo` spellings are not inferred automatically from unmarked `oo`, but explicit per-vowel commands should be preserved:
+
+```text
+lo6o62ng -> lôồng
+```
+
 The exact grammar inventory should become machine-readable data as the engine grows. Do not encode the complete model as an ordered list of overlapping regex replacements.
+
+The Phase 3 engine uses a compact rime-aware model rather than a full syllable dictionary. It is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIWP.IME does not copy the generated syllable list into runtime validation.
+
+The practical grouping matters because tone placement and vowel-diacritic commands depend on whether a written vowel is a nucleus, medial, or ending. For example, `coi`, `kheo`, `thay`, and `khuay` must not place tone on the final off-glide.
 
 ## Tone-target rules
 
@@ -154,6 +186,8 @@ Before policy-specific exceptions, the natural tone target follows the nucleus:
 | `uô` | `ô` |
 | `ưa` | `ư` |
 | `ươ` | `ơ` |
+| `uơ` | `ơ` |
+| `uya` | `y` |
 
 Examples:
 
@@ -236,7 +270,7 @@ Contextual spellings such as `c/k`, `g/gh`, and `ng/ngh` may become validation d
 
 In Vietnamese spelling, the `u` in `qu` is not always an ordinary independent vowel. The engine must avoid transforming it as though `q` + `u` were a normal onset plus nucleus in every context.
 
-Examples that must eventually be covered:
+Examples covered by Phase 3:
 
 ```text
 quốc
@@ -244,7 +278,7 @@ quả
 quên
 ```
 
-The internal representation may model `qu` as a special onset or as onset plus a constrained medial. The chosen representation must be documented once implemented.
+The Phase 3 implementation models `qu` as a special onset. The written `u` in this onset is ignored for ordinary tone-target and vowel-diacritic selection.
 
 ## Special `gi`
 
@@ -252,7 +286,7 @@ The internal representation may model `qu` as a special onset or as onset plus a
 
 The `i` in `gi` must not always be treated like an ordinary nucleus vowel.
 
-Examples that must eventually be covered:
+Examples covered by Phase 3:
 
 ```text
 già
@@ -260,7 +294,15 @@ giếng
 gió
 ```
 
-The required surface behavior is clear; the cleanest internal representation remains an implementation decision.
+The Phase 3 implementation models `gi` as a special onset when another vowel follows it:
+
+```text
+gia
+gio
+gieng
+```
+
+In that case the written `i` is ignored for ordinary tone-target and vowel-diacritic selection. When `gi` has no following vowel, as in `gì`, the parser treats `g` as the onset and `i` as the rime.
 
 ## Endings and checked syllables
 
@@ -280,7 +322,7 @@ Checked syllables ending in:
 
 are structurally compatible with acute and dot tones in standard Vietnamese orthography.
 
-The engine should represent this constraint, but the first behavior for explicitly incompatible tone commands is unresolved.
+The Phase 3 VNI behavior for incompatible checked-tone commands is conservative pass-through. For example, `mat2` remains literal rather than rendering a nonstandard checked syllable.
 
 ## Complete, intermediate, and unrecognized
 
@@ -324,13 +366,13 @@ The engine must support valid Unicode Vietnamese text.
 
 Rendered output should use NFC unless a documented technical reason requires otherwise.
 
-Internally, the parser may use NFD or another decomposition strategy if it simplifies extraction of:
+The Phase 3 parser uses NFD internally because it simplifies extraction of:
 
 * base vowel;
 * vowel diacritic;
 * tone mark.
 
-This is an implementation decision, not a user-visible requirement.
+This is an internal implementation detail, not a user-visible output format.
 
 The engine must not assume every visible Vietnamese character is one JavaScript code unit.
 
@@ -384,13 +426,16 @@ When behavior is uncertain, prefer sources in this order:
 
 Existing IME behavior should not automatically override Vietnamese orthographic structure. Likewise, a linguistic analysis should not force an awkward implementation if a simpler written-text model produces correct behavior.
 
+Current external references used by the model include:
+
+* Unicode for Vietnamese character representation and normalization;
+* established Vietnamese input-method behavior for VNI repeated-key escape;
+* [Luong Hieu Thi's orthography-based onset and rime inventory](https://www.hieuthi.com/blog/2017/03/21/all-vietnamese-syllables.html) as a coverage reference, not as a runtime dictionary.
+
 ## Open modeling questions
 
 These questions must be resolved by implementation experiments or explicit decisions:
 
-* exact machine-readable inventory of medial, nucleus, and ending combinations;
-* internal representation of `gi`;
-* whether the parser should be NFD-first internally;
+* whether the machine-readable rime inventory should be expanded to full generated coverage;
 * how strict initial structural validation should be;
-* behavior for incompatible tone commands on checked syllables;
 * treatment of rare, borrowed, dialectal, minority-language, and expressive spellings.

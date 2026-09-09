@@ -14,7 +14,7 @@ The implementation is intended for upstream contribution to `wikimedia/jquery.im
 
 ## Current status
 
-Phase 0 and Phase 1 are complete. Phase 2 is complete as a VNI vertical slice and integration proof.
+Phase 0 through Phase 3 are complete for the VNI path. The shared engine now has the core orthographic structure needed before adding Telex and VIQR adapters.
 
 Confirmed by Phase 1:
 
@@ -34,6 +34,17 @@ Implemented by the current Phase 2 slice:
 * Tone preservation when applying a vowel diacritic, such as `á6 -> ấ`.
 * Traditional tone placement for initial examples such as `hoa2 -> hòa`.
 * Initial `uo7 -> ươ` behavior, such as `tuong7 -> tương`.
+
+Implemented by Phase 3:
+
+* Rime-aware parser structure with `onset`, `rime`, `ending`, checked-ending, and tone-target data.
+* Tone placement for common off-glide rimes such as `coi4 -> cõi`, `kheo1 -> khéo`, `thay61 -> thấy`, and `khuay61 -> khuấy`.
+* More precise `u`-initial rime handling for cases such as `huo7 -> huơ`, `huop71 -> hướp`, `hướp6 -> huốp`, and `huya1 -> huýa`.
+* Explicit multi-vowel marking before repeated-key escape, such as `lo6o62ng -> lôồng`.
+* Explicit `qu` and `gi` treatment for examples such as `quoc61 -> quốc` and `gieng61 -> giếng`.
+* Checked-ending compatibility for `c`, `ch`, `p`, and `t`, with incompatible tone commands passing through unchanged.
+* VNI repeated-key escape for covered tone, vowel-diacritic, and `d`/`đ` commands, including delayed `d`-stroke input such as `dac91 -> đác`.
+* Uppercase and mixed-case coverage for the implemented VNI path.
 
 Telex and VIQR are still pass-through scaffolds until their mapping tables and escape behavior are specified.
 
@@ -99,6 +110,8 @@ Expand the shared engine beyond the initial slice:
 * uppercase and mixed-case expansion;
 * conservative fallback for unrecognized input.
 
+Status: complete for the VNI path. Broader generated coverage and manual upstream hardening belong to Phase 5.
+
 ### Phase 4 – Telex and VIQR adapters
 
 Specify Telex and VIQR mapping tables, then implement them as thin adapters over the shared engine.
@@ -122,7 +135,6 @@ Do not guess these while implementing:
 
 * exact Telex mapping and escape behavior;
 * exact VIQR mapping, especially punctuation and shifted-key behavior;
-* behavior for incompatible tone commands on checked syllables;
 * how strict initial structural validation should be;
 * whether reformed tone placement appears as separate input methods or a future setting.
 

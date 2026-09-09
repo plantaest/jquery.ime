@@ -63,6 +63,7 @@
 				key: key,
 				command: {
 					type: Vietnamese.CommandType.APPLY_TONE,
+					literal: key,
 					tone: toneCommands[ key ]
 				}
 			};
@@ -73,6 +74,7 @@
 				key: key,
 				command: {
 					type: Vietnamese.CommandType.APPLY_VOWEL_DIACRITIC,
+					literal: key,
 					vowelDiacritic: vowelDiacriticCommands[ key ]
 				}
 			};
@@ -82,7 +84,8 @@
 			return {
 				key: key,
 				command: {
-					type: Vietnamese.CommandType.REMOVE_TONE
+					type: Vietnamese.CommandType.REMOVE_TONE,
+					literal: key
 				}
 			};
 		}
@@ -91,7 +94,8 @@
 			return {
 				key: key,
 				command: {
-					type: Vietnamese.CommandType.APPLY_D_STROKE
+					type: Vietnamese.CommandType.APPLY_D_STROKE,
+					literal: key
 				}
 			};
 		}
@@ -212,6 +216,278 @@
 		};
 	}
 
+	function resultFromState( state, literalSuffix ) {
+		return {
+			state: prepareState( state ),
+			literalSuffix: literalSuffix || ''
+		};
+	}
+
+	function getTokenIdentity( token ) {
+		if ( token.dStroke ) {
+			return token.base === 'D' ? '\u0110' : '\u0111';
+		}
+
+		if ( token.isVowel ) {
+			return getVowelIdentity( token );
+		}
+
+		return token.base;
+	}
+
+	function getLowerText( state ) {
+		var i,
+			output = '';
+
+		for ( i = 0; i < state.tokens.length; i++ ) {
+			output += getTokenIdentity( state.tokens[ i ] ).toLowerCase();
+		}
+
+		return output;
+	}
+
+	function hasVowelFromIndex( state, startIndex ) {
+		var i;
+
+		for ( i = startIndex; i < state.tokens.length; i++ ) {
+			if ( state.tokens[ i ].isVowel ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	function resolveOnset( state, lowerText ) {
+		var i,
+			onsets = [
+				'ngh',
+				'ch',
+				'gh',
+				'kh',
+				'ng',
+				'nh',
+				'ph',
+				'th',
+				'tr',
+				'b',
+				'c',
+				'd',
+				'\u0111',
+				'g',
+				'h',
+				'k',
+				'l',
+				'm',
+				'n',
+				'p',
+				'r',
+				's',
+				't',
+				'v',
+				'x'
+			];
+
+		if ( lowerText.indexOf( 'qu' ) === 0 ) {
+			return {
+				end: 2,
+				ignoredVowelIndices: { 1: true },
+				text: 'qu'
+			};
+		}
+
+		if ( lowerText.indexOf( 'gi' ) === 0 && hasVowelFromIndex( state, 2 ) ) {
+			return {
+				end: 2,
+				ignoredVowelIndices: { 1: true },
+				text: 'gi'
+			};
+		}
+
+		for ( i = 0; i < onsets.length; i++ ) {
+			if ( lowerText.indexOf( onsets[ i ] ) === 0 ) {
+				return {
+					end: onsets[ i ].length,
+					ignoredVowelIndices: {},
+					text: onsets[ i ]
+				};
+			}
+		}
+
+		return {
+			end: 0,
+			ignoredVowelIndices: {},
+			text: ''
+		};
+	}
+
+	function collectEligibleVowels( state, ignoredVowelIndices ) {
+		var i,
+			identities = [],
+			indices = [];
+
+		for ( i = 0; i < state.tokens.length; i++ ) {
+			if ( state.tokens[ i ].isVowel && !ignoredVowelIndices[ i ] ) {
+				identities.push( getVowelIdentity( state.tokens[ i ] ) );
+				indices.push( i );
+			}
+		}
+
+		return {
+			identities: identities,
+			indices: indices
+		};
+	}
+
+	function findEnding( rimeText ) {
+		if ( rimeText.length > 2 && rimeText.slice( -2 ) === 'ch' ) {
+			return 'ch';
+		}
+
+		if ( rimeText.length > 2 && rimeText.slice( -2 ) === 'ng' ) {
+			return 'ng';
+		}
+
+		if ( rimeText.length > 2 && rimeText.slice( -2 ) === 'nh' ) {
+			return 'nh';
+		}
+
+		if ( rimeText.length > 1 && 'm n p t c'.split( ' ' ).includes( rimeText.slice( -1 ) ) ) {
+			return rimeText.slice( -1 );
+		}
+
+		if ( rimeText.length > 1 && 'iyou'.includes( rimeText.slice( -1 ) ) ) {
+			return rimeText.slice( -1 );
+		}
+
+		return '';
+	}
+
+	function isCheckedEnding( ending ) {
+		return ending === 'c' || ending === 'ch' || ending === 'p' || ending === 't';
+	}
+
+	function findRimePatternToneTarget( structure ) {
+		var i, pattern,
+			patterns = [
+				{ text: 'uy\u00ea', offset: 2, prefix: true },
+				{ text: 'uye', offset: 2, prefix: true },
+				{ text: 'uya', offset: 1 },
+				{ text: 'i\u00ea', offset: 1, prefix: true },
+				{ text: 'y\u00ea', offset: 1, prefix: true },
+				{ text: 'u\u00f4', offset: 1, prefix: true },
+				{ text: '\u01b0\u01a1', offset: 1, prefix: true },
+				{ text: 'u\u00e2', offset: 1, prefix: true },
+				{ text: 'u\u0103', offset: 1, prefix: true },
+				{ text: 'ie', offset: 1, prefix: true },
+				{ text: 'ye', offset: 1, prefix: true },
+				{ text: 'uo', offset: 1, prefix: true },
+				{ text: '\u01b0a', offset: 0 },
+				{ text: 'ua', offset: 0 },
+				{ text: 'ia', offset: 0 },
+				{ text: 'ya', offset: 0 }
+			];
+
+		for ( i = 0; i < patterns.length; i++ ) {
+			pattern = patterns[ i ];
+			if (
+				( pattern.prefix && structure.rime.indexOf( pattern.text ) === 0 ) ||
+				structure.rime === pattern.text
+			) {
+				return structure.rimeStart + pattern.offset;
+			}
+		}
+
+		return -1;
+	}
+
+	function findOffGlideToneTarget( state, vowels ) {
+		var lastIndex, previousIndex, lastIdentity;
+
+		if ( vowels.indices.length < 2 ) {
+			return -1;
+		}
+
+		lastIndex = vowels.indices[ vowels.indices.length - 1 ];
+		previousIndex = vowels.indices[ vowels.indices.length - 2 ];
+		lastIdentity = vowels.identities[ vowels.identities.length - 1 ];
+
+		if (
+			lastIndex === state.tokens.length - 1 &&
+			'i y o u'.split( ' ' ).includes( lastIdentity )
+		) {
+			return previousIndex;
+		}
+
+		return -1;
+	}
+
+	function findToneTarget( state, structure ) {
+		var patternTarget, offGlideTarget,
+			vowels = structure.vowels;
+
+		if ( vowels.indices.length === 0 ) {
+			return -1;
+		}
+
+		if ( vowels.indices.length === 1 ) {
+			return vowels.indices[ 0 ];
+		}
+
+		if ( structure.rime === 'oa' || structure.rime === 'oe' || structure.rime === 'uy' ) {
+			return vowels.indices[ 0 ];
+		}
+
+		patternTarget = findRimePatternToneTarget( structure );
+		if ( patternTarget !== -1 ) {
+			return patternTarget;
+		}
+
+		offGlideTarget = findOffGlideToneTarget( state, vowels );
+		if ( offGlideTarget !== -1 ) {
+			return offGlideTarget;
+		}
+
+		return vowels.indices[ vowels.indices.length - 1 ];
+	}
+
+	function analyzeStructure( state ) {
+		var lowerText = getLowerText( state ),
+			onset = resolveOnset( state, lowerText ),
+			vowels = collectEligibleVowels( state, onset.ignoredVowelIndices ),
+			rimeText = lowerText.slice( onset.end ),
+			ending = findEnding( rimeText ),
+			structure = {
+				checked: false,
+				ending: ending,
+				ignoredVowelIndices: onset.ignoredVowelIndices,
+				onset: onset.text,
+				rime: rimeText,
+				rimeStart: onset.end,
+				toneTargetIndex: -1,
+				vowels: vowels
+			};
+
+		structure.checked = isCheckedEnding( ending );
+		structure.toneTargetIndex = findToneTarget( state, structure );
+		return structure;
+	}
+
+	function prepareState( state ) {
+		var hasVowel = false;
+
+		state.structure = analyzeStructure( state );
+		hasVowel = state.structure.vowels.indices.length > 0;
+
+		if ( !hasVowel ) {
+			state.status = Vietnamese.StateType.INTERMEDIATE;
+		} else {
+			state.status = Vietnamese.StateType.STRUCTURALLY_VALID;
+		}
+
+		return state;
+	}
+
 	function isValidVowelDiacritic( base, vowelDiacritic ) {
 		var lowerBase = base.toLowerCase();
 
@@ -266,6 +542,7 @@
 
 	function unrecognizedCandidate() {
 		return {
+			structure: null,
 			status: Vietnamese.StateType.UNRECOGNIZED,
 			tone: Vietnamese.Tone.NONE,
 			tokens: []
@@ -280,7 +557,6 @@
 	 */
 	function parseCandidate( candidate ) {
 		var i, character, token,
-			hasVowel = false,
 			normalizedCandidate = normalizeText( candidate, 'NFD' ),
 			state = {
 				status: Vietnamese.StateType.STRUCTURALLY_VALID,
@@ -311,18 +587,10 @@
 				return unrecognizedCandidate();
 			}
 
-			if ( token.isVowel ) {
-				hasVowel = true;
-			}
-
 			state.tokens.push( token );
 		}
 
-		if ( !hasVowel ) {
-			state.status = Vietnamese.StateType.INTERMEDIATE;
-		}
-
-		return state;
+		return prepareState( state );
 	}
 
 	function renderToken( token, tone ) {
@@ -354,82 +622,6 @@
 		}, Vietnamese.Tone.NONE );
 	}
 
-	function collectVowels( state ) {
-		var i, token,
-			identities = [],
-			indices = [];
-
-		for ( i = 0; i < state.tokens.length; i++ ) {
-			token = state.tokens[ i ];
-			if ( token.isVowel ) {
-				identities.push( getVowelIdentity( token ) );
-				indices.push( i );
-			}
-		}
-
-		return {
-			identities: identities,
-			indices: indices
-		};
-	}
-
-	function findLastVowelPattern( vowels, pattern, targetOffset ) {
-		var patternIndex,
-			vowelText = vowels.identities.join( '' );
-
-		patternIndex = vowelText.lastIndexOf( pattern );
-		if ( patternIndex === -1 ) {
-			return -1;
-		}
-
-		return vowels.indices[ patternIndex + targetOffset ];
-	}
-
-	function resolveNaturalToneTarget( state, vowels ) {
-		var i, target,
-			patterns = [
-				{ text: '\u01b0\u01a1', offset: 1 },
-				{ text: 'u\u00f4', offset: 1 },
-				{ text: 'i\u00ea', offset: 1 },
-				{ text: 'y\u00ea', offset: 1 },
-				{ text: '\u01b0a', offset: 0 },
-				{ text: 'ua', offset: 0 },
-				{ text: 'ia', offset: 0 },
-				{ text: 'ya', offset: 0 }
-			];
-
-		for ( i = 0; i < patterns.length; i++ ) {
-			target = findLastVowelPattern( vowels, patterns[ i ].text, patterns[ i ].offset );
-			if ( target !== -1 ) {
-				return target;
-			}
-		}
-
-		return vowels.indices[ vowels.indices.length - 1 ];
-	}
-
-	function resolveTraditionalOpenMedialTarget( state, vowels ) {
-		var firstIndex, secondIndex, suffix,
-			vowelCount = vowels.identities.length;
-
-		if ( vowelCount < 2 ) {
-			return -1;
-		}
-
-		firstIndex = vowels.indices[ vowelCount - 2 ];
-		secondIndex = vowels.indices[ vowelCount - 1 ];
-		suffix = vowels.identities[ vowelCount - 2 ] + vowels.identities[ vowelCount - 1 ];
-
-		if (
-			secondIndex === state.tokens.length - 1 &&
-			( suffix === 'oa' || suffix === 'oe' || suffix === 'uy' )
-		) {
-			return firstIndex;
-		}
-
-		return -1;
-	}
-
 	/**
 	 * Resolve the token index that should carry the visible tone mark.
 	 *
@@ -437,23 +629,11 @@
 	 * @return {number} Token index, or -1 if there is no vowel target.
 	 */
 	function resolveTonePlacement( state ) {
-		var traditionalTarget,
-			vowels = collectVowels( state );
-
-		if ( vowels.indices.length === 0 ) {
-			return -1;
+		if ( !state.structure ) {
+			prepareState( state );
 		}
 
-		if ( vowels.indices.length === 1 ) {
-			return vowels.indices[ 0 ];
-		}
-
-		traditionalTarget = resolveTraditionalOpenMedialTarget( state, vowels );
-		if ( traditionalTarget !== -1 ) {
-			return traditionalTarget;
-		}
-
-		return resolveNaturalToneTarget( state, vowels );
+		return state.structure ? state.structure.toneTargetIndex : -1;
 	}
 
 	/**
@@ -477,16 +657,49 @@
 		return normalizeText( output, 'NFC' );
 	}
 
-	function applyTone( state, tone ) {
-		var nextState;
+	function setStateTone( state, tone ) {
+		var i,
+			toneTarget = resolveTonePlacement( state );
 
-		if ( state.tone === tone || resolveTonePlacement( state ) === -1 ) {
+		state.tone = tone;
+		for ( i = 0; i < state.tokens.length; i++ ) {
+			state.tokens[ i ].tone = i === toneTarget ? tone : Vietnamese.Tone.NONE;
+		}
+	}
+
+	function canApplyTone( state, tone ) {
+		if ( resolveTonePlacement( state ) === -1 ) {
+			return false;
+		}
+
+		if (
+			state.structure &&
+			state.structure.checked &&
+			tone !== Vietnamese.Tone.ACUTE &&
+			tone !== Vietnamese.Tone.DOT
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	function applyTone( state, command ) {
+		var nextState,
+			tone = command.tone;
+
+		if ( !canApplyTone( state, tone ) ) {
 			return null;
 		}
 
 		nextState = cloneState( state );
-		nextState.tone = tone;
-		return nextState;
+		if ( state.tone === tone ) {
+			setStateTone( nextState, Vietnamese.Tone.NONE );
+			return resultFromState( nextState, command.literal );
+		}
+
+		setStateTone( nextState, tone );
+		return resultFromState( nextState );
 	}
 
 	function removeTone( state ) {
@@ -497,31 +710,57 @@
 		}
 
 		nextState = cloneState( state );
-		nextState.tone = Vietnamese.Tone.NONE;
-		return nextState;
+		setStateTone( nextState, Vietnamese.Tone.NONE );
+		return resultFromState( nextState );
 	}
 
-	function applySimpleVowelDiacritic( state, vowelDiacritic ) {
-		var i, token, nextState;
+	function resolveVowelDiacriticTarget( state, vowelDiacritic ) {
+		var target = resolveTonePlacement( state );
 
-		for ( i = state.tokens.length - 1; i >= 0; i-- ) {
-			token = state.tokens[ i ];
+		if (
+			target !== -1 &&
+			state.tokens[ target ].vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+			isValidVowelDiacritic( state.tokens[ target ].base, vowelDiacritic )
+		) {
+			return target;
+		}
+
+		return -1;
+	}
+
+	function resolveAdditionalVowelDiacriticTarget( state, vowelDiacritic, excludedTarget ) {
+		var i, index, token,
+			vowels = state.structure.vowels.indices;
+
+		for ( i = vowels.length - 1; i >= 0; i-- ) {
+			index = vowels[ i ];
+			token = state.tokens[ index ];
+
 			if (
-				token.isVowel &&
+				index !== excludedTarget &&
 				token.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
 				isValidVowelDiacritic( token.base, vowelDiacritic )
 			) {
-				nextState = cloneState( state );
-				nextState.tokens[ i ].vowelDiacritic = vowelDiacritic;
-				return nextState;
+				return index;
 			}
 		}
 
-		return null;
+		return -1;
 	}
 
-	function applyHornToUo( state ) {
-		var i, firstToken, secondToken, nextState;
+	function applyVowelDiacriticToTarget( state, target, vowelDiacritic ) {
+		var nextState = cloneState( state );
+
+		nextState.tokens[ target ].vowelDiacritic = vowelDiacritic;
+		return resultFromState( nextState );
+	}
+
+	function findHornUoPair( state ) {
+		var i, firstToken, secondToken;
+
+		if ( state.structure && state.structure.rime === 'uo' ) {
+			return -1;
+		}
 
 		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
 			firstToken = state.tokens[ i ];
@@ -533,43 +772,220 @@
 				firstToken.base.toLowerCase() === 'u' &&
 				secondToken.base.toLowerCase() === 'o' &&
 				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE
+				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+				!(
+					state.structure &&
+					( state.structure.ignoredVowelIndices[ i ] ||
+						state.structure.ignoredVowelIndices[ i + 1 ] )
+				)
 			) {
-				nextState = cloneState( state );
-				nextState.tokens[ i ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-				nextState.tokens[ i + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-				return nextState;
+				return i;
 			}
 		}
 
-		return null;
+		return -1;
 	}
 
-	function applyVowelDiacritic( state, vowelDiacritic ) {
-		if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
-			return applyHornToUo( state ) ||
-				applySimpleVowelDiacritic( state, vowelDiacritic );
+	function findUoFamilyPair( state, firstVowelDiacritic, secondVowelDiacritic ) {
+		var i, firstToken, secondToken;
+
+		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
+			firstToken = state.tokens[ i ];
+			secondToken = state.tokens[ i + 1 ];
+
+			if (
+				firstToken.isVowel &&
+				secondToken.isVowel &&
+				firstToken.base.toLowerCase() === 'u' &&
+				secondToken.base.toLowerCase() === 'o' &&
+				firstToken.vowelDiacritic === firstVowelDiacritic &&
+				secondToken.vowelDiacritic === secondVowelDiacritic &&
+				!(
+					state.structure &&
+					( state.structure.ignoredVowelIndices[ i ] ||
+						state.structure.ignoredVowelIndices[ i + 1 ] )
+				)
+			) {
+				return i;
+			}
 		}
 
-		return applySimpleVowelDiacritic( state, vowelDiacritic );
+		return -1;
 	}
 
-	function applyDStroke( state ) {
-		var nextState,
-			token = state.tokens[ 0 ];
+	function applyHornToUo( state ) {
+		var pairStart = findHornUoPair( state ),
+			nextState;
 
+		if ( pairStart === -1 ) {
+			return null;
+		}
+
+		nextState = cloneState( state );
+		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		return resultFromState( nextState );
+	}
+
+	function applyHornToCircumflexUo( state ) {
+		var pairStart = findUoFamilyPair(
+				state,
+				Vietnamese.VowelDiacritic.NONE,
+				Vietnamese.VowelDiacritic.CIRCUMFLEX
+			),
+			nextState;
+
+		if ( pairStart === -1 ) {
+			return null;
+		}
+
+		nextState = cloneState( state );
+		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		return resultFromState( nextState );
+	}
+
+	function applyCircumflexToHornUo( state ) {
+		var pairStart = findUoFamilyPair(
+				state,
+				Vietnamese.VowelDiacritic.HORN,
+				Vietnamese.VowelDiacritic.HORN
+			),
+			nextState;
+
+		if ( pairStart === -1 ) {
+			return null;
+		}
+
+		nextState = cloneState( state );
+		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
+		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.CIRCUMFLEX;
+		return resultFromState( nextState );
+	}
+
+	function removeVowelDiacritic( state, target, literal ) {
+		var nextState = cloneState( state );
+
+		nextState.tokens[ target ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
+		return resultFromState( nextState, literal );
+	}
+
+	function removeHornFromUo( state, literal ) {
+		var target = resolveTonePlacement( state ),
+			previousToken,
+			nextState;
+
+		if ( target < 1 ) {
+			return null;
+		}
+
+		previousToken = state.tokens[ target - 1 ];
 		if (
-			state.tokens.length !== 1 ||
-			!token ||
-			token.dStroke ||
-			( token.base !== 'd' && token.base !== 'D' )
+			!previousToken ||
+			!previousToken.isVowel ||
+			previousToken.vowelDiacritic !== Vietnamese.VowelDiacritic.HORN ||
+			state.tokens[ target ].vowelDiacritic !== Vietnamese.VowelDiacritic.HORN
 		) {
 			return null;
 		}
 
 		nextState = cloneState( state );
-		nextState.tokens[ 0 ].dStroke = true;
-		return nextState;
+		nextState.tokens[ target - 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
+		nextState.tokens[ target ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
+		return resultFromState( nextState, literal );
+	}
+
+	function applySimpleVowelDiacritic( state, command ) {
+		var target = resolveVowelDiacriticTarget( state, command.vowelDiacritic );
+
+		if ( target === -1 ) {
+			return null;
+		}
+
+		return applyVowelDiacriticToTarget( state, target, command.vowelDiacritic );
+	}
+
+	function applyVowelDiacritic( state, command ) {
+		var alternateTarget,
+			target = resolveTonePlacement( state ),
+			vowelDiacritic = command.vowelDiacritic;
+
+		if (
+			target !== -1 &&
+			state.tokens[ target ].vowelDiacritic === vowelDiacritic &&
+			command.literal
+		) {
+			alternateTarget = resolveAdditionalVowelDiacriticTarget( state, vowelDiacritic, target );
+			if ( alternateTarget !== -1 ) {
+				return applyVowelDiacriticToTarget( state, alternateTarget, vowelDiacritic );
+			}
+
+			if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
+				return removeHornFromUo( state, command.literal ) ||
+					removeVowelDiacritic( state, target, command.literal );
+			}
+
+			return removeVowelDiacritic( state, target, command.literal );
+		}
+
+		if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
+			return applyHornToCircumflexUo( state ) ||
+				applyHornToUo( state ) ||
+				applySimpleVowelDiacritic( state, command );
+		}
+
+		if ( vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX ) {
+			return applyCircumflexToHornUo( state ) ||
+				applySimpleVowelDiacritic( state, command );
+		}
+
+		return applySimpleVowelDiacritic( state, command );
+	}
+
+	function resolveDStrokeTarget( state ) {
+		var token;
+
+		if ( !state.structure ) {
+			prepareState( state );
+		}
+
+		token = state.tokens[ 0 ];
+		if (
+			!token ||
+			!state.structure ||
+			( state.structure.onset !== 'd' && state.structure.onset !== '\u0111' )
+		) {
+			return -1;
+		}
+
+		if ( token.dStroke || token.base === 'd' || token.base === 'D' ) {
+			return 0;
+		}
+
+		return -1;
+	}
+
+	function applyDStroke( state, command ) {
+		var nextState,
+			target = resolveDStrokeTarget( state );
+
+		if ( target === -1 ) {
+			return null;
+		}
+
+		if ( state.tokens[ target ].dStroke ) {
+			if ( !command.literal ) {
+				return null;
+			}
+
+			nextState = cloneState( state );
+			nextState.tokens[ target ].dStroke = false;
+			return resultFromState( nextState, command.literal );
+		}
+
+		nextState = cloneState( state );
+		nextState.tokens[ target ].dStroke = true;
+		return resultFromState( nextState );
 	}
 
 	function transformState( state, command ) {
@@ -578,7 +994,7 @@
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_TONE ) {
-			return applyTone( state, command.tone );
+			return applyTone( state, command );
 		}
 
 		if ( command.type === Vietnamese.CommandType.REMOVE_TONE ) {
@@ -586,11 +1002,11 @@
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_VOWEL_DIACRITIC ) {
-			return applyVowelDiacritic( state, command.vowelDiacritic );
+			return applyVowelDiacritic( state, command );
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_D_STROKE ) {
-			return applyDStroke( state );
+			return applyDStroke( state, command );
 		}
 
 		return null;
@@ -729,11 +1145,11 @@
 		 * @return {Object} Result object with handled and output fields.
 		 */
 		transformCandidate: function ( candidate, command ) {
-			var nextState,
+			var transformResult,
 				state = parseCandidate( candidate );
 
-			nextState = transformState( state, command );
-			if ( !nextState ) {
+			transformResult = transformState( state, command );
+			if ( !transformResult ) {
 				return {
 					handled: false
 				};
@@ -741,7 +1157,7 @@
 
 			return {
 				handled: true,
-				output: renderCandidate( nextState )
+				output: renderCandidate( transformResult.state ) + transformResult.literalSuffix
 			};
 		}
 	};

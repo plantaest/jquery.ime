@@ -16,15 +16,15 @@ VNI is the preferred method for examples and early implementation work when only
 
 ## Current status
 
-The current branch contains the Phase 2 shared engine vertical slice:
+The current branch contains the Phase 3 VNI shared-engine path:
 
 * Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, and `vi-viqr`.
 * The three input methods share one Vietnamese rule source.
 * Functional `patterns` rules can call a shared engine boundary.
-* VNI has a small real path through the shared engine for basic tones, vowel diacritics, `d`/`đ`, and traditional tone placement examples.
+* VNI has a rime-aware shared-engine path for tones, vowel diacritics, `d`/`đ`, common tone-placement structures, `qu`, `gi`, checked endings, repeated-key escape, and case-preserving output.
 * Telex and VIQR remain pass-through scaffolds until their mapping tables and escape behavior are specified.
 
-Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests.
+Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broad generated coverage and manual upstream hardening are still Phase 5 work.
 
 ## Required reading
 
@@ -48,11 +48,11 @@ The active plan is:
 * Phase 0 – baseline and project specification.
 * Phase 1 – jQuery.IME integration spike.
 * Phase 2 – shared engine vertical slice with VNI.
-* Phase 3 – complete shared Vietnamese behavior.
+* Phase 3 – complete shared Vietnamese behavior for the VNI path.
 * Phase 4 – Telex and VIQR adapters.
 * Phase 5 – coverage, playground, and upstream hardening.
 
-The next implementation work should normally be Phase 3: expanding the shared engine beyond the initial VNI vertical slice.
+The next implementation work should normally be Phase 4: specifying and implementing Telex and VIQR adapters over the shared engine.
 
 ## Architectural constraints
 

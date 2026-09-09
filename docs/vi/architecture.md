@@ -187,6 +187,7 @@ createAdapter( {
     key: "1",
     command: {
         type: "apply-tone",
+        literal: "1",
         tone: "acute"
     }
 }
@@ -239,6 +240,8 @@ If `handled` is true, the adapter returns:
 ```
 
 This contract is intentionally small. Add fields only when a tested behavior requires them.
+
+For VNI repeated-key escape, the adapter includes the literal command key in the semantic command object. The engine still reconstructs behavior from the rendered candidate, not from raw key history.
 
 ## Candidate extraction
 
@@ -295,6 +298,8 @@ The engine should reconstruct composition state from the current rendered candid
 Do not rely on a persistent raw-keystroke buffer for ordinary transformations. Raw history is fragile because users can move the caret, delete text, paste text, or reach the same rendered output through different typing orders.
 
 `context` may be used only for narrow behaviors that cannot be represented from rendered text and have a focused test.
+
+The Phase 3 parser attaches a rime-aware `structure` object to parsed candidates. It includes the parsed onset, rime, ending, checked-ending flag, eligible vowel indices, and resolved tone target.
 
 ## `maxKeyLength` and `contextLength`
 
@@ -395,15 +400,16 @@ Confirmed:
 * functional `patterns` can call a shared engine;
 * adapter output must include the unchanged prefix from the jQuery.IME input window;
 * current scaffold does not require `context`;
-* focused QUnit modules can be run through Grunt.
+* focused QUnit modules can be run through Grunt;
+* the shared engine can use NFD internally while rendering NFC output;
+* VNI repeated-key escape can be implemented from rendered text;
+* incompatible checked-tone commands can pass through without jQuery.IME core changes.
 
 Unresolved:
 
 * exact Telex mapping and escape behavior;
 * exact VIQR mapping, especially shifted punctuation and literal escaping;
 * whether functional `patterns` interacts badly with `patterns_shift` for VIQR-like commands;
-* whether the engine should use NFD internally;
-* exact behavior for impossible checked-syllable tone commands;
 * whether a future file split is worth the extra loader complexity;
 * how to expose reformed tone placement through jQuery.IME.
 

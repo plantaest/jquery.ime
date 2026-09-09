@@ -79,11 +79,13 @@ o6 -> ô
 
 o7 -> ơ
 u7 -> ư
+huo7 -> huơ
 
 a8 -> ă
 
 d9 -> đ
 D9 -> Đ
+dac9 -> đac
 ```
 
 ## Telex mapping
@@ -125,9 +127,13 @@ Tone commands MUST apply to the appropriate tone-bearing vowel in the current Vi
 Examples:
 
 ```text
-tieng1 -> tiếng
-hoa2   -> hòa
-tuong7 -> tương
+coi4     -> cõi
+kheo1    -> khéo
+hoa2     -> hòa
+tuong72  -> tường
+quoc61   -> quốc
+gieng61  -> giếng
+huya1    -> huýa
 ```
 
 If a candidate already has a tone, a new tone command MUST replace it. The result MUST contain at most one semantic Vietnamese tone.
@@ -172,6 +178,17 @@ Example:
 
 Replacement among vowel-diacritic forms, such as `â <-> ă` or `ô <-> ơ`, is UNRESOLVED. Do not implement broad replacement behavior until the rule is specified with examples.
 
+The first VNI implementation supports the narrow `uô <-> ươ` family switch needed for equivalent composition order:
+
+```text
+huop61  -> huốp
+huop71  -> hướp
+huop617 -> hướp
+huop716 -> huốp
+```
+
+This does not imply broad arbitrary replacement among all vowel-diacritic forms.
+
 ## Tone placement
 
 The default first-version tone-placement policy MUST be traditional tone placement:
@@ -205,6 +222,18 @@ commands after a coda
 commands on already-rendered Vietnamese text
 ```
 
+VNI examples:
+
+```text
+thay61 -> thấy
+thay16 -> thấy
+quoc61 -> quốc
+gieng61 -> giếng
+dac91  -> đác
+huop617 -> hướp
+huop716 -> huốp
+```
+
 The exact maximum editable range is constrained by jQuery.IME `maxKeyLength` and must be covered by tests.
 
 ## Repeated-key escape
@@ -218,9 +247,22 @@ VNI example:
 ```text
 a1  -> á
 a11 -> a1
+a66 -> a6
+d99 -> d9
+dac99 -> dac9
 ```
 
-The exact behavior for complex candidates and for Telex/VIQR is UNRESOLVED until each adapter has a fixed mapping table.
+For VNI, repeated-key escape MUST reconstruct from rendered text rather than raw key history. For example, the second `1` in `a11` is processed when the visible candidate is already `á`.
+
+For multi-vowel candidates, repeated-key escape MUST NOT fire while the same command can still apply to another eligible unmarked vowel in the candidate. This preserves explicit extended spellings such as:
+
+```text
+lo6o62ng -> lôồng
+```
+
+VNI `9` SHOULD also be able to apply to an initial `d` after later rime material has been typed, so equivalent orders such as `d9ac1` and `dac91` converge to `đác`.
+
+The exact repeated-key behavior for Telex/VIQR is UNRESOLVED until each adapter has a fixed mapping table.
 
 ## Special Vietnamese structures
 
@@ -237,7 +279,9 @@ The implementation SHOULD represent checked syllables ending in:
 -t
 ```
 
-Standard checked syllables are structurally compatible only with acute and dot tones. The exact user-visible behavior for an explicitly incompatible tone command is UNRESOLVED.
+Standard checked syllables are structurally compatible only with acute and dot tones.
+
+For the first VNI implementation, incompatible tone commands on checked syllables MUST pass through unchanged. This avoids rendering nonstandard checked-tone forms while keeping the user's literal command available.
 
 ## Unicode behavior
 

@@ -92,6 +92,7 @@ a11     -> a1
 tuong72 -> tường
 hoa2    -> hòa
 d9      -> đ
+dac91   -> đác
 quoc61  -> quốc
 gieng61 -> giếng
 ```
@@ -232,7 +233,9 @@ a6 -> â
 d9 -> đ
 ```
 
-After this slice, Phase 3 should broaden coverage for:
+## Phase 3 VNI coverage
+
+Phase 3 keeps the Phase 2 coverage and adds focused tests for:
 
 ```text
 repeated-key escape
@@ -241,6 +244,40 @@ qu
 gi
 checked syllables
 larger tone-placement inventory
+uppercase and mixed-case rendering
+tone removal on complex nuclei
+```
+
+Representative Phase 3 VNI regression cases:
+
+```text
+coi4     -> cõi
+kheo1    -> khéo
+thay61   -> thấy
+thay16   -> thấy
+khuay61  -> khuấy
+quoc61   -> quốc
+gieng61  -> giếng
+hoan2    -> hoàn
+huy3     -> hủy
+huynh2   -> huỳnh
+huo7     -> huơ
+huop61   -> huốp
+huop71   -> hướp
+huop617  -> hướp
+huop716  -> huốp
+huya1    -> huýa
+lo6o62ng -> lôồng
+mat1     -> mát
+mat5     -> mạt
+mat2     -> mat2
+a11      -> a1
+a66      -> a6
+d99      -> d9
+dac91    -> đác
+dac99    -> dac9
+Quoc61   -> Quốc
+THAY61   -> THẤY
 ```
 
 Do not add broad Telex or VIQR fixtures before their mapping tables are explicitly fixed.
