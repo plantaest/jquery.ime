@@ -21,9 +21,11 @@ QUnit
 test/index.html
 test/jquery.ime.test.js
 test/jquery.ime.test.fixtures.js
+test/jquery.ime.vi.test.js
+test/jquery.ime.vi.test.fixtures.js
 ```
 
-`test/index.html` loads jQuery, jQuery.IME source files, fixture data, QUnit, then `test/jquery.ime.test.js`.
+`test/index.html` loads jQuery, jQuery.IME source files, upstream fixture data, Vietnamese fixture data, QUnit, the upstream QUnit runner, then Vietnamese-specific QUnit tests.
 
 The full test task is:
 
@@ -108,7 +110,37 @@ Use manual browser testing for typing feel, caret behavior, deletion, pasted tex
 
 ## Recommended test layout
 
-Short term, keep Vietnamese tests in `test/jquery.ime.test.js` under clearly named QUnit modules. This avoids changing the test loader before the suite is large.
+Keep Vietnamese-specific tests outside the upstream generic test files.
+
+Use:
+
+```text
+test/jquery.ime.vi.test.js
+```
+
+for pure engine tests and adapter boundary tests.
+
+Use:
+
+```text
+test/jquery.ime.vi.test.fixtures.js
+```
+
+for representative Vietnamese end-to-end typing fixtures.
+
+Do not add VIWP-specific QUnit modules to:
+
+```text
+test/jquery.ime.test.js
+```
+
+Do not add VIWP-specific fixture entries to:
+
+```text
+test/jquery.ime.test.fixtures.js
+```
+
+This keeps the upstream test runner and upstream fixture corpus easy to compare against.
 
 Recommended module names:
 
@@ -119,28 +151,14 @@ VIWP.IME – Transform
 VIWP.IME – Tone placement
 VIWP.IME – Renderer
 VIWP.IME – Adapter
-VIWP.IME – VNI integration
-VIWP.IME – Telex integration
-VIWP.IME – VIQR integration
+VIWP.IME – VNI adapter
+VIWP.IME – Telex adapter
+VIWP.IME – VIQR adapter
 ```
-
-When Vietnamese tests become large, add a separate file:
-
-```text
-test/jquery.ime.vi.test.js
-```
-
-and load it from:
-
-```text
-test/index.html
-```
-
-Do this only when it improves readability enough to justify the extra upstream diff.
 
 ## Fixture layout
 
-Use `test/jquery.ime.test.fixtures.js` for representative end-to-end typing sequences.
+Use `test/jquery.ime.vi.test.fixtures.js` for representative Vietnamese end-to-end typing sequences. The file should append Vietnamese fixtures to the existing `testFixtures` array so the upstream generic fixture runner can execute them without Vietnamese-specific changes in `test/jquery.ime.test.js`.
 
 Group fixtures by method and behavior:
 
@@ -161,22 +179,24 @@ Avoid huge generated fixture blocks. Generated coverage belongs in pure tests.
 For one engine behavior:
 
 ```bash
-npx eslint rules/vi/vi.js test/jquery.ime.test.js
+npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js
 npx grunt connect qunit --modules="VIWP.IME – Transform"
 ```
 
 For adapter work:
 
 ```bash
-npx eslint rules/vi/vi.js test/jquery.ime.test.js src/jquery.ime.inputmethods.js
+npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js src/jquery.ime.inputmethods.js
 npx grunt connect qunit --modules="VIWP.IME – Adapter"
 ```
 
 For Vietnamese integration before a commit:
 
 ```bash
-npx grunt connect qunit --modules="VIWP.IME – VNI integration"
+npx grunt connect qunit --modules="jquery.ime - input method rules tests"
 ```
+
+This runs the generic fixture module, including Vietnamese fixtures appended by `test/jquery.ime.vi.test.fixtures.js`. If this becomes too broad for the inner loop, first verify whether the current Grunt/QUnit setup supports reliable test-name filtering before adding a separate Vietnamese fixture runner.
 
 If multiple Vietnamese modules are relevant, pass a comma-separated module list as the current Grunt/QUnit integration allows.
 
@@ -188,11 +208,9 @@ npx grunt test
 
 Before upstream review, also run the repository's lint/default command expected by current upstream CI. If full lint reports unrelated pre-existing failures, document that separately and keep touched-file lint clean.
 
-## What to test first in revised Phase 2
+## Phase 2 vertical slice coverage
 
-The next implementation phase should start with a VNI vertical slice.
-
-Write pure tests first for:
+The Phase 2 VNI vertical slice should keep focused tests for:
 
 ```text
 decompose/render a, á, à, ă, â
@@ -204,7 +222,7 @@ traditional tone placement for one simple multi-letter case
 pass-through for unrecognized candidates
 ```
 
-Then add a small VNI integration fixture group proving jQuery.IME calls the adapter correctly:
+The representative VNI integration fixture group should include:
 
 ```text
 a1 -> á
@@ -212,6 +230,17 @@ a2 -> à
 a6 -> â
 á2 -> à
 d9 -> đ
+```
+
+After this slice, Phase 3 should broaden coverage for:
+
+```text
+repeated-key escape
+broader flexible command placement
+qu
+gi
+checked syllables
+larger tone-placement inventory
 ```
 
 Do not add broad Telex or VIQR fixtures before their mapping tables are explicitly fixed.

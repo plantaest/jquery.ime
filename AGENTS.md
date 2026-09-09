@@ -16,14 +16,15 @@ VNI is the preferred method for examples and early implementation work when only
 
 ## Current status
 
-The current branch contains the Phase 1 jQuery.IME integration scaffold:
+The current branch contains the Phase 2 shared engine vertical slice:
 
 * Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, and `vi-viqr`.
 * The three input methods share one Vietnamese rule source.
 * Functional `patterns` rules can call a shared engine boundary.
-* The current engine is a pass-through placeholder and does not implement production Vietnamese behavior yet.
+* VNI has a small real path through the shared engine for basic tones, vowel diacritics, `d`/`đ`, and traditional tone placement examples.
+* Telex and VIQR remain pass-through scaffolds until their mapping tables and escape behavior are specified.
 
-Do not assume Vietnamese production behavior exists unless it is present in the current branch and covered by tests.
+Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests.
 
 ## Required reading
 
@@ -51,7 +52,7 @@ The active plan is:
 * Phase 4 – Telex and VIQR adapters.
 * Phase 5 – coverage, playground, and upstream hardening.
 
-The next implementation work should normally be Phase 2: a small VNI vertical slice through the shared engine.
+The next implementation work should normally be Phase 3: expanding the shared engine beyond the initial VNI vertical slice.
 
 ## Architectural constraints
 
@@ -218,6 +219,20 @@ Keep this packaging until tests or implementation size prove that a split is wor
 ## Testing rules
 
 Read `docs/vi/testing.md` before changing test infrastructure.
+
+Keep VIWP-specific unit and adapter tests in:
+
+```text
+test/jquery.ime.vi.test.js
+```
+
+Keep VIWP-specific fixture data in:
+
+```text
+test/jquery.ime.vi.test.fixtures.js
+```
+
+Do not add Vietnamese-specific QUnit modules or fixture entries to the upstream generic test files unless an upstream review explicitly asks for that layout.
 
 Use pure engine tests for:
 

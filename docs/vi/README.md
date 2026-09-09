@@ -2,186 +2,138 @@
 
 VIWP.IME adds Vietnamese input methods to jQuery.IME.
 
-The project supports three input methods:
+The supported input methods are:
 
 * VNI
 * Telex
 * VIQR
 
-They must share one Vietnamese composition engine. VNI, Telex, and VIQR are different ways to request the same Vietnamese orthographic operations; they must not become three separate implementations of Vietnamese tone placement, vowel handling, `qu`, `gi`, or Unicode rendering.
+All three input methods must share one Vietnamese composition engine. VNI, Telex, and VIQR should differ mainly in how they translate typed keys into semantic commands.
 
-The implementation is intended for upstream contribution to `wikimedia/jquery.ime`, so the preferred shape is small, conventional, and easy to review.
+The implementation is intended for upstream contribution to `wikimedia/jquery.ime`, so changes should stay small, conventional, and easy to review.
 
 ## Current status
 
-The current branch has completed the initial jQuery.IME integration spike.
+Phase 0 and Phase 1 are complete. Phase 2 is complete as a VNI vertical slice and integration proof.
 
-Confirmed by the spike:
+Confirmed by Phase 1:
 
-* jQuery.IME can load Vietnamese support through ordinary rule metadata.
-* `vi-vni`, `vi-telex`, and `vi-viqr` can point to one shared source file.
+* Vietnamese metadata entries can use ordinary jQuery.IME rule loading.
+* `vi-vni`, `vi-telex`, and `vi-viqr` can share one source file: `rules/vi/vi.js`.
 * Functional `patterns` rules can call a shared Vietnamese engine.
-* The adapter must return output for the complete jQuery.IME input window, not only the changed Vietnamese syllable.
-* `contextLength` can remain `0` for the current scaffold.
-* `maxKeyLength` controls how much rendered text before the caret is available to the adapter.
-* No jQuery.IME core change has been proven necessary so far.
+* Adapter output must include unchanged prefix text because jQuery.IME replaces the complete input window.
+* `contextLength` can remain `0` for the current architecture.
+* `maxKeyLength` controls the rendered text available before the caret.
+* No jQuery.IME core change has been proven necessary.
 
-The current Vietnamese source is an integration scaffold, not a production Vietnamese input engine. It registers the target input methods and defines the adapter boundary, but the placeholder engine intentionally does not transform Vietnamese text yet.
+Implemented by the current Phase 2 slice:
 
-## Documentation map
+* VNI basic tone input for covered simple vowels.
+* VNI tone replacement and tone removal for covered examples.
+* VNI circumflex, breve, horn, and `d`/`đ` commands for covered examples.
+* Tone preservation when applying a vowel diacritic, such as `á6 -> ấ`.
+* Traditional tone placement for initial examples such as `hoa2 -> hòa`.
+* Initial `uo7 -> ươ` behavior, such as `tuong7 -> tương`.
 
-Read these files as one compact specification:
+Telex and VIQR are still pass-through scaffolds until their mapping tables and escape behavior are specified.
 
-* [`requirements.md`](./requirements.md) describes required user-visible behavior.
-* [`architecture.md`](./architecture.md) describes the software boundary between jQuery.IME, adapters, and the shared engine.
-* [`orthographic-model.md`](./orthographic-model.md) describes the Vietnamese written structure the engine must understand.
-* [`testing.md`](./testing.md) describes how to test the engine and jQuery.IME integration.
-* [`terminology.md`](./terminology.md) defines canonical names for code, tests, and documentation.
+## Read order
 
-The docs are intentionally short enough to be reread during implementation. When a question needs a detailed decision, add or update a focused section rather than scattering the answer across multiple files.
+Use these documents as the project specification:
 
-## Product scope
+* [`requirements.md`](./requirements.md) – user-visible behavior.
+* [`architecture.md`](./architecture.md) – jQuery.IME boundary, adapter contract, and engine structure.
+* [`orthographic-model.md`](./orthographic-model.md) – Vietnamese written structure used by the engine.
+* [`testing.md`](./testing.md) – unit tests, fixtures, focused commands, and regression workflow.
+* [`terminology.md`](./terminology.md) – canonical names for code, tests, and docs.
 
-VIWP.IME is responsible for Vietnamese input behavior inside jQuery.IME.
+This README should stay short. Put detailed behavior, architecture, orthographic notes, and test strategy in the owning document above.
 
-It must support:
+## Design guardrails
 
-* tone input, replacement, and removal;
-* vowel-diacritic input for circumflex, breve, and horn;
-* `d`/`đ` and `D`/`Đ`;
-* uppercase and lowercase text;
-* flexible command placement during composition;
-* repeated-key escape behavior where applicable;
-* correct tone placement using the traditional policy by default;
-* correct handling of `qu`, `gi`, and ordinary Vietnamese syllable structure;
-* valid Unicode output, preferably NFC;
-* automated unit and integration tests.
+Keep these constraints intact unless a documented blocker proves otherwise:
 
-It does not initially target:
+* Use one shared Vietnamese engine for VNI, Telex, and VIQR.
+* Keep adapters thin: they decode input-method keys and call the engine.
+* Keep the engine independent from DOM APIs, jQuery selectors, keyboard events, and caret manipulation.
+* Reconstruct composition state from rendered text near the caret where practical.
+* Treat tone as semantic; render the visible tone mark through a tone-placement policy.
+* Keep vowel diacritics separate from tone marks.
+* Distinguish complete states, intermediate states, and unrecognized input.
+* Keep structural validity separate from lexical validity.
+* Avoid large ordered regex grammars.
+* Avoid jQuery.IME core changes unless a focused blocker is demonstrated and documented.
 
-* automatic input-method detection;
-* VIQR*;
-* every extended Telex variant;
-* exact compatibility with every historical behavior of UniKey, AVIM, or other Vietnamese IMEs;
-* dictionary-based spell checking;
-* browser, operating-system, or editor compatibility beyond jQuery.IME itself.
-
-Compatibility with established Vietnamese IMEs matters when deciding typing conventions. It should be verified with explicit examples and tests rather than assumed silently.
-
-## Architectural commitments
-
-The project follows these commitments unless a documented blocker proves that one must change:
-
-* One shared Vietnamese engine serves VNI, Telex, and VIQR.
-* Input-method adapters translate keys into semantic commands.
-* The engine operates on rendered text near the caret, not on persistent raw keystroke history.
-* Tone is represented semantically and rendered according to a tone-placement policy.
-* Vowel diacritics are distinct from tone marks.
-* Complete syllables, valid intermediate states, and unrecognized input are different classifications.
-* Structural validity is separate from lexical validity.
-* jQuery.IME remains responsible for events, caret handling, editable elements, loading, and text replacement.
-* Vietnamese code should not modify jQuery.IME core unless a minimal reproducible blocker is documented.
-
-## Revised development phases
-
-The old plan had many small phases. The implementation plan is now shorter and tied to reviewable milestones.
+## Roadmap
 
 ### Phase 0 – baseline and project spec
 
-Establish the upstream baseline, install dependencies, verify the existing suite, and define the initial VIWP.IME documentation and agent instructions.
+Set up the repository, verify the upstream baseline, and define the initial VIWP.IME documentation and agent instructions.
 
 Status: complete.
 
 ### Phase 1 – jQuery.IME integration spike
 
-Prove how Vietnamese support plugs into the current repository:
+Verify shared rule loading, functional `patterns`, adapter-to-engine calls, focused QUnit workflow, expected upstream files, and jQuery.IME constraints.
 
-* shared rule loading;
-* functional `patterns` contract;
-* adapter-to-engine call shape;
-* test loading;
-* expected upstream files;
-* jQuery.IME constraints.
-
-Status: complete in the current scaffold.
+Status: complete.
 
 ### Phase 2 – shared engine vertical slice with VNI
 
-Build the smallest real Vietnamese path through the shared engine, using VNI first.
+Build the smallest real path from VNI input to shared-engine transformation to rendered Vietnamese output.
 
-The vertical slice should include:
+The slice covers Unicode decomposition/composition, a minimal parser, basic semantic transformations, initial traditional tone placement, pure QUnit tests, and representative VNI fixtures.
 
-* Unicode decomposition/composition helpers;
-* a minimal candidate parser;
-* semantic tone application;
-* semantic vowel-diacritic application;
-* rendering with traditional tone placement;
-* focused pure QUnit tests;
-* a small VNI integration fixture set.
-
-The goal is not to finish all Vietnamese behavior. The goal is to prove the engine API and data model with real output such as `a1 -> á`, `a6 -> â`, and a small number of multi-letter cases.
+Status: complete as a vertical slice. Broader Vietnamese correctness belongs to Phase 3.
 
 ### Phase 3 – complete shared Vietnamese behavior
 
-Expand the engine until VNI can exercise the important Vietnamese composition model:
+Expand the shared engine beyond the initial slice:
 
-* tone replacement;
-* tone removal;
-* repeated-key escape;
-* flexible command placement;
-* tone relocation after structural changes;
-* uppercase handling;
+* repeated-key escape, beginning with VNI;
+* broader flexible command placement;
+* fuller tone-placement coverage;
 * `qu`;
 * `gi`;
 * checked-syllable constraints;
-* intermediate-state classification;
+* uppercase and mixed-case expansion;
 * conservative fallback for unrecognized input.
-
-This phase should add tests at the pure engine layer first, then representative jQuery.IME fixtures.
 
 ### Phase 4 – Telex and VIQR adapters
 
-Add Telex and VIQR as thin adapters over the same engine.
+Specify Telex and VIQR mapping tables, then implement them as thin adapters over the shared engine.
 
-This phase should primarily define method-specific key decoding and escape behavior. It should not duplicate Vietnamese parsing, tone placement, rendering, or validation.
-
-Adapter equivalence tests should prove that VNI, Telex, and VIQR reach the same semantic output when they express the same operation.
+This phase should add adapter equivalence tests proving that VNI, Telex, and VIQR produce the same Vietnamese output when they express the same semantic command.
 
 ### Phase 5 – coverage, playground, and upstream hardening
 
-Prepare the implementation for real review:
+Prepare for review:
 
 * broaden generated or data-driven engine coverage;
 * add representative integration fixtures for all methods;
 * provide a small manual typing playground if useful;
 * update user-facing Vietnamese documentation;
 * run full regression tests;
-* inspect diffs for unrelated changes;
-* document any remaining limitations or upstream issues.
+* document remaining limitations or upstream issues.
 
-## Next recommended work
+## Current open decisions
 
-The next implementation step is revised Phase 2: a small VNI vertical slice through the shared engine.
+Do not guess these while implementing:
 
-Start with the lowest useful layer:
+* exact Telex mapping and escape behavior;
+* exact VIQR mapping, especially punctuation and shifted-key behavior;
+* behavior for incompatible tone commands on checked syllables;
+* how strict initial structural validation should be;
+* whether reformed tone placement appears as separate input methods or a future setting.
 
-1. define the engine result contract in tests;
-2. implement Unicode helpers for Vietnamese vowel/tone decomposition and NFC rendering;
-3. implement a minimal parser for one-letter and simple multi-letter candidates;
-4. implement `APPLY_TONE` and `APPLY_VOWEL_DIACRITIC`;
-5. connect the current adapter to the real engine;
-6. add a small VNI fixture group.
-
-Do not begin by adding a large regex table or by implementing VNI, Telex, and VIQR separately.
-
-## Updating the docs
+## Documentation ownership
 
 Update the smallest document that owns the decision:
 
 * user-visible behavior belongs in `requirements.md`;
 * software boundaries belong in `architecture.md`;
 * Vietnamese written structure belongs in `orthographic-model.md`;
-* tests and commands belong in `testing.md`;
-* naming belongs in `terminology.md`.
+* test layout and commands belong in `testing.md`;
+* names belong in `terminology.md`.
 
-If implementation contradicts these docs, record the discrepancy and resolve it explicitly before continuing.
+If implementation contradicts the docs, record the discrepancy and resolve it explicitly before continuing.

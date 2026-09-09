@@ -371,10 +371,12 @@ The minimum upstream-facing files are:
 ```text
 rules/vi/vi.js
 src/jquery.ime.inputmethods.js
-test/jquery.ime.test.js
-test/jquery.ime.test.fixtures.js
-test/index.html, only if a separate Vietnamese test file is added
+test/index.html
+test/jquery.ime.vi.test.js
+test/jquery.ime.vi.test.fixtures.js
 ```
+
+Keep Vietnamese-specific tests out of `test/jquery.ime.test.js` and `test/jquery.ime.test.fixtures.js` so the upstream generic runner and upstream fixture corpus remain easy to compare.
 
 Possible later files:
 
