@@ -380,6 +380,40 @@ A complete syllable may remain composable. An incomplete candidate may also be c
 
 Do not reject an input solely because the current surface form is not valid final Vietnamese if it is a normal intermediate typing state.
 
+The current Phase 5 classifier is a structural recognizer, not a word list. It accepts:
+
+* no-vowel candidates only when they are prefixes of recognized Vietnamese onsets, such as `n`, `ng`, `ngh`, `q`, `qu`, and `tr`;
+* candidates whose rime begins with an eligible vowel after the onset;
+* candidates whose vowel block is contiguous before any consonantal ending;
+* suffixes after the vowel block only when they are covered Vietnamese consonantal endings.
+
+This rejects structurally impossible Latin runs such as:
+
+```text
+br
+bro
+davi
+droi
+node
+wa
+brow
+browse
+```
+
+while preserving nearby Vietnamese composition states such as:
+
+```text
+ba
+thay
+thuong
+gieng
+quoc
+hoao
+hoeo
+```
+
+This is still not a full generated rime inventory. Ambiguous Telex sequences that are also plausible Vietnamese structure remain outside grammar-only disambiguation.
+
 ## Candidate boundary
 
 The engine operates on a candidate near the caret, not the full document.

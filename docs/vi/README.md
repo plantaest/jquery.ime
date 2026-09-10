@@ -70,6 +70,7 @@ Started in Phase 5:
 
 * Tone reflow after ordinary letter extension for covered VNI examples, such as `to1an -> toán` and `hoa2n -> hoàn`.
 * Reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*, such as `vi-vni-reformed`.
+* Structural-validation hardening for covered foreign-like Telex runs whose written structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
 
 ## Read order
 
@@ -164,7 +165,7 @@ Playground work and upstream submission preparation are outside the current Phas
 Do not guess these while implementing:
 
 * whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
-* how strict initial structural validation should be, including foreign-like candidates such as `david` and `droid`;
+* how much further structural validation should go beyond covered impossible Latin runs;
 
 ## Documentation ownership
 

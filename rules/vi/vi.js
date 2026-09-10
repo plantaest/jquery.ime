@@ -650,35 +650,53 @@
 		return false;
 	}
 
+	function getOnsets() {
+		return [
+			'ngh',
+			'ch',
+			'gh',
+			'kh',
+			'ng',
+			'nh',
+			'ph',
+			'th',
+			'tr',
+			'qu',
+			'b',
+			'c',
+			'd',
+			'\u0111',
+			'g',
+			'h',
+			'k',
+			'l',
+			'm',
+			'n',
+			'p',
+			'r',
+			's',
+			't',
+			'v',
+			'x'
+		];
+	}
+
+	function isOnsetPrefix( lowerText ) {
+		var i,
+			onsets = getOnsets();
+
+		for ( i = 0; i < onsets.length; i++ ) {
+			if ( onsets[ i ].indexOf( lowerText ) === 0 ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	function resolveOnset( state, lowerText ) {
 		var i,
-			onsets = [
-				'ngh',
-				'ch',
-				'gh',
-				'kh',
-				'ng',
-				'nh',
-				'ph',
-				'th',
-				'tr',
-				'b',
-				'c',
-				'd',
-				'\u0111',
-				'g',
-				'h',
-				'k',
-				'l',
-				'm',
-				'n',
-				'p',
-				'r',
-				's',
-				't',
-				'v',
-				'x'
-			];
+			onsets = getOnsets();
 
 		if ( lowerText.indexOf( 'qu' ) === 0 ) {
 			return {
@@ -757,6 +775,10 @@
 
 	function isCheckedEnding( ending ) {
 		return ending === 'c' || ending === 'ch' || ending === 'p' || ending === 't';
+	}
+
+	function isConsonantalEnding( ending ) {
+		return 'm n ng nh p t c ch'.split( ' ' ).includes( ending );
 	}
 
 	function findRimePatternToneTarget( structure ) {
@@ -884,18 +906,60 @@
 		return structure;
 	}
 
-	function prepareState( state, tonePlacement ) {
-		var hasVowel = false;
+	function hasOnlyVowelsBetween( state, startIndex, endIndex ) {
+		var i;
 
-		state.structure = analyzeStructure( state, tonePlacement );
-		hasVowel = state.structure.vowels.indices.length > 0;
-
-		if ( !hasVowel ) {
-			state.status = Vietnamese.StateType.INTERMEDIATE;
-		} else {
-			state.status = Vietnamese.StateType.STRUCTURALLY_VALID;
+		for ( i = startIndex; i <= endIndex; i++ ) {
+			if ( !state.tokens[ i ].isVowel ) {
+				return false;
+			}
 		}
 
+		return true;
+	}
+
+	/**
+	 * Classify a candidate by its written structure, without lexical lookup.
+	 *
+	 * This keeps Telex command keys literal once a Latin run can no longer be
+	 * one Vietnamese orthographic syllable in the current model.
+	 *
+	 * @param {Object} state Composition state with analyzed structure.
+	 * @return {string} StateType value.
+	 */
+	function classifyStructure( state ) {
+		var firstVowelIndex,
+			lastVowelIndex,
+			vowels = state.structure.vowels.indices,
+			lowerText = getLowerText( state ),
+			suffix;
+
+		if ( vowels.length === 0 ) {
+			return isOnsetPrefix( lowerText ) ?
+				Vietnamese.StateType.INTERMEDIATE :
+				Vietnamese.StateType.UNRECOGNIZED;
+		}
+
+		firstVowelIndex = vowels[ 0 ];
+		lastVowelIndex = vowels[ vowels.length - 1 ];
+		if (
+			firstVowelIndex !== state.structure.rimeStart ||
+			!hasOnlyVowelsBetween( state, firstVowelIndex, lastVowelIndex )
+		) {
+			return Vietnamese.StateType.UNRECOGNIZED;
+		}
+
+		suffix = lowerText.slice( lastVowelIndex + 1 );
+		if ( suffix && !isConsonantalEnding( suffix ) ) {
+			return Vietnamese.StateType.UNRECOGNIZED;
+		}
+
+		return Vietnamese.StateType.STRUCTURALLY_VALID;
+	}
+
+	function prepareState( state, tonePlacement ) {
+		state.structure = analyzeStructure( state, tonePlacement );
+		state.status = classifyStructure( state );
 		return state;
 	}
 

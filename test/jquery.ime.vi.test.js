@@ -278,6 +278,34 @@
 		assert.true( parsedMat.structure.checked, 'mat is recognized as a checked syllable' );
 	} );
 
+	QUnit.test( 'Vietnamese parser rejects structurally impossible Latin candidates', ( assert ) => {
+		var stateType = $.ime.vi.StateType;
+
+		[ 'ba', 'thay', 'thuong', 'gieng', 'quoc', 'hoao', 'hoeo' ].forEach( ( candidate ) => {
+			assert.strictEqual(
+				$.ime.vi.parseCandidate( candidate ).status,
+				stateType.STRUCTURALLY_VALID,
+				candidate + ' remains a structurally valid Vietnamese candidate'
+			);
+		} );
+
+		[ 'n', 'ng', 'ngh', 'q', 'qu', 'tr' ].forEach( ( candidate ) => {
+			assert.strictEqual(
+				$.ime.vi.parseCandidate( candidate ).status,
+				stateType.INTERMEDIATE,
+				candidate + ' remains a valid intermediate onset candidate'
+			);
+		} );
+
+		[ 'br', 'bro', 'davi', 'droi', 'node', 'wa', 'brow', 'browse' ].forEach( ( candidate ) => {
+			assert.strictEqual(
+				$.ime.vi.parseCandidate( candidate ).status,
+				stateType.UNRECOGNIZED,
+				candidate + ' is not a Vietnamese composition candidate'
+			);
+		} );
+	} );
+
 	QUnit.module( 'VIWP.IME – Transform', {
 		before: loadVietnameseSource
 	} );
@@ -1548,6 +1576,54 @@
 				output: 'Việt'
 			},
 			'Explicit Telex ee produces Việt before tone placement'
+		);
+	} );
+
+	QUnit.test( 'Telex adapter passes through structurally impossible Latin runs', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
+
+		[ 'droid', 'david', 'browser', 'nodej', 'nodejs', 'was', 'washington' ].forEach( ( input ) => {
+			assert.deepEqual(
+				telex( input, '' ),
+				{
+					noop: true,
+					output: input
+				},
+				input + ' remains literal because its candidate structure is not Vietnamese'
+			);
+		} );
+
+		assert.deepEqual(
+			telex( 'dacd', '' ),
+			{
+				noop: false,
+				output: 'đac'
+			},
+			'Vietnamese delayed d-stroke still applies'
+		);
+		assert.deepEqual(
+			telex( 'thaya', '' ),
+			{
+				noop: false,
+				output: 'thây'
+			},
+			'Vietnamese delayed circumflex still applies'
+		);
+		assert.deepEqual(
+			telex( 'quoco', '' ),
+			{
+				noop: false,
+				output: 'quôc'
+			},
+			'Vietnamese qu near-neighbor still accepts delayed circumflex'
+		);
+		assert.deepEqual(
+			telex( 'gienge', '' ),
+			{
+				noop: false,
+				output: 'giêng'
+			},
+			'Vietnamese gi near-neighbor still accepts delayed circumflex'
 		);
 	} );
 

@@ -395,6 +395,27 @@ vi-viqr-star-reformed: ddu*o*`ng -> đường
 
 Reformed fixtures should be representative only. Pure engine tests own the broader policy matrix.
 
+Covered structural-validation examples:
+
+```text
+parser: br, bro, davi, droi, node, wa, brow, browse -> UNRECOGNIZED
+parser: n, ng, ngh, q, qu, tr -> INTERMEDIATE
+parser: ba, thay, thuong, gieng, quoc, hoao, hoeo -> STRUCTURALLY_VALID
+
+vi-telex: droid      -> droid
+vi-telex: david      -> david
+vi-telex: browser    -> browser
+vi-telex: nodejs     -> nodejs
+vi-telex: washington -> washington
+
+vi-telex: dacds   -> đác
+vi-telex: thayas  -> thấy
+vi-telex: quocos  -> quốc
+vi-telex: gienges -> giếng
+```
+
+These are paired tests: every protected foreign-like case should sit near Vietnamese cases that must continue to compose. The runtime implementation must not use the foreign-like examples as a word exception list.
+
 ## Generated tests
 
 Generated or data-driven tests are useful for:

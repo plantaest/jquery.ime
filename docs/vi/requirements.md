@@ -499,7 +499,30 @@ The first priority is correct Vietnamese composition. Conservative protection ag
 
 The architecture SHOULD allow stricter structural validation later, but VIWP.IME MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental transformations.
 
-Foreign-like candidates such as `david` and `droid` are Phase 5 structural-validation questions. They should not be handled by hard-coded word exceptions.
+Phase 5 structural-validation hardening SHOULD pass through a continuous Latin candidate when its written structure is impossible as one Vietnamese orthographic syllable in the current model.
+
+Covered Telex examples:
+
+```text
+droid      -> droid
+david      -> david
+browser    -> browser
+nodejs     -> nodejs
+washington -> washington
+```
+
+These examples are regression coverage, not a runtime dictionary. They are protected because their candidate structure violates the orthographic model, such as a rime beginning with an unsupported consonant, a consonant inserted between vowel letters, or a suffix that is not a Vietnamese ending.
+
+This hardening MUST preserve Vietnamese near-neighbor behavior:
+
+```text
+dacds   -> đác
+thayas  -> thấy
+quocos  -> quốc
+gienges -> giếng
+```
+
+VIWP.IME does not attempt to infer user intent when a raw Telex sequence is structurally ambiguous. For example, `bar` and `gas` may still compose because `ba` and `ga` are Vietnamese candidates before the final Telex tone key. Strong Telex sequences such as `aa`, `ee`, `oo`, `aw`, `ow`, `uw`, and `dd` may also still compose when their command interpretation is structurally valid.
 
 ## jQuery.IME compatibility
 

@@ -350,6 +350,8 @@ Do not rely on a persistent raw-keystroke buffer for ordinary transformations. R
 
 The Phase 3 parser attaches a rime-aware `structure` object to parsed candidates. It includes the parsed onset, rime, ending, checked-ending flag, eligible vowel indices, and resolved tone target.
 
+The Phase 5 classifier uses that structure to reject candidates whose rime shape is impossible in the current orthographic model. It does not identify foreign words. It checks structural facts such as onset prefixes, whether the rime begins with an eligible vowel, whether the vowel block is contiguous, and whether any suffix after the vowel block is a covered Vietnamese consonantal ending.
+
 ## `maxKeyLength` and `contextLength`
 
 Current recommendation:
@@ -472,6 +474,7 @@ Confirmed:
 * VIQR and VIQR* delayed d-stroke can reuse the shared d-stroke command without jQuery.IME core changes;
 * tone reflow after ordinary letter extension can be implemented from rendered text without raw `context`, for covered cases such as `to1an -> toán` and `hoa2n -> hoàn`;
 * traditional and reformed tone-placement policies can be exposed as separate input-method ids without jQuery.IME core changes;
+* structural-validation hardening can pass through covered foreign-like Telex runs such as `droid`, `david`, `browser`, `nodejs`, and `washington` without dictionary data, hard-coded word exceptions, raw key history, or jQuery.IME core changes;
 * incompatible checked-tone commands can pass through without jQuery.IME core changes;
 * Telex can protect a small set of covered literal rimes such as `oao` and `oeo` during delayed-command disambiguation without jQuery.IME core changes.
 
@@ -479,7 +482,7 @@ Unresolved:
 
 * whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
 * whether a future file split is worth the extra loader complexity;
-* how strict initial structural validation should be for foreign-like candidates such as `david` and `droid`.
+* how much further structural validation should go beyond the covered impossible Latin runs.
 
 ## Architecture acceptance criteria
 

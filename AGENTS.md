@@ -39,6 +39,7 @@ The current branch contains the Phase 4 shared-engine integration path:
 * Telex leaves standalone `w`, `[`, and `]` as literal input; `w` still works as a horn command when it can transform an existing candidate.
 * Phase 5 hardening has started with tone reflow after ordinary letter extension, such as `to1an -> toán` and `hoa2n -> hoàn`.
 * Phase 5 also exposes reformed tone-placement variants, such as `vi-vni-reformed`, while keeping traditional placement as the default.
+* Phase 5 structural-validation hardening passes through covered foreign-like Telex runs whose candidate structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
 
 Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broader coverage, structural-validation hardening, and engine documentation are still Phase 5 work.
 
@@ -68,7 +69,7 @@ The active plan is:
 * Phase 4 – Telex and VIQR adapters.
 * Phase 5 – engine hardening and documentation.
 
-The next implementation work should normally be Phase 5: broader coverage, manual typing hardening, structural-validation tuning, engine simplification where useful, and documentation polish. Playground work and upstream submission preparation are outside the current Phase 5 scope unless the project direction explicitly brings them back.
+The next implementation work should normally be Phase 5: broader coverage, manual typing hardening, further structural-validation tuning, engine simplification where useful, and documentation polish. Playground work and upstream submission preparation are outside the current Phase 5 scope unless the project direction explicitly brings them back.
 
 ## Architectural constraints
 

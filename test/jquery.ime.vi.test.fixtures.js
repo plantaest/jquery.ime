@@ -92,6 +92,22 @@ testFixtures.push( {
 } );
 
 testFixtures.push( {
+	description: 'Vietnamese Telex structural validation test',
+	inputmethod: 'vi-telex',
+	tests: [
+		{ input: 'droid', output: 'droid', description: 'Vietnamese Telex keeps structurally impossible droid literal' },
+		{ input: 'david', output: 'david', description: 'Vietnamese Telex keeps structurally impossible david literal' },
+		{ input: 'browser', output: 'browser', description: 'Vietnamese Telex keeps structurally impossible browser literal' },
+		{ input: 'nodejs', output: 'nodejs', description: 'Vietnamese Telex keeps structurally impossible nodejs literal' },
+		{ input: 'washington', output: 'washington', description: 'Vietnamese Telex keeps structurally impossible washington literal' },
+		{ input: 'dacds', output: 'đác', description: 'Vietnamese Telex still composes delayed d-stroke near-neighbor' },
+		{ input: 'thayas', output: 'thấy', description: 'Vietnamese Telex still composes delayed circumflex near-neighbor' },
+		{ input: 'quocos', output: 'quốc', description: 'Vietnamese Telex still composes qu near-neighbor' },
+		{ input: 'gienges', output: 'giếng', description: 'Vietnamese Telex still composes gi near-neighbor' }
+	]
+} );
+
+testFixtures.push( {
 	description: 'Vietnamese VNI reformed tone-placement test',
 	inputmethod: 'vi-vni-reformed',
 	tests: [
