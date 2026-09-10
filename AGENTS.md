@@ -19,7 +19,7 @@ VNI is the preferred method for examples and early implementation work when only
 
 The current branch contains the Phase 4 shared-engine integration path:
 
-* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, `vi-viqr`, and `vi-viqr-star`.
+* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, `vi-viqr`, `vi-viqr-star`, and their `-reformed` tone-placement variants.
 * The Vietnamese input methods share one Vietnamese rule source.
 * Functional `patterns` rules can call a shared engine boundary.
 * VNI has a rime-aware shared-engine path for tones, vowel diacritics, `d`/`đ`, common tone-placement structures, `qu`, `gi`, checked endings, repeated-key escape, and case-preserving output.
@@ -37,6 +37,8 @@ The current branch contains the Phase 4 shared-engine integration path:
 * Telex supports the covered `ua`-family horn sequence `huaws -> hứa`.
 * Telex keeps final `o` literal in covered rimes such as `hoaos -> hoáo` and `hoeos -> hoéo`.
 * Telex leaves standalone `w`, `[`, and `]` as literal input; `w` still works as a horn command when it can transform an existing candidate.
+* Phase 5 hardening has started with tone reflow after ordinary letter extension, such as `to1an -> toán` and `hoa2n -> hoàn`.
+* Phase 5 also exposes reformed tone-placement variants, such as `vi-vni-reformed`, while keeping traditional placement as the default.
 
 Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broader coverage, structural-validation hardening, and engine documentation are still Phase 5 work.
 
@@ -194,9 +196,15 @@ xóa
 hủy
 ```
 
-The shared engine should remain capable of supporting the reformed policy where practical.
+The shared engine supports reformed policy variants where open `oa`, `oe`, and `uy` rimes place tone on the final vowel:
 
-Do not hard-code tone-placement policy inside VNI, Telex, or VIQR adapters.
+```text
+hoà
+khoẻ
+huỷ
+```
+
+Do not hard-code tone-placement policy inside VNI, Telex, VIQR, or VIQR* adapters.
 
 ## jQuery.IME core
 
@@ -226,6 +234,10 @@ vi-vni
 vi-telex
 vi-viqr
 vi-viqr-star
+vi-vni-reformed
+vi-telex-reformed
+vi-viqr-reformed
+vi-viqr-star-reformed
 ```
 
 all pointing to that source.

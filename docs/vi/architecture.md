@@ -68,7 +68,7 @@ If `noop` is false, jQuery.IME replaces the complete `input` window before the c
 
 `contextLength` controls raw input-key history. It is not the same thing as rendered text before the caret.
 
-The current Vietnamese implementation uses one source file, `rules/vi/vi.js`, to register VNI, Telex, VIQR, and VIQR*. This matches the current jQuery.IME loader better than inventing a shared non-input-method dependency.
+The current Vietnamese implementation uses one source file, `rules/vi/vi.js`, to register VNI, Telex, VIQR, VIQR*, and their `-reformed` tone-placement variants. This matches the current jQuery.IME loader better than inventing a shared non-input-method dependency.
 
 ## Current packaging recommendation
 
@@ -96,10 +96,14 @@ Vietnamese namespace
 All Vietnamese metadata entries should point to this source:
 
 ```text
-vi-vni       -> rules/vi/vi.js
-vi-telex     -> rules/vi/vi.js
-vi-viqr      -> rules/vi/vi.js
-vi-viqr-star -> rules/vi/vi.js
+vi-vni                -> rules/vi/vi.js
+vi-telex              -> rules/vi/vi.js
+vi-viqr               -> rules/vi/vi.js
+vi-viqr-star          -> rules/vi/vi.js
+vi-vni-reformed       -> rules/vi/vi.js
+vi-telex-reformed     -> rules/vi/vi.js
+vi-viqr-reformed      -> rules/vi/vi.js
+vi-viqr-star-reformed -> rules/vi/vi.js
 ```
 
 Reason: jQuery.IME has a simple rule-file loader. Its existing dependency support is oriented around input methods, not arbitrary shared helper modules. A single shared Vietnamese source is the smallest jQuery.IME-compatible package that preserves one engine.
@@ -182,11 +186,14 @@ The current implementation uses this adapter shape:
 createAdapter( {
     inputMethodId: "vi-vni",
     decodeCommand: decodeVNICommand,
-    engine: Vietnamese.engine
+    engine: Vietnamese.engine,
+    tonePlacement: Vietnamese.TonePlacement.TRADITIONAL
 } )
 ```
 
-`decodeCommand( input, context )` returns either:
+`tonePlacement` defaults to `TonePlacement.TRADITIONAL`. Reformed input methods reuse the same adapters and pass `TonePlacement.REFORMED`; they do not duplicate Vietnamese parsing or transformation logic.
+
+`decodeCommand( input, context, options )` returns either:
 
 ```javascript
 {
@@ -210,12 +217,24 @@ or an adapter-level literal replacement:
 
 or `null`.
 
+The adapter passes these options to decoders:
+
+```javascript
+{
+    inputMethodId: inputMethodId,
+    tonePlacement: tonePlacement
+}
+```
+
+Most decoders ignore the options. Telex may use `tonePlacement` only to ask shared engine helpers whether an ambiguous delayed command can apply under the current rendering policy.
+
 For semantic commands, the adapter extracts the candidate before the command key and calls:
 
 ```javascript
 engine.transformCandidate( candidate, command, {
     context: context,
-    inputMethodId: inputMethodId
+    inputMethodId: inputMethodId,
+    tonePlacement: tonePlacement
 } );
 ```
 
@@ -268,6 +287,10 @@ If `handled` is true, the adapter returns:
 This contract is intentionally small. Add fields only when a tested behavior requires them.
 
 For VNI repeated-key escape, the adapter includes the literal command key in the semantic command object. The engine still reconstructs behavior from the rendered candidate, not from raw key history.
+
+When an input-method decoder returns no command, the shared adapter may still ask the engine to reflow the extracted rendered candidate. This path is intentionally narrower than a semantic command: it re-renders an already toned candidate when ordinary letter input has changed the candidate structure and the resolved tone target changes. For example, `to1an` reaches the adapter as `tóan`, then reflows to `toán`.
+
+The reflow path receives the same `tonePlacement` option as command transformations.
 
 ## Candidate extraction
 
@@ -333,13 +356,14 @@ Current recommendation:
 
 ```text
 contextLength:
-  vi-vni       0
-  vi-telex     0
-  vi-viqr      0
-  vi-viqr-star 0
+  all Vietnamese methods 0
 
 maxKeyLength:
   all Vietnamese methods 16
+
+tonePlacement:
+  vi-vni, vi-telex, vi-viqr, vi-viqr-star traditional
+  vi-vni-reformed, vi-telex-reformed, vi-viqr-reformed, vi-viqr-star-reformed reformed
 ```
 
 `contextLength = 0` keeps raw key history out of the main composition model.
@@ -393,11 +417,13 @@ Still, pure engine pieces should be reachable from QUnit tests. The preferred co
 
 ```text
 createAdapter()
+TonePlacement
 decodeVNICommand()
 decodeTelexCommand()
 decodeVIQRCommand()
 decodeVIQRStarCommand()
-transformCandidate()
+engine.transformCandidate()
+engine.reflowCandidate()
 parseCandidate()
 renderCandidate()
 ```
@@ -444,15 +470,16 @@ Confirmed:
 * VIQR* can share the VIQR adapter shape with a different horn key;
 * VIQR and VIQR* shifted punctuation can be handled by a `patterns_shift` bridge without jQuery.IME core changes;
 * VIQR and VIQR* delayed d-stroke can reuse the shared d-stroke command without jQuery.IME core changes;
-* incompatible checked-tone commands can pass through without jQuery.IME core changes.
+* tone reflow after ordinary letter extension can be implemented from rendered text without raw `context`, for covered cases such as `to1an -> toán` and `hoa2n -> hoàn`;
+* traditional and reformed tone-placement policies can be exposed as separate input-method ids without jQuery.IME core changes;
+* incompatible checked-tone commands can pass through without jQuery.IME core changes;
 * Telex can protect a small set of covered literal rimes such as `oao` and `oeo` during delayed-command disambiguation without jQuery.IME core changes.
 
 Unresolved:
 
 * whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
 * whether a future file split is worth the extra loader complexity;
-* how strict initial structural validation should be for foreign-like candidates such as `david` and `droid`;
-* how to expose reformed tone placement through jQuery.IME.
+* how strict initial structural validation should be for foreign-like candidates such as `david` and `droid`.
 
 ## Architecture acceptance criteria
 

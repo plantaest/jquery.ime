@@ -20,6 +20,8 @@ testFixtures.push( {
 		{ input: 'dac99', output: 'dac9', description: 'Vietnamese VNI d-stroke repeated-key escape after rime material' },
 		{ input: 'hoa2', output: 'hòa', description: 'Vietnamese VNI traditional tone placement' },
 		{ input: 'hoan2', output: 'hoàn', description: 'Vietnamese VNI oa plus ending placement' },
+		{ input: 'to1an', output: 'toán', description: 'Vietnamese VNI reflows tone after extending tó' },
+		{ input: 'hoa2n', output: 'hoàn', description: 'Vietnamese VNI reflows tone after extending hòa' },
 		{ input: 'huy3', output: 'hủy', description: 'Vietnamese VNI traditional open uy placement' },
 		{ input: 'huynh2', output: 'huỳnh', description: 'Vietnamese VNI uy plus ending placement' },
 		{ input: 'coi4', output: 'cõi', description: 'Vietnamese VNI oi placement' },
@@ -90,6 +92,32 @@ testFixtures.push( {
 } );
 
 testFixtures.push( {
+	description: 'Vietnamese VNI reformed tone-placement test',
+	inputmethod: 'vi-vni-reformed',
+	tests: [
+		{ input: 'hoa2', output: 'hoà', description: 'Vietnamese VNI reformed open oa placement' },
+		{ input: 'khoe3', output: 'khoẻ', description: 'Vietnamese VNI reformed open oe placement' },
+		{ input: 'huy3', output: 'huỷ', description: 'Vietnamese VNI reformed open uy placement' },
+		{ input: 'hoan2', output: 'hoàn', description: 'Vietnamese VNI reformed oa plus ending placement' },
+		{ input: 'huynh2', output: 'huỳnh', description: 'Vietnamese VNI reformed uy plus ending placement' },
+		{ input: 'hoa2n', output: 'hoàn', description: 'Vietnamese VNI reformed reflows after extending hoà' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese Telex reformed tone-placement test',
+	inputmethod: 'vi-telex-reformed',
+	tests: [
+		{ input: 'hoaf', output: 'hoà', description: 'Vietnamese Telex reformed open oa placement' },
+		{ input: 'khoer', output: 'khoẻ', description: 'Vietnamese Telex reformed open oe placement' },
+		{ input: 'huyr', output: 'huỷ', description: 'Vietnamese Telex reformed open uy placement' },
+		{ input: 'huynhf', output: 'huỳnh', description: 'Vietnamese Telex reformed uy plus ending placement' },
+		{ input: 'quoocs', output: 'quốc', description: 'Vietnamese Telex reformed keeps qu behavior shared' },
+		{ input: 'tieengs', output: 'tiếng', description: 'Vietnamese Telex reformed keeps iê behavior shared' }
+	]
+} );
+
+testFixtures.push( {
 	description: 'Vietnamese VIQR adapter test',
 	inputmethod: 'vi-viqr',
 	tests: [
@@ -144,6 +172,18 @@ testFixtures.push( {
 } );
 
 testFixtures.push( {
+	description: 'Vietnamese VIQR reformed tone-placement test',
+	inputmethod: 'vi-viqr-reformed',
+	tests: [
+		{ input: 'hoa`', output: 'hoà', description: 'Vietnamese VIQR reformed open oa placement' },
+		{ input: 'khoe?', output: 'khoẻ', description: 'Vietnamese VIQR reformed open oe placement' },
+		{ input: 'huy?', output: 'huỷ', description: 'Vietnamese VIQR reformed open uy placement' },
+		{ input: 'huynh`', output: 'huỳnh', description: 'Vietnamese VIQR reformed uy plus ending placement' },
+		{ input: 'tie^\'ng', output: 'tiếng', description: 'Vietnamese VIQR reformed keeps iê behavior shared' }
+	]
+} );
+
+testFixtures.push( {
 	description: 'Vietnamese VIQR* adapter test',
 	inputmethod: 'vi-viqr-star',
 	tests: [
@@ -171,5 +211,16 @@ testFixtures.push( {
 			description: 'Vietnamese VIQR* shifted star preserves backslash escape'
 		},
 		{ input: 'o\\*', output: 'o*', description: 'Vietnamese VIQR* backslash escapes star' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese VIQR* reformed tone-placement test',
+	inputmethod: 'vi-viqr-star-reformed',
+	tests: [
+		{ input: 'hoa`', output: 'hoà', description: 'Vietnamese VIQR* reformed open oa placement' },
+		{ input: 'huy?', output: 'huỷ', description: 'Vietnamese VIQR* reformed open uy placement' },
+		{ input: 'ddu*o*`ng', output: 'đường', description: 'Vietnamese VIQR* reformed keeps star horn behavior shared' },
+		{ input: 'o*', output: 'ơ', description: 'Vietnamese VIQR* reformed star horn' }
 	]
 } );

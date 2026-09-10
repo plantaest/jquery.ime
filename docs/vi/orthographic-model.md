@@ -228,6 +228,17 @@ tường
 
 The default policy is traditional tone placement.
 
+The current implementation exposes reformed placement as separate input-method variants:
+
+```text
+vi-vni-reformed
+vi-telex-reformed
+vi-viqr-reformed
+vi-viqr-star-reformed
+```
+
+These variants use the same shared engine and adapters as the default methods. Only the tone-placement policy passed to the renderer changes.
+
 Traditional and reformed placement are identical for most structures. The main visible difference is open rimes involving an orthographic medial and a simple nucleus:
 
 ```text

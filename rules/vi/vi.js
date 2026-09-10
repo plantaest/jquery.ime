@@ -139,9 +139,12 @@
 	 * Decode a Telex key sequence into a shared Vietnamese semantic command.
 	 *
 	 * @param {string} input Text window ending with the latest typed key.
+	 * @param {string} context Raw jQuery.IME key context.
+	 * @param {Object} [options] Adapter options.
+	 * @param {string} [options.tonePlacement] Tone-placement policy.
 	 * @return {Object|null} Decoded command with key and command fields, or null.
 	 */
-	function decodeTelexCommand( input ) {
+	function decodeTelexCommand( input, context, options ) {
 		var toneCommands = {
 				s: Vietnamese.Tone.ACUTE,
 				f: Vietnamese.Tone.GRAVE,
@@ -179,8 +182,10 @@
 			lowerInput = input.toLowerCase(),
 			key = input.slice( -1 ),
 			lowerKey = key.toLowerCase(),
+			tonePlacement = options && options.tonePlacement,
 			vowelDiacriticCommand = vowelDiacriticCommands[ lowerInput.slice( -2 ) ],
-			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ];
+			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ],
+			delayedOptions;
 
 		if ( toneCommands[ lowerKey ] ) {
 			return createToneCommand( key, toneCommands[ lowerKey ] );
@@ -210,19 +215,27 @@
 			return null;
 		}
 
+		if ( delayedCommand ) {
+			delayedOptions = {
+				excludeOffGlideEnding: delayedCommand.excludeOffGlideEnding,
+				tonePlacement: tonePlacement
+			};
+		}
+
 		if ( delayedCommand && (
 			candidateHasTargetVowelDiacritic(
 				input,
 				key,
 				delayedCommand.vowelDiacritic,
-				delayedCommand.bases
+				delayedCommand.bases,
+				tonePlacement
 			) ||
 			candidateCanReceiveTargetVowelDiacritic(
 				input,
 				key,
 				delayedCommand.vowelDiacritic,
 				delayedCommand.bases,
-				delayedCommand
+				delayedOptions
 			)
 		) ) {
 			return createVowelDiacriticCommand( key, delayedCommand.vowelDiacritic );
@@ -334,20 +347,31 @@
 	}
 
 	/**
+	 * Normalize an optional tone-placement policy.
+	 *
+	 * @param {string} [tonePlacement] Tone-placement policy.
+	 * @return {string} Tone-placement policy.
+	 */
+	function normalizeTonePlacement( tonePlacement ) {
+		return tonePlacement || Vietnamese.TonePlacement.TRADITIONAL;
+	}
+
+	/**
 	 * Parse the rendered candidate before a command key.
 	 *
 	 * @param {string} input Text window ending with the command key.
 	 * @param {string} commandKey Command key recognized by the adapter.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 * @return {Object|null} Parsed candidate state, or null when empty.
 	 */
-	function parseExtractedCandidate( input, commandKey ) {
+	function parseExtractedCandidate( input, commandKey, tonePlacement ) {
 		var extracted = extractCandidate( input, commandKey );
 
 		if ( !extracted.candidate ) {
 			return null;
 		}
 
-		return parseCandidate( extracted.candidate );
+		return parseCandidate( extracted.candidate, tonePlacement );
 	}
 
 	/**
@@ -360,10 +384,11 @@
 	 * @param {string} commandKey Command key recognized by the adapter.
 	 * @param {string} vowelDiacritic Expected vowel-diacritic enum value.
 	 * @param {string[]} bases Base vowel letters that may repeat this command.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 * @return {boolean} True if the command should escape a rendered diacritic.
 	 */
-	function candidateHasTargetVowelDiacritic( input, commandKey, vowelDiacritic, bases ) {
-		var state = parseExtractedCandidate( input, commandKey ),
+	function candidateHasTargetVowelDiacritic( input, commandKey, vowelDiacritic, bases, tonePlacement ) {
+		var state = parseExtractedCandidate( input, commandKey, tonePlacement ),
 			target, token;
 
 		if ( !state || state.status === Vietnamese.StateType.UNRECOGNIZED ) {
@@ -393,7 +418,8 @@
 	function candidateCanReceiveTargetVowelDiacritic(
 		input, commandKey, vowelDiacritic, bases, options
 	) {
-		var state = parseExtractedCandidate( input, commandKey ),
+		var tonePlacement = options && options.tonePlacement,
+			state = parseExtractedCandidate( input, commandKey, tonePlacement ),
 			target, token;
 
 		if ( !state || state.status === Vietnamese.StateType.UNRECOGNIZED ) {
@@ -582,9 +608,9 @@
 		};
 	}
 
-	function resultFromState( state, literalSuffix ) {
+	function resultFromState( state, literalSuffix, tonePlacement ) {
 		return {
-			state: prepareState( state ),
+			state: prepareState( state, tonePlacement ),
 			literalSuffix: literalSuffix || ''
 		};
 	}
@@ -788,7 +814,25 @@
 		return -1;
 	}
 
-	function findToneTarget( state, structure ) {
+	function isOpenMedialRime( structure ) {
+		return structure.rime === 'oa' || structure.rime === 'oe' || structure.rime === 'uy';
+	}
+
+	function findOpenMedialToneTarget( structure, tonePlacement ) {
+		var vowels = structure.vowels;
+
+		if ( !isOpenMedialRime( structure ) ) {
+			return -1;
+		}
+
+		if ( normalizeTonePlacement( tonePlacement ) === Vietnamese.TonePlacement.REFORMED ) {
+			return vowels.indices[ vowels.indices.length - 1 ];
+		}
+
+		return vowels.indices[ 0 ];
+	}
+
+	function findToneTarget( state, structure, tonePlacement ) {
 		var patternTarget, offGlideTarget,
 			vowels = structure.vowels;
 
@@ -800,8 +844,9 @@
 			return vowels.indices[ 0 ];
 		}
 
-		if ( structure.rime === 'oa' || structure.rime === 'oe' || structure.rime === 'uy' ) {
-			return vowels.indices[ 0 ];
+		patternTarget = findOpenMedialToneTarget( structure, tonePlacement );
+		if ( patternTarget !== -1 ) {
+			return patternTarget;
 		}
 
 		patternTarget = findRimePatternToneTarget( structure );
@@ -817,7 +862,7 @@
 		return vowels.indices[ vowels.indices.length - 1 ];
 	}
 
-	function analyzeStructure( state ) {
+	function analyzeStructure( state, tonePlacement ) {
 		var lowerText = getLowerText( state ),
 			onset = resolveOnset( state, lowerText ),
 			vowels = collectEligibleVowels( state, onset.ignoredVowelIndices ),
@@ -832,17 +877,17 @@
 				rimeStart: onset.end,
 				toneTargetIndex: -1,
 				vowels: vowels
-			};
+		};
 
 		structure.checked = isCheckedEnding( ending );
-		structure.toneTargetIndex = findToneTarget( state, structure );
+		structure.toneTargetIndex = findToneTarget( state, structure, tonePlacement );
 		return structure;
 	}
 
-	function prepareState( state ) {
+	function prepareState( state, tonePlacement ) {
 		var hasVowel = false;
 
-		state.structure = analyzeStructure( state );
+		state.structure = analyzeStructure( state, tonePlacement );
 		hasVowel = state.structure.vowels.indices.length > 0;
 
 		if ( !hasVowel ) {
@@ -919,9 +964,10 @@
 	 * Parse rendered candidate text into a minimal Vietnamese composition state.
 	 *
 	 * @param {string} candidate Candidate text near the caret.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 * @return {Object} Composition state.
 	 */
-	function parseCandidate( candidate ) {
+	function parseCandidate( candidate, tonePlacement ) {
 		var i, character, token,
 			normalizedCandidate = normalizeText( candidate, 'NFD' ),
 			state = {
@@ -956,7 +1002,7 @@
 			state.tokens.push( token );
 		}
 
-		return prepareState( state );
+		return prepareState( state, tonePlacement );
 	}
 
 	function renderToken( token, tone ) {
@@ -992,26 +1038,28 @@
 	 * Resolve the token index that should carry the visible tone mark.
 	 *
 	 * @param {Object} state Composition state.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 * @return {number} Token index, or -1 if there is no vowel target.
 	 */
-	function resolveTonePlacement( state ) {
+	function resolveTonePlacement( state, tonePlacement ) {
 		if ( !state.structure ) {
-			prepareState( state );
+			prepareState( state, tonePlacement );
 		}
 
-		return state.structure ? state.structure.toneTargetIndex : -1;
+		return state.structure ? findToneTarget( state, state.structure, tonePlacement ) : -1;
 	}
 
 	/**
 	 * Render a Vietnamese composition state to normalized output text.
 	 *
 	 * @param {Object} state Composition state.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 * @return {string} NFC output.
 	 */
-	function renderCandidate( state ) {
+	function renderCandidate( state, tonePlacement ) {
 		var i,
 			output = '',
-			toneTarget = resolveTonePlacement( state );
+			toneTarget = resolveTonePlacement( state, tonePlacement );
 
 		for ( i = 0; i < state.tokens.length; i++ ) {
 			output += renderToken(
@@ -1023,9 +1071,9 @@
 		return normalizeText( output, 'NFC' );
 	}
 
-	function setStateTone( state, tone ) {
+	function setStateTone( state, tone, tonePlacement ) {
 		var i,
-			toneTarget = resolveTonePlacement( state );
+			toneTarget = resolveTonePlacement( state, tonePlacement );
 
 		state.tone = tone;
 		for ( i = 0; i < state.tokens.length; i++ ) {
@@ -1033,8 +1081,8 @@
 		}
 	}
 
-	function canApplyTone( state, tone ) {
-		if ( resolveTonePlacement( state ) === -1 ) {
+	function canApplyTone( state, tone, tonePlacement ) {
+		if ( resolveTonePlacement( state, tonePlacement ) === -1 ) {
 			return false;
 		}
 
@@ -1050,25 +1098,25 @@
 		return true;
 	}
 
-	function applyTone( state, command ) {
+	function applyTone( state, command, tonePlacement ) {
 		var nextState,
 			tone = command.tone;
 
-		if ( !canApplyTone( state, tone ) ) {
+		if ( !canApplyTone( state, tone, tonePlacement ) ) {
 			return null;
 		}
 
 		nextState = cloneState( state );
 		if ( state.tone === tone ) {
-			setStateTone( nextState, Vietnamese.Tone.NONE );
-			return resultFromState( nextState, command.literal );
+			setStateTone( nextState, Vietnamese.Tone.NONE, tonePlacement );
+			return resultFromState( nextState, command.literal, tonePlacement );
 		}
 
-		setStateTone( nextState, tone );
-		return resultFromState( nextState );
+		setStateTone( nextState, tone, tonePlacement );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function removeTone( state ) {
+	function removeTone( state, tonePlacement ) {
 		var nextState;
 
 		if ( state.tone === Vietnamese.Tone.NONE ) {
@@ -1076,8 +1124,8 @@
 		}
 
 		nextState = cloneState( state );
-		setStateTone( nextState, Vietnamese.Tone.NONE );
-		return resultFromState( nextState );
+		setStateTone( nextState, Vietnamese.Tone.NONE, tonePlacement );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
 	function resolveVowelDiacriticTarget( state, vowelDiacritic ) {
@@ -1114,11 +1162,11 @@
 		return -1;
 	}
 
-	function applyVowelDiacriticToTarget( state, target, vowelDiacritic ) {
+	function applyVowelDiacriticToTarget( state, target, vowelDiacritic, tonePlacement ) {
 		var nextState = cloneState( state );
 
 		nextState.tokens[ target ].vowelDiacritic = vowelDiacritic;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
 	function isIgnoredVowelPair( state, firstIndex ) {
@@ -1202,7 +1250,7 @@
 		return -1;
 	}
 
-	function applyHornToUo( state ) {
+	function applyHornToUo( state, tonePlacement ) {
 		var pairStart = findHornUoPair( state ),
 			nextState;
 
@@ -1213,10 +1261,10 @@
 		nextState = cloneState( state );
 		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function applyHornToUa( state ) {
+	function applyHornToUa( state, tonePlacement ) {
 		var pairStart = findHornUaPair( state ),
 			nextState;
 
@@ -1226,10 +1274,10 @@
 
 		nextState = cloneState( state );
 		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function applyHornToCircumflexUo( state ) {
+	function applyHornToCircumflexUo( state, tonePlacement ) {
 		var pairStart = findUoFamilyPair(
 				state,
 				Vietnamese.VowelDiacritic.NONE,
@@ -1244,10 +1292,10 @@
 		nextState = cloneState( state );
 		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function applyCircumflexToHornUo( state ) {
+	function applyCircumflexToHornUo( state, tonePlacement ) {
 		var pairStart = findUoFamilyPair(
 				state,
 				Vietnamese.VowelDiacritic.HORN,
@@ -1262,17 +1310,17 @@
 		nextState = cloneState( state );
 		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
 		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.CIRCUMFLEX;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function removeVowelDiacritic( state, target, literal ) {
+	function removeVowelDiacritic( state, target, literal, tonePlacement ) {
 		var nextState = cloneState( state );
 
 		nextState.tokens[ target ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
-		return resultFromState( nextState, literal );
+		return resultFromState( nextState, literal, tonePlacement );
 	}
 
-	function removeHornFromUo( state, literal ) {
+	function removeHornFromUo( state, literal, tonePlacement ) {
 		var target = resolveTonePlacement( state ),
 			previousToken,
 			nextState;
@@ -1294,17 +1342,17 @@
 		nextState = cloneState( state );
 		nextState.tokens[ target - 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
 		nextState.tokens[ target ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
-		return resultFromState( nextState, literal );
+		return resultFromState( nextState, literal, tonePlacement );
 	}
 
-	function applySimpleVowelDiacritic( state, command ) {
+	function applySimpleVowelDiacritic( state, command, tonePlacement ) {
 		var target = resolveVowelDiacriticTarget( state, command.vowelDiacritic );
 
 		if ( target === -1 ) {
 			return null;
 		}
 
-		return applyVowelDiacriticToTarget( state, target, command.vowelDiacritic );
+		return applyVowelDiacriticToTarget( state, target, command.vowelDiacritic, tonePlacement );
 	}
 
 	function canSwitchTokenVowelDiacritic( token, vowelDiacritic ) {
@@ -1327,7 +1375,7 @@
 		return false;
 	}
 
-	function applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) {
+	function applySameBaseVowelDiacriticSwitch( state, vowelDiacritic, tonePlacement ) {
 		var nextState,
 			target = resolveTonePlacement( state ),
 			token;
@@ -1340,13 +1388,13 @@
 		if ( canSwitchTokenVowelDiacritic( token, vowelDiacritic ) ) {
 			nextState = cloneState( state );
 			nextState.tokens[ target ].vowelDiacritic = vowelDiacritic;
-			return resultFromState( nextState );
+			return resultFromState( nextState, null, tonePlacement );
 		}
 
 		return null;
 	}
 
-	function applyVowelDiacritic( state, command ) {
+	function applyVowelDiacritic( state, command, tonePlacement ) {
 		var alternateTarget,
 			target = resolveTonePlacement( state ),
 			vowelDiacritic = command.vowelDiacritic;
@@ -1358,33 +1406,33 @@
 		) {
 			alternateTarget = resolveAdditionalVowelDiacriticTarget( state, vowelDiacritic, target );
 			if ( alternateTarget !== -1 ) {
-				return applyVowelDiacriticToTarget( state, alternateTarget, vowelDiacritic );
+				return applyVowelDiacriticToTarget( state, alternateTarget, vowelDiacritic, tonePlacement );
 			}
 
 			if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
-				return removeHornFromUo( state, command.literal ) ||
-					removeVowelDiacritic( state, target, command.literal );
+				return removeHornFromUo( state, command.literal, tonePlacement ) ||
+					removeVowelDiacritic( state, target, command.literal, tonePlacement );
 			}
 
-			return removeVowelDiacritic( state, target, command.literal );
+			return removeVowelDiacritic( state, target, command.literal, tonePlacement );
 		}
 
 		if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
-			return applyHornToCircumflexUo( state ) ||
-				applyHornToUo( state ) ||
-				applyHornToUa( state ) ||
-				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
-				applySimpleVowelDiacritic( state, command );
+			return applyHornToCircumflexUo( state, tonePlacement ) ||
+				applyHornToUo( state, tonePlacement ) ||
+				applyHornToUa( state, tonePlacement ) ||
+				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic, tonePlacement ) ||
+				applySimpleVowelDiacritic( state, command, tonePlacement );
 		}
 
 		if ( vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX ) {
-			return applyCircumflexToHornUo( state ) ||
-				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
-				applySimpleVowelDiacritic( state, command );
+			return applyCircumflexToHornUo( state, tonePlacement ) ||
+				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic, tonePlacement ) ||
+				applySimpleVowelDiacritic( state, command, tonePlacement );
 		}
 
-		return applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
-			applySimpleVowelDiacritic( state, command );
+		return applySameBaseVowelDiacriticSwitch( state, vowelDiacritic, tonePlacement ) ||
+			applySimpleVowelDiacritic( state, command, tonePlacement );
 	}
 
 	function resolveDStrokeTarget( state ) {
@@ -1410,7 +1458,7 @@
 		return -1;
 	}
 
-	function applyDStroke( state, command ) {
+	function applyDStroke( state, command, tonePlacement ) {
 		var nextState,
 			target = resolveDStrokeTarget( state );
 
@@ -1425,33 +1473,33 @@
 
 			nextState = cloneState( state );
 			nextState.tokens[ target ].dStroke = false;
-			return resultFromState( nextState, command.literal );
+			return resultFromState( nextState, command.literal, tonePlacement );
 		}
 
 		nextState = cloneState( state );
 		nextState.tokens[ target ].dStroke = true;
-		return resultFromState( nextState );
+		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function transformState( state, command ) {
+	function transformState( state, command, tonePlacement ) {
 		if ( state.status === Vietnamese.StateType.UNRECOGNIZED ) {
 			return null;
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_TONE ) {
-			return applyTone( state, command );
+			return applyTone( state, command, tonePlacement );
 		}
 
 		if ( command.type === Vietnamese.CommandType.REMOVE_TONE ) {
-			return removeTone( state );
+			return removeTone( state, tonePlacement );
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_VOWEL_DIACRITIC ) {
-			return applyVowelDiacritic( state, command );
+			return applyVowelDiacritic( state, command, tonePlacement );
 		}
 
 		if ( command.type === Vietnamese.CommandType.APPLY_D_STROKE ) {
-			return applyDStroke( state, command );
+			return applyDStroke( state, command, tonePlacement );
 		}
 
 		return null;
@@ -1466,19 +1514,46 @@
 	 *  literal replacement for input-method escape keys.
 	 * @param {Object} [options.engine] Shared Vietnamese composition engine.
 	 * @param {string} options.inputMethodId Input method id passed to the engine.
+	 * @param {string} [options.tonePlacement] Tone-placement policy.
 	 * @return {Function} jQuery.IME patterns function.
 	 */
 	function createAdapter( options ) {
 		var decodeCommand = options.decodeCommand || decodeNoCommand,
 			adapterEngine = options.engine || engine,
-			inputMethodId = options.inputMethodId;
+			inputMethodId = options.inputMethodId,
+			tonePlacement = normalizeTonePlacement( options.tonePlacement );
 
 		return function ( input, context ) {
-			var decoded = decodeCommand( input, context ),
+			var decoded = decodeCommand( input, context, {
+					inputMethodId: inputMethodId,
+					tonePlacement: tonePlacement
+				} ),
 				extracted, result;
 
 			if ( !decoded ) {
-				return passThrough( input );
+				if ( typeof adapterEngine.reflowCandidate !== 'function' ) {
+					return passThrough( input );
+				}
+
+				extracted = extractCandidate( input, '' );
+				if ( !extracted.candidate ) {
+					return passThrough( input );
+				}
+
+				result = adapterEngine.reflowCandidate( extracted.candidate, {
+					context: context,
+					inputMethodId: inputMethodId,
+					tonePlacement: tonePlacement
+				} );
+
+				if ( !result || !result.handled ) {
+					return passThrough( input );
+				}
+
+				return {
+					noop: false,
+					output: extracted.prefix + result.output
+				};
 			}
 
 			extracted = extractCandidate( input, decoded.key );
@@ -1495,7 +1570,8 @@
 
 			result = adapterEngine.transformCandidate( extracted.candidate, decoded.command, {
 				context: context,
-				inputMethodId: inputMethodId
+				inputMethodId: inputMethodId,
+				tonePlacement: tonePlacement
 			} );
 
 			if ( !result || !result.handled ) {
@@ -1552,12 +1628,17 @@
 	 * @param {string} description Input method description.
 	 * @param {Function} decodeCommand Input-method-specific command decoder.
 	 * @param {string[]} [shiftedKeys] Shifted command keys that need a patterns bridge.
+	 * @param {string} [tonePlacement] Tone-placement policy.
 	 */
-	function registerInputMethod( inputMethodId, name, description, decodeCommand, shiftedKeys ) {
-		var adapter = createAdapter( {
+	function registerInputMethod(
+		inputMethodId, name, description, decodeCommand, shiftedKeys, tonePlacement
+	) {
+		var normalizedTonePlacement = normalizeTonePlacement( tonePlacement ),
+			adapter = createAdapter( {
 				inputMethodId: inputMethodId,
 				decodeCommand: decodeCommand,
-				engine: engine
+				engine: engine,
+				tonePlacement: normalizedTonePlacement
 			} ),
 			inputMethod = {
 				id: inputMethodId,
@@ -1569,6 +1650,7 @@
 				version: '0.2.0',
 				contextLength: DEFAULT_CONTEXT_LENGTH,
 				maxKeyLength: DEFAULT_MAX_KEY_LENGTH,
+				tonePlacement: normalizedTonePlacement,
 				patterns: adapter
 			};
 
@@ -1608,6 +1690,11 @@
 		STRUCTURALLY_VALID: 'structurally-valid'
 	};
 
+	Vietnamese.TonePlacement = Vietnamese.TonePlacement || {
+		TRADITIONAL: 'traditional',
+		REFORMED: 'reformed'
+	};
+
 	toneToMark = {};
 	toneToMark[ Vietnamese.Tone.ACUTE ] = COMBINING_ACUTE;
 	toneToMark[ Vietnamese.Tone.GRAVE ] = COMBINING_GRAVE;
@@ -1638,13 +1725,16 @@
 		 *
 		 * @param {string} candidate Candidate text near the caret.
 		 * @param {Object} command Shared semantic command.
+		 * @param {Object} [options] Engine options.
+		 * @param {string} [options.tonePlacement] Tone-placement policy.
 		 * @return {Object} Result object with handled and output fields.
 		 */
-		transformCandidate: function ( candidate, command ) {
+		transformCandidate: function ( candidate, command, options ) {
 			var transformResult,
-				state = parseCandidate( candidate );
+				tonePlacement = options && options.tonePlacement,
+				state = parseCandidate( candidate, tonePlacement );
 
-			transformResult = transformState( state, command );
+			transformResult = transformState( state, command, tonePlacement );
 			if ( !transformResult ) {
 				return {
 					handled: false
@@ -1653,7 +1743,43 @@
 
 			return {
 				handled: true,
-				output: renderCandidate( transformResult.state ) + transformResult.literalSuffix
+				output: renderCandidate( transformResult.state, tonePlacement ) +
+					transformResult.literalSuffix
+			};
+		},
+
+		/**
+		 * Re-render a toned candidate after ordinary letters extend it.
+		 *
+		 * @param {string} candidate Candidate text near the caret.
+		 * @param {Object} [options] Engine options.
+		 * @param {string} [options.tonePlacement] Tone-placement policy.
+		 * @return {Object} Result object with handled and output fields.
+		 */
+		reflowCandidate: function ( candidate, options ) {
+			var output,
+				tonePlacement = options && options.tonePlacement,
+				state = parseCandidate( candidate, tonePlacement );
+
+			if (
+				state.status === Vietnamese.StateType.UNRECOGNIZED ||
+				state.tone === Vietnamese.Tone.NONE
+			) {
+				return {
+					handled: false
+				};
+			}
+
+			output = renderCandidate( state, tonePlacement );
+			if ( output === normalizeText( candidate, 'NFC' ) ) {
+				return {
+					handled: false
+				};
+			}
+
+			return {
+				handled: true,
+				output: output
 			};
 		}
 	};
@@ -1676,28 +1802,60 @@
 
 	registerInputMethod(
 		'vi-vni',
-		'Vietnamese VNI',
+		'VNI',
 		'Vietnamese VNI input method',
 		decodeVNICommand
 	);
 	registerInputMethod(
 		'vi-telex',
-		'Vietnamese Telex',
+		'Telex',
 		'Vietnamese Telex input method',
 		decodeTelexCommand
 	);
 	registerInputMethod(
 		'vi-viqr',
-		'Vietnamese VIQR',
+		'VIQR',
 		'Vietnamese VIQR input method',
 		decodeVIQRCommand,
 		[ '?', '~', '^', '(', '+' ]
 	);
 	registerInputMethod(
 		'vi-viqr-star',
-		'Vietnamese VIQR*',
+		'VIQR*',
 		'Vietnamese VIQR* input method',
 		decodeVIQRStarCommand,
 		[ '?', '~', '^', '(', '*' ]
+	);
+	registerInputMethod(
+		'vi-vni-reformed',
+		'VNI (đặt dấu kiểu mới)',
+		'Vietnamese VNI input method with reformed tone placement',
+		decodeVNICommand,
+		null,
+		Vietnamese.TonePlacement.REFORMED
+	);
+	registerInputMethod(
+		'vi-telex-reformed',
+		'Telex (đặt dấu kiểu mới)',
+		'Vietnamese Telex input method with reformed tone placement',
+		decodeTelexCommand,
+		null,
+		Vietnamese.TonePlacement.REFORMED
+	);
+	registerInputMethod(
+		'vi-viqr-reformed',
+		'VIQR (đặt dấu kiểu mới)',
+		'Vietnamese VIQR input method with reformed tone placement',
+		decodeVIQRCommand,
+		[ '?', '~', '^', '(', '+' ],
+		Vietnamese.TonePlacement.REFORMED
+	);
+	registerInputMethod(
+		'vi-viqr-star-reformed',
+		'VIQR* (đặt dấu kiểu mới)',
+		'Vietnamese VIQR* input method with reformed tone placement',
+		decodeVIQRStarCommand,
+		[ '?', '~', '^', '(', '*' ],
+		Vietnamese.TonePlacement.REFORMED
 	);
 }( jQuery ) );

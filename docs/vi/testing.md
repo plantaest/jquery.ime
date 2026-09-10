@@ -65,6 +65,7 @@ These tests should be fast and numerous. They are the main place for edge cases.
 Adapter tests verify the jQuery.IME-facing boundary without simulating editable elements:
 
 * VNI, Telex, VIQR, and VIQR* command decoding;
+* reformed variants using the same adapters with a different tone-placement policy;
 * candidate extraction;
 * pass-through behavior;
 * output shape for functional `patterns`;
@@ -96,6 +97,7 @@ dac91   -> đác
 quoc61  -> quốc
 gieng61 -> giếng
 hua71   -> hứa
+vi-vni-reformed: hoa2 -> hoà
 ```
 
 Only add examples after the behavior is intentionally implemented.
@@ -174,6 +176,10 @@ Vietnamese VNI – escape
 Vietnamese Telex – adapter equivalence
 Vietnamese VIQR – adapter equivalence
 Vietnamese VIQR* – adapter equivalence
+Vietnamese VNI – reformed tone placement
+Vietnamese Telex – reformed tone placement
+Vietnamese VIQR – reformed tone placement
+Vietnamese VIQR* – reformed tone placement
 ```
 
 Avoid huge generated fixture blocks. Generated coverage belongs in pure tests.
@@ -192,8 +198,17 @@ npx grunt connect qunit --modules="VIWP.IME – Transform"
 For adapter work:
 
 ```bash
-npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js src/jquery.ime.inputmethods.js
+npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js test/jquery.ime.vi.test.fixtures.js
 npx grunt connect qunit --modules="VIWP.IME – Adapter,VIWP.IME – Telex adapter,VIWP.IME – VIQR adapter,VIWP.IME – VIQR* adapter"
+```
+
+When adapter work touches `src/jquery.ime.inputmethods.js`, inspect that diff separately and run broader lint when practical. That upstream metadata file may contain unrelated lint failures outside VIWP.IME changes.
+
+For tone-placement policy work:
+
+```bash
+npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js test/jquery.ime.vi.test.fixtures.js
+npx grunt connect qunit --modules="VIWP.IME – Tone placement,VIWP.IME – Adapter,jquery.ime - input method rules tests"
 ```
 
 For Vietnamese integration before a commit:
@@ -271,6 +286,8 @@ huop61   -> huốp
 huop71   -> hướp
 huop617  -> hướp
 huop716  -> huốp
+to1an    -> toán
+hoa2n    -> hoàn
 huya1    -> huýa
 lo6o62ng -> lôồng
 mat1     -> mát
@@ -352,6 +369,32 @@ o\*        -> o*
 Shifted VIQR* star sequence -> ư
 ```
 
+## Phase 5 hardening coverage
+
+Phase 5 starts by adding focused regression tests for current algorithm gaps before broadening coverage.
+
+Covered tone-reflow examples:
+
+```text
+to1an -> toán
+hoa2n -> hoàn
+```
+
+The corresponding pure engine tests should call `engine.reflowCandidate()` directly, while representative input-method fixtures should prove that jQuery.IME invokes the reflow path during ordinary typing.
+
+Covered reformed tone-placement examples:
+
+```text
+vi-vni-reformed: hoa2 -> hoà
+vi-vni-reformed: khoe3 -> khoẻ
+vi-vni-reformed: huy3 -> huỷ
+vi-telex-reformed: hoaf -> hoà
+vi-viqr-reformed: hoa` -> hoà
+vi-viqr-star-reformed: ddu*o*`ng -> đường
+```
+
+Reformed fixtures should be representative only. Pure engine tests own the broader policy matrix.
+
 ## Generated tests
 
 Generated or data-driven tests are useful for:
@@ -360,6 +403,7 @@ Generated or data-driven tests are useful for:
 * tone replacement invariants;
 * tone removal invariants;
 * traditional tone placement;
+* reformed tone placement;
 * equivalent composition orders;
 * uppercase/lowercase pairs;
 * Unicode normalization pairs.

@@ -20,6 +20,20 @@ The first stable implementation MUST support:
 The current implementation also supports:
 
 * VIQR* as a VIQR variant using `*` for horn
+* reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*
+
+The Vietnamese selector SHOULD show concise method names:
+
+```text
+VNI
+Telex
+VIQR
+VIQR*
+VNI (đặt dấu kiểu mới)
+Telex (đặt dấu kiểu mới)
+VIQR (đặt dấu kiểu mới)
+VIQR* (đặt dấu kiểu mới)
+```
 
 All Vietnamese input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
 
@@ -311,7 +325,7 @@ This does not imply broad arbitrary replacement among all vowel-diacritic forms.
 
 ## Tone placement
 
-The default first-version tone-placement policy MUST be traditional tone placement:
+The default tone-placement policy MUST be traditional tone placement:
 
 ```text
 hòa
@@ -319,15 +333,34 @@ xóa
 hủy
 ```
 
-The shared engine SHOULD keep tone-placement policy independent from input-method key mapping so that reformed placement can be supported later:
+The shared engine MUST keep tone-placement policy independent from input-method key mapping. Reformed placement is exposed through separate `-reformed` input-method variants:
 
 ```text
-hoà
-xoá
-huỷ
+vi-vni-reformed
+vi-telex-reformed
+vi-viqr-reformed
+vi-viqr-star-reformed
 ```
 
-How reformed placement is exposed through jQuery.IME is UNRESOLVED. It may require separate input-method entries if jQuery.IME does not provide a suitable per-method setting.
+The core policy difference is limited to open `oa`, `oe`, and `uy` rimes in the current engine:
+
+```text
+traditional: hoa2 -> hòa
+reformed:    hoa2 -> hoà
+
+traditional: khoe3 -> khỏe
+reformed:    khoe3 -> khoẻ
+
+traditional: huy3 -> hủy
+reformed:    huy3 -> huỷ
+```
+
+When an ending follows, both policies SHOULD converge:
+
+```text
+hoan2  -> hoàn
+huynh2 -> huỳnh
+```
 
 ## Flexible composition
 
@@ -352,6 +385,8 @@ gieng61 -> giếng
 dac91  -> đác
 huop617 -> hướp
 huop716 -> huốp
+to1an  -> toán
+hoa2n  -> hoàn
 ```
 
 Telex examples:
@@ -372,6 +407,8 @@ matj     -> mạt
 matf     -> matf
 matx     -> matx
 ```
+
+If a candidate already has a tone and the user extends it with ordinary letters, the engine SHOULD reflow the tone when the resolved tone target changes. For example, `to1an -> toán` and `hoa2n -> hoàn`. This reflow MUST still respect the current parsed structure: `thay1 -> tháy` remains a valid intermediate result, because `thày` is a possible Vietnamese spelling and the user may continue with an explicit vowel-diacritic command if they want `thấy`.
 
 The exact maximum editable range is constrained by jQuery.IME `maxKeyLength` and must be covered by tests.
 

@@ -95,6 +95,7 @@ A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + A
 | `engine` | The shared Vietnamese implementation for parsing, transforming, validating, tone placement, and rendering. |
 | `escape behavior` | Behavior that lets users type literal command characters. |
 | `repeated-key escape` | Escape behavior where repeating a command produces literal input, such as VNI `a1 -> á`, `a11 -> a1`. |
+| `tone reflow` | Re-rendering an already toned candidate after ordinary typed letters change its parsed structure and therefore its tone target. |
 
 ## Unicode terms
 
@@ -163,3 +164,5 @@ Avoid `main vowel` in code. Use `nucleus` or `tone target`, depending on the mea
 Avoid `valid word` when discussing composition. Use `structurally valid`, `complete`, `intermediate`, or `lexically valid`.
 
 Avoid `old style` and `new style`. Use `traditional tone placement` and `reformed tone placement`.
+
+For Vietnamese user-facing selector labels, `đặt dấu kiểu mới` may be used as the readable label for `reformed tone placement`.

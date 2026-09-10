@@ -11,6 +11,8 @@ The supported input methods are:
 
 All Vietnamese input methods must share one Vietnamese composition engine. VNI, Telex, VIQR, and VIQR* should differ mainly in how they translate typed keys into semantic commands.
 
+The current implementation also exposes reformed tone-placement variants for each input method.
+
 The implementation should remain compatible with the current jQuery.IME architecture, so changes should stay small, conventional, and easy to review.
 
 ## Current status
@@ -20,7 +22,7 @@ Phase 0 through Phase 4 are complete for the current integration path. The share
 Confirmed by Phase 1:
 
 * Vietnamese metadata entries can use ordinary jQuery.IME rule loading.
-* `vi-vni`, `vi-telex`, `vi-viqr`, and `vi-viqr-star` can share one source file: `rules/vi/vi.js`.
+* `vi-vni`, `vi-telex`, `vi-viqr`, `vi-viqr-star`, and their `-reformed` variants can share one source file: `rules/vi/vi.js`.
 * Functional `patterns` rules can call a shared Vietnamese engine.
 * Adapter output must include unchanged prefix text because jQuery.IME replaces the complete input window.
 * `contextLength` can remain `0` for all current Vietnamese input methods.
@@ -63,6 +65,11 @@ Implemented by Phase 4:
 * VIQR and VIQR* shifted punctuation command keys through a `patterns_shift` bridge.
 * VIQR and VIQR* delayed d-stroke input such as `dacd' -> đác`.
 * VIQR* as a separate input method that reuses VIQR behavior but uses `*` instead of `+` for horn.
+
+Started in Phase 5:
+
+* Tone reflow after ordinary letter extension for covered VNI examples, such as `to1an -> toán` and `hoa2n -> hoàn`.
+* Reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*, such as `vi-vni-reformed`.
 
 ## Read order
 
@@ -143,6 +150,8 @@ Stabilize the current algorithm:
 * broaden generated or data-driven pure-engine coverage;
 * add broader representative integration fixtures for all methods;
 * harden structural validation for accidental transformations in foreign-like text;
+* harden tone reflow after a toned candidate is extended by ordinary letters;
+* keep traditional and reformed tone-placement policies covered by pure engine and representative adapter tests;
 * simplify parser, transformer, renderer, or adapter code where tests show the behavior is stable enough to clarify;
 * document the parse/apply/render algorithm and remaining known limitations;
 * keep manual typing checks focused on the existing examples page;
@@ -156,7 +165,6 @@ Do not guess these while implementing:
 
 * whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
 * how strict initial structural validation should be, including foreign-like candidates such as `david` and `droid`;
-* whether reformed tone placement appears as separate input methods or a future setting.
 
 ## Documentation ownership
 

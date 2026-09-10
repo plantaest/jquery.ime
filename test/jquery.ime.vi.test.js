@@ -12,63 +12,81 @@
 		} );
 	}
 
+	function getVietnameseDisplayNames() {
+		return {
+			'vi-vni': 'VNI',
+			'vi-telex': 'Telex',
+			'vi-viqr': 'VIQR',
+			'vi-viqr-star': 'VIQR*',
+			'vi-vni-reformed': 'VNI (đặt dấu kiểu mới)',
+			'vi-telex-reformed': 'Telex (đặt dấu kiểu mới)',
+			'vi-viqr-reformed': 'VIQR (đặt dấu kiểu mới)',
+			'vi-viqr-star-reformed': 'VIQR* (đặt dấu kiểu mới)'
+		};
+	}
+
 	QUnit.module( 'VIWP.IME – Phase 1 integration spike', {
 		before: loadVietnameseSource
 	} );
 
 	QUnit.test( 'Vietnamese input methods are registered through shared source metadata', ( assert ) => {
+		var displayNames = getVietnameseDisplayNames(),
+			inputMethodIds = Object.keys( displayNames );
+
 		assert.deepEqual(
 			$.ime.languages.vi.inputmethods,
-			[ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ],
-			'Vietnamese exposes VNI, Telex, VIQR, and VIQR* input methods'
+			inputMethodIds,
+			'Vietnamese exposes traditional and reformed variants for all input methods'
 		);
-		assert.strictEqual(
-			$.ime.sources[ 'vi-vni' ].source,
-			'rules/vi/vi.js',
-			'VNI uses the shared Vietnamese rule source'
-		);
-		assert.strictEqual(
-			$.ime.sources[ 'vi-telex' ].source,
-			$.ime.sources[ 'vi-vni' ].source,
-			'Telex uses the same shared Vietnamese rule source'
-		);
-		assert.strictEqual(
-			$.ime.sources[ 'vi-viqr' ].source,
-			$.ime.sources[ 'vi-vni' ].source,
-			'VIQR uses the same shared Vietnamese rule source'
-		);
-		assert.strictEqual(
-			$.ime.sources[ 'vi-viqr-star' ].source,
-			$.ime.sources[ 'vi-vni' ].source,
-			'VIQR* uses the same shared Vietnamese rule source'
-		);
+		inputMethodIds.forEach( ( inputMethodId ) => {
+			assert.strictEqual(
+				$.ime.sources[ inputMethodId ].source,
+				'rules/vi/vi.js',
+				inputMethodId + ' uses the shared Vietnamese rule source'
+			);
+			assert.strictEqual(
+				$.ime.sources[ inputMethodId ].name,
+				displayNames[ inputMethodId ],
+				inputMethodId + ' uses the expected selector label in metadata'
+			);
+		} );
 	} );
 
 	QUnit.test( 'Loading one Vietnamese method registers the shared engine and all adapters', ( assert ) => {
+		var displayNames = getVietnameseDisplayNames(),
+			inputMethodIds = Object.keys( displayNames );
+
 		assert.strictEqual(
 			typeof $.ime.vi.createAdapter,
 			'function',
 			'Shared Vietnamese adapter factory is exposed for unit tests'
 		);
 		assert.strictEqual(
-			typeof $.ime.inputmethods[ 'vi-vni' ].patterns,
-			'function',
-			'VNI adapter provides functional patterns'
+			$.ime.vi.TonePlacement.TRADITIONAL,
+			'traditional',
+			'Shared Vietnamese engine exposes traditional tone-placement policy'
 		);
 		assert.strictEqual(
-			typeof $.ime.inputmethods[ 'vi-telex' ].patterns,
-			'function',
-			'Telex adapter is registered by the shared source'
+			$.ime.vi.TonePlacement.REFORMED,
+			'reformed',
+			'Shared Vietnamese engine exposes reformed tone-placement policy'
 		);
+		inputMethodIds.forEach( ( inputMethodId ) => {
+			assert.strictEqual(
+				typeof $.ime.inputmethods[ inputMethodId ].patterns,
+				'function',
+				inputMethodId + ' adapter provides functional patterns'
+			);
+			assert.strictEqual(
+				$.ime.inputmethods[ inputMethodId ].name,
+				displayNames[ inputMethodId ],
+				inputMethodId + ' uses the expected selector label after loading'
+			);
+		} );
 		assert.strictEqual(
-			typeof $.ime.inputmethods[ 'vi-viqr' ].patterns,
+			typeof $.ime.vi.engine.reflowCandidate,
 			'function',
-			'VIQR adapter is registered by the shared source'
-		);
-		assert.strictEqual(
-			typeof $.ime.inputmethods[ 'vi-viqr-star' ].patterns,
-			'function',
-			'VIQR* adapter is registered by the shared source'
+			'Shared Vietnamese engine exposes candidate reflow for unit tests'
 		);
 	} );
 
@@ -92,6 +110,11 @@
 					assert.strictEqual( command.tone, $.ime.vi.Tone.ACUTE, 'Adapter passes the semantic command' );
 					assert.strictEqual( options.context, '', 'Adapter forwards jQuery.IME context explicitly' );
 					assert.strictEqual( options.inputMethodId, 'vi-vni', 'Adapter forwards input method id explicitly' );
+					assert.strictEqual(
+						options.tonePlacement,
+						$.ime.vi.TonePlacement.TRADITIONAL,
+						'Adapter forwards the default tone-placement policy explicitly'
+					);
 
 					return {
 						handled: true,
@@ -113,8 +136,60 @@
 		);
 	} );
 
+	QUnit.test( 'Vietnamese adapter maps handled engine reflow to jQuery.IME patterns result', ( assert ) => {
+		var adapter, result;
+
+		adapter = $.ime.vi.createAdapter( {
+			inputMethodId: 'vi-vni',
+			decodeCommand: function () {
+				return null;
+			},
+			engine: {
+				reflowCandidate: function ( candidate, options ) {
+					assert.strictEqual( candidate, 'tóan', 'Adapter passes the extracted rendered candidate to reflow' );
+					assert.strictEqual( options.context, '', 'Adapter forwards jQuery.IME context to reflow' );
+					assert.strictEqual( options.inputMethodId, 'vi-vni', 'Adapter forwards input method id to reflow' );
+					assert.strictEqual(
+						options.tonePlacement,
+						$.ime.vi.TonePlacement.TRADITIONAL,
+						'Adapter forwards the default tone-placement policy to reflow'
+					);
+
+					return {
+						handled: true,
+						output: 'toán'
+					};
+				}
+			}
+		} );
+
+		result = adapter( 'hello tóan', '' );
+
+		assert.deepEqual(
+			result,
+			{
+				noop: false,
+				output: 'hello toán'
+			},
+			'Adapter preserves prefix outside the reflowed Vietnamese candidate'
+		);
+	} );
+
 	QUnit.test( 'Vietnamese adapters keep the expected input-window settings', ( assert ) => {
-		[ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ].forEach( ( inputMethodId ) => {
+		[
+			'vi-vni',
+			'vi-vni-reformed',
+			'vi-telex',
+			'vi-telex-reformed',
+			'vi-viqr',
+			'vi-viqr-reformed',
+			'vi-viqr-star',
+			'vi-viqr-star-reformed'
+		].forEach( ( inputMethodId ) => {
+			var expectedTonePlacement = inputMethodId.includes( '-reformed' ) ?
+				$.ime.vi.TonePlacement.REFORMED :
+				$.ime.vi.TonePlacement.TRADITIONAL;
+
 			assert.strictEqual(
 				$.ime.inputmethods[ inputMethodId ].contextLength,
 				0,
@@ -124,6 +199,11 @@
 				$.ime.inputmethods[ inputMethodId ].maxKeyLength,
 				$.ime.vi.DEFAULT_MAX_KEY_LENGTH,
 				inputMethodId + ' uses the shared maxKeyLength'
+			);
+			assert.strictEqual(
+				$.ime.inputmethods[ inputMethodId ].tonePlacement,
+				expectedTonePlacement,
+				inputMethodId + ' stores the expected tone-placement policy'
 			);
 		} );
 	} );
@@ -580,6 +660,128 @@
 		);
 	} );
 
+	QUnit.test( 'Vietnamese engine renders reformed tone placement for open medial rimes', ( assert ) => {
+		var tone = $.ime.vi.Tone,
+			commandType = $.ime.vi.CommandType,
+			tonePlacement = $.ime.vi.TonePlacement;
+
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoa', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			}, {
+				tonePlacement: tonePlacement.REFORMED
+			} ),
+			{
+				handled: true,
+				output: 'hoà'
+			},
+			'Reformed open oa placement marks a'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'khoe', {
+				type: commandType.APPLY_TONE,
+				tone: tone.HOOK
+			}, {
+				tonePlacement: tonePlacement.REFORMED
+			} ),
+			{
+				handled: true,
+				output: 'khoẻ'
+			},
+			'Reformed open oe placement marks e'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huy', {
+				type: commandType.APPLY_TONE,
+				tone: tone.HOOK
+			}, {
+				tonePlacement: tonePlacement.REFORMED
+			} ),
+			{
+				handled: true,
+				output: 'huỷ'
+			},
+			'Reformed open uy placement marks y'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoan', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			}, {
+				tonePlacement: tonePlacement.REFORMED
+			} ),
+			{
+				handled: true,
+				output: 'hoàn'
+			},
+			'oa plus ending converges under reformed placement'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huynh', {
+				type: commandType.APPLY_TONE,
+				tone: tone.GRAVE
+			}, {
+				tonePlacement: tonePlacement.REFORMED
+			} ),
+			{
+				handled: true,
+				output: 'huỳnh'
+			},
+			'uy plus ending converges under reformed placement'
+		);
+		assert.deepEqual(
+			$.ime.vi.renderCandidate(
+				$.ime.vi.parseCandidate( 'hoa' ),
+				tonePlacement.REFORMED
+			),
+			'hoa',
+			'Reformed rendering is still pass-through when there is no tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.renderCandidate(
+				$.ime.vi.parseCandidate( 'hòa' ),
+				tonePlacement.REFORMED
+			),
+			'hoà',
+			'Reformed rendering can re-render a traditional open oa surface'
+		);
+		assert.deepEqual(
+			$.ime.vi.renderCandidate(
+				$.ime.vi.parseCandidate( 'hoà' ),
+				tonePlacement.TRADITIONAL
+			),
+			'hòa',
+			'Traditional rendering can re-render a reformed open oa surface'
+		);
+	} );
+
+	QUnit.test( 'Vietnamese engine reflows tone placement after candidate extension', ( assert ) => {
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'tóan' ),
+			{
+				handled: true,
+				output: 'toán'
+			},
+			'Extending tó to tóan reflows tone placement to toán'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'hòan' ),
+			{
+				handled: true,
+				output: 'hoàn'
+			},
+			'Extending hòa to hòan reflows tone placement to hoàn'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'tháy' ),
+			{
+				handled: false
+			},
+			'Intermediate tháy is already rendered at its current tone target'
+		);
+	} );
+
 	QUnit.module( 'VIWP.IME – Tone placement', {
 		before: loadVietnameseSource
 	} );
@@ -938,6 +1140,46 @@
 				output: 'dác9'
 			},
 			'Repeating d-stroke key escapes after a full rendered candidate'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'tóan', '' ),
+			{
+				noop: false,
+				output: 'toán'
+			},
+			'VNI reflows tone placement after a toned candidate receives more letters'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'hòan', '' ),
+			{
+				noop: false,
+				output: 'hoàn'
+			},
+			'VNI reflows traditional oa placement after an ending is typed'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni-reformed' ].patterns( 'hoa2', '' ),
+			{
+				noop: false,
+				output: 'hoà'
+			},
+			'VNI reformed marks open oa on a'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni-reformed' ].patterns( 'huy3', '' ),
+			{
+				noop: false,
+				output: 'huỷ'
+			},
+			'VNI reformed marks open uy on y'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni-reformed' ].patterns( 'hoàn', '' ),
+			{
+				noop: true,
+				output: 'hoàn'
+			},
+			'VNI reformed already has the shared ending placement after ordinary extension'
 		);
 	} );
 
@@ -1309,6 +1551,43 @@
 		);
 	} );
 
+	QUnit.test( 'Telex reformed adapter changes only tone-placement policy', ( assert ) => {
+		var telexReformed = $.ime.inputmethods[ 'vi-telex-reformed' ].patterns;
+
+		assert.deepEqual(
+			telexReformed( 'hoaf', '' ),
+			{
+				noop: false,
+				output: 'hoà'
+			},
+			'Telex reformed marks open oa on a'
+		);
+		assert.deepEqual(
+			telexReformed( 'khoer', '' ),
+			{
+				noop: false,
+				output: 'khoẻ'
+			},
+			'Telex reformed marks open oe on e'
+		);
+		assert.deepEqual(
+			telexReformed( 'huyr', '' ),
+			{
+				noop: false,
+				output: 'huỷ'
+			},
+			'Telex reformed marks open uy on y'
+		);
+		assert.deepEqual(
+			telexReformed( 'huynhf', '' ),
+			{
+				noop: false,
+				output: 'huỳnh'
+			},
+			'Telex reformed keeps uy plus ending shared with traditional placement'
+		);
+	} );
+
 	QUnit.module( 'VIWP.IME – VIQR adapter', {
 		before: loadVietnameseSource
 	} );
@@ -1489,6 +1768,33 @@
 		);
 	} );
 
+	QUnit.test( 'VIQR reformed adapter changes only tone-placement policy', ( assert ) => {
+		var viqrReformed = $.ime.inputmethods[ 'vi-viqr-reformed' ].patterns,
+			viqrReformedShift = $.ime.inputmethods[ 'vi-viqr-reformed' ].patterns_shift[ 0 ][ 1 ];
+
+		assert.deepEqual(
+			viqrReformed( 'hoa`', '' ),
+			{
+				noop: false,
+				output: 'hoà'
+			},
+			'VIQR reformed marks open oa on a'
+		);
+		assert.deepEqual(
+			viqrReformed( 'huy?', '' ),
+			{
+				noop: false,
+				output: 'huỷ'
+			},
+			'VIQR reformed marks open uy on y'
+		);
+		assert.strictEqual(
+			viqrReformedShift( 'khoe?' ),
+			'khoẻ',
+			'VIQR reformed shifted bridge keeps the reformed policy'
+		);
+	} );
+
 	QUnit.module( 'VIWP.IME – VIQR* adapter', {
 		before: loadVietnameseSource
 	} );
@@ -1543,6 +1849,34 @@
 				output: 'o*'
 			},
 			'VIQR* backslash escapes star'
+		);
+	} );
+
+	QUnit.test( 'VIQR* reformed adapter changes only tone-placement policy', ( assert ) => {
+		var viqrStarReformed = $.ime.inputmethods[ 'vi-viqr-star-reformed' ].patterns,
+			viqrStarReformedShift =
+				$.ime.inputmethods[ 'vi-viqr-star-reformed' ].patterns_shift[ 0 ][ 1 ];
+
+		assert.deepEqual(
+			viqrStarReformed( 'hoa`', '' ),
+			{
+				noop: false,
+				output: 'hoà'
+			},
+			'VIQR* reformed marks open oa on a'
+		);
+		assert.deepEqual(
+			viqrStarReformed( 'o*', '' ),
+			{
+				noop: false,
+				output: 'ơ'
+			},
+			'VIQR* reformed keeps star horn behavior'
+		);
+		assert.strictEqual(
+			viqrStarReformedShift( 'huy?' ),
+			'huỷ',
+			'VIQR* reformed shifted bridge keeps the reformed policy'
 		);
 	} );
 }( jQuery ) );

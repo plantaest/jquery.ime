@@ -1102,20 +1102,36 @@
 			name: 'Vèneto',
 			source: 'rules/vec/vec-GVU.js'
 		},
+		'vi-vni': {
+			name: 'VNI',
+			source: 'rules/vi/vi.js'
+		},
 		'vi-telex': {
-			name: 'Vietnamese Telex',
+			name: 'Telex',
 			source: 'rules/vi/vi.js'
 		},
 		'vi-viqr': {
-			name: 'Vietnamese VIQR',
+			name: 'VIQR',
 			source: 'rules/vi/vi.js'
 		},
 		'vi-viqr-star': {
-			name: 'Vietnamese VIQR*',
+			name: 'VIQR*',
 			source: 'rules/vi/vi.js'
 		},
-		'vi-vni': {
-			name: 'Vietnamese VNI',
+		'vi-vni-reformed': {
+			name: 'VNI (đặt dấu kiểu mới)',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-telex-reformed': {
+			name: 'Telex (đặt dấu kiểu mới)',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-viqr-reformed': {
+			name: 'VIQR (đặt dấu kiểu mới)',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-viqr-star-reformed': {
+			name: 'VIQR* (đặt dấu kiểu mới)',
 			source: 'rules/vi/vi.js'
 		},
 		'wlx-tilde': {
@@ -1968,7 +1984,16 @@
 		},
 		vi: {
 			autonym: 'Tiếng Việt',
-			inputmethods: [ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ]
+			inputmethods: [
+				'vi-vni',
+				'vi-telex',
+				'vi-viqr',
+				'vi-viqr-star',
+				'vi-vni-reformed',
+				'vi-telex-reformed',
+				'vi-viqr-reformed',
+				'vi-viqr-star-reformed'
+			]
 		},
 		wlx: {
 			autonym: 'Waale',
