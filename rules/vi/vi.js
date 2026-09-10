@@ -37,6 +37,64 @@
 		return null;
 	}
 
+	function createToneCommand( key, tone ) {
+		return {
+			key: key,
+			command: {
+				type: Vietnamese.CommandType.APPLY_TONE,
+				literal: key,
+				tone: tone
+			}
+		};
+	}
+
+	function createRemoveToneCommand( key ) {
+		return {
+			key: key,
+			command: {
+				type: Vietnamese.CommandType.REMOVE_TONE,
+				literal: key
+			}
+		};
+	}
+
+	function createVowelDiacriticCommand( key, vowelDiacritic ) {
+		return {
+			key: key,
+			command: {
+				type: Vietnamese.CommandType.APPLY_VOWEL_DIACRITIC,
+				literal: key,
+				vowelDiacritic: vowelDiacritic
+			}
+		};
+	}
+
+	function createDStrokeCommand( key ) {
+		return {
+			key: key,
+			command: {
+				type: Vietnamese.CommandType.APPLY_D_STROKE,
+				literal: key
+			}
+		};
+	}
+
+	function createOneWayDStrokeCommand( key ) {
+		return {
+			key: key,
+			command: {
+				type: Vietnamese.CommandType.APPLY_D_STROKE
+			}
+		};
+	}
+
+	function createLiteralOutputCommand( key, literalOutput ) {
+		return {
+			key: key,
+			literalOutput: literalOutput
+		};
+	}
+
 	/**
 	 * Decode a VNI key into a shared Vietnamese semantic command.
 	 *
@@ -59,48 +117,356 @@
 			key = input.slice( -1 );
 
 		if ( toneCommands[ key ] ) {
-			return {
-				key: key,
-				command: {
-					type: Vietnamese.CommandType.APPLY_TONE,
-					literal: key,
-					tone: toneCommands[ key ]
-				}
-			};
+			return createToneCommand( key, toneCommands[ key ] );
 		}
 
 		if ( vowelDiacriticCommands[ key ] ) {
-			return {
-				key: key,
-				command: {
-					type: Vietnamese.CommandType.APPLY_VOWEL_DIACRITIC,
-					literal: key,
-					vowelDiacritic: vowelDiacriticCommands[ key ]
-				}
-			};
+			return createVowelDiacriticCommand( key, vowelDiacriticCommands[ key ] );
 		}
 
 		if ( key === '0' ) {
-			return {
-				key: key,
-				command: {
-					type: Vietnamese.CommandType.REMOVE_TONE,
-					literal: key
-				}
-			};
+			return createRemoveToneCommand( key );
 		}
 
 		if ( key === '9' ) {
-			return {
-				key: key,
-				command: {
-					type: Vietnamese.CommandType.APPLY_D_STROKE,
-					literal: key
-				}
-			};
+			return createDStrokeCommand( key );
 		}
 
 		return null;
+	}
+
+	/**
+	 * Decode a Telex key sequence into a shared Vietnamese semantic command.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @return {Object|null} Decoded command with key and command fields, or null.
+	 */
+	function decodeTelexCommand( input ) {
+		var toneCommands = {
+				s: Vietnamese.Tone.ACUTE,
+				f: Vietnamese.Tone.GRAVE,
+				r: Vietnamese.Tone.HOOK,
+				x: Vietnamese.Tone.TILDE,
+				j: Vietnamese.Tone.DOT
+			},
+			vowelDiacriticCommands = {
+				aa: Vietnamese.VowelDiacritic.CIRCUMFLEX,
+				ee: Vietnamese.VowelDiacritic.CIRCUMFLEX,
+				oo: Vietnamese.VowelDiacritic.CIRCUMFLEX,
+				aw: Vietnamese.VowelDiacritic.BREVE,
+				ow: Vietnamese.VowelDiacritic.HORN,
+				uw: Vietnamese.VowelDiacritic.HORN
+			},
+			delayedVowelDiacriticCommands = {
+				a: {
+					bases: [ 'a' ],
+					vowelDiacritic: Vietnamese.VowelDiacritic.CIRCUMFLEX
+				},
+				e: {
+					bases: [ 'e' ],
+					vowelDiacritic: Vietnamese.VowelDiacritic.CIRCUMFLEX
+				},
+				o: {
+					bases: [ 'o' ],
+					vowelDiacritic: Vietnamese.VowelDiacritic.CIRCUMFLEX
+				},
+				w: {
+					bases: [ 'a' ],
+					excludeOffGlideEnding: true,
+					vowelDiacritic: Vietnamese.VowelDiacritic.BREVE
+				}
+			},
+			lowerInput = input.toLowerCase(),
+			key = input.slice( -1 ),
+			lowerKey = key.toLowerCase(),
+			vowelDiacriticCommand = vowelDiacriticCommands[ lowerInput.slice( -2 ) ],
+			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ];
+
+		if ( toneCommands[ lowerKey ] ) {
+			return createToneCommand( key, toneCommands[ lowerKey ] );
+		}
+
+		if ( lowerKey === 'z' ) {
+			return createRemoveToneCommand( key );
+		}
+
+		if ( lowerInput.slice( -2 ) === 'dd' ) {
+			return createDStrokeCommand( key );
+		}
+
+		if ( lowerKey === 'w' && candidateCanReceiveHornUaFamily( input, key ) ) {
+			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.HORN );
+		}
+
+		if ( vowelDiacriticCommand ) {
+			return createVowelDiacriticCommand( key, vowelDiacriticCommand );
+		}
+
+		if ( lowerKey === 'd' ) {
+			return createDStrokeCommand( key );
+		}
+
+		if ( lowerKey === 'o' && candidateHasProtectedLiteralRime( input ) ) {
+			return null;
+		}
+
+		if ( delayedCommand && (
+			candidateHasTargetVowelDiacritic(
+				input,
+				key,
+				delayedCommand.vowelDiacritic,
+				delayedCommand.bases
+			) ||
+			candidateCanReceiveTargetVowelDiacritic(
+				input,
+				key,
+				delayedCommand.vowelDiacritic,
+				delayedCommand.bases,
+				delayedCommand
+			)
+		) ) {
+			return createVowelDiacriticCommand( key, delayedCommand.vowelDiacritic );
+		}
+
+		if ( lowerKey === 'w' ) {
+			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.HORN );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check whether the latest VIQR command key is escaped by a backslash.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @param {string} hornKey VIQR horn key, either `+` or `*`.
+	 * @return {boolean} True if the latest command key should be literal.
+	 */
+	function isVIQREscapedCommand( input, hornKey ) {
+		var key = input.slice( -1 ),
+			previousKey = input.slice( -2, -1 ),
+			commandKeys = {
+				'\'': true,
+				'`': true,
+				'?': true,
+				'~': true,
+				'.': true,
+				'^': true,
+				'(': true,
+				0: true
+			};
+
+		commandKeys[ hornKey ] = true;
+		return previousKey === '\\' && commandKeys[ key ];
+	}
+
+	/**
+	 * Decode a VIQR-family key using the provided horn key.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @param {string} hornKey VIQR horn key, either `+` or `*`.
+	 * @return {Object|null} Decoded command with key and command fields, or null.
+	 */
+	function decodeVIQRCommandWithHornKey( input, hornKey ) {
+		var toneCommands = {
+				'\'': Vietnamese.Tone.ACUTE,
+				'`': Vietnamese.Tone.GRAVE,
+				'?': Vietnamese.Tone.HOOK,
+				'~': Vietnamese.Tone.TILDE,
+				'.': Vietnamese.Tone.DOT
+			},
+			lowerInput = input.toLowerCase(),
+			key = input.slice( -1 );
+
+		if ( isVIQREscapedCommand( input, hornKey ) ) {
+			return createLiteralOutputCommand( input.slice( -2 ), key );
+		}
+
+		if ( lowerInput.slice( -2 ) === 'dd' ) {
+			return createDStrokeCommand( key );
+		}
+
+		if ( key === 'd' || key === 'D' ) {
+			return createOneWayDStrokeCommand( key );
+		}
+
+		if ( toneCommands[ key ] ) {
+			return createToneCommand( key, toneCommands[ key ] );
+		}
+
+		if ( key === '0' ) {
+			return createRemoveToneCommand( key );
+		}
+
+		if ( key === '^' ) {
+			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.CIRCUMFLEX );
+		}
+
+		if ( key === '(' ) {
+			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.BREVE );
+		}
+
+		if ( key === hornKey ) {
+			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.HORN );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Decode a VIQR key into a shared Vietnamese semantic command.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @return {Object|null} Decoded command with key and command fields, or null.
+	 */
+	function decodeVIQRCommand( input ) {
+		return decodeVIQRCommandWithHornKey( input, '+' );
+	}
+
+	/**
+	 * Decode a VIQR* key into a shared Vietnamese semantic command.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @return {Object|null} Decoded command with key and command fields, or null.
+	 */
+	function decodeVIQRStarCommand( input ) {
+		return decodeVIQRCommandWithHornKey( input, '*' );
+	}
+
+	/**
+	 * Parse the rendered candidate before a command key.
+	 *
+	 * @param {string} input Text window ending with the command key.
+	 * @param {string} commandKey Command key recognized by the adapter.
+	 * @return {Object|null} Parsed candidate state, or null when empty.
+	 */
+	function parseExtractedCandidate( input, commandKey ) {
+		var extracted = extractCandidate( input, commandKey );
+
+		if ( !extracted.candidate ) {
+			return null;
+		}
+
+		return parseCandidate( extracted.candidate );
+	}
+
+	/**
+	 * Check whether a rendered candidate already has the requested vowel diacritic.
+	 *
+	 * Used by Telex repeated-key escape, where the raw key history has already
+	 * been replaced by rendered Vietnamese text.
+	 *
+	 * @param {string} input Text window ending with the command key.
+	 * @param {string} commandKey Command key recognized by the adapter.
+	 * @param {string} vowelDiacritic Expected vowel-diacritic enum value.
+	 * @param {string[]} bases Base vowel letters that may repeat this command.
+	 * @return {boolean} True if the command should escape a rendered diacritic.
+	 */
+	function candidateHasTargetVowelDiacritic( input, commandKey, vowelDiacritic, bases ) {
+		var state = parseExtractedCandidate( input, commandKey ),
+			target, token;
+
+		if ( !state || state.status === Vietnamese.StateType.UNRECOGNIZED ) {
+			return false;
+		}
+
+		target = resolveTonePlacement( state );
+		if ( target === -1 ) {
+			return false;
+		}
+
+		token = state.tokens[ target ];
+		return token.vowelDiacritic === vowelDiacritic &&
+			bases.includes( token.base.toLowerCase() );
+	}
+
+	/**
+	 * Check whether a rendered candidate can receive the requested diacritic.
+	 *
+	 * @param {string} input Text window ending with the command key.
+	 * @param {string} commandKey Command key recognized by the adapter.
+	 * @param {string} vowelDiacritic Expected vowel-diacritic enum value.
+	 * @param {string[]} bases Base vowel letters that may receive this command.
+	 * @param {Object} [options] Extra constraints for input-method-specific commands.
+	 * @return {boolean} True if the command can apply to the candidate.
+	 */
+	function candidateCanReceiveTargetVowelDiacritic(
+		input, commandKey, vowelDiacritic, bases, options
+	) {
+		var state = parseExtractedCandidate( input, commandKey ),
+			target, token;
+
+		if ( !state || state.status === Vietnamese.StateType.UNRECOGNIZED ) {
+			return false;
+		}
+
+		if (
+			options &&
+			options.excludeOffGlideEnding &&
+			state.structure &&
+			'i y o u'.split( ' ' ).includes( state.structure.ending )
+		) {
+			return false;
+		}
+
+		target = resolveVowelDiacriticTarget( state, vowelDiacritic );
+		if ( target === -1 ) {
+			return canSwitchSameBaseVowelDiacritic( state, vowelDiacritic, bases ) ||
+				vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX &&
+				bases.includes( 'o' ) &&
+				findUoFamilyPair(
+					state,
+					Vietnamese.VowelDiacritic.HORN,
+					Vietnamese.VowelDiacritic.HORN
+				) !== -1;
+		}
+
+		token = state.tokens[ target ];
+		return bases.includes( token.base.toLowerCase() );
+	}
+
+	function canSwitchSameBaseVowelDiacritic( state, vowelDiacritic, bases ) {
+		var target = resolveTonePlacement( state ),
+			token;
+
+		if ( target === -1 ) {
+			return false;
+		}
+
+		token = state.tokens[ target ];
+		if ( !bases.includes( token.base.toLowerCase() ) ) {
+			return false;
+		}
+
+		return canSwitchTokenVowelDiacritic( token, vowelDiacritic );
+	}
+
+	function candidateCanReceiveHornUaFamily( input, commandKey ) {
+		var state = parseExtractedCandidate( input, commandKey );
+
+		return !!(
+			state &&
+			state.status !== Vietnamese.StateType.UNRECOGNIZED &&
+			findHornUaPair( state ) !== -1
+		);
+	}
+
+	function candidateHasProtectedLiteralRime( input ) {
+		var extracted = extractCandidate( input, '' ),
+			state;
+
+		if ( !extracted.candidate ) {
+			return false;
+		}
+
+		state = parseCandidate( extracted.candidate );
+		return state.status !== Vietnamese.StateType.UNRECOGNIZED &&
+			state.structure &&
+			isProtectedLiteralRime( state.structure.rime );
+	}
+
+	function isProtectedLiteralRime( rime ) {
+		return rime === 'oao' || rime === 'oeo';
 	}
 
 	function isCandidateCodeUnit( character ) {
@@ -755,6 +1121,14 @@
 		return resultFromState( nextState );
 	}
 
+	function isIgnoredVowelPair( state, firstIndex ) {
+		return !!(
+			state.structure &&
+			( state.structure.ignoredVowelIndices[ firstIndex ] ||
+				state.structure.ignoredVowelIndices[ firstIndex + 1 ] )
+		);
+	}
+
 	function findHornUoPair( state ) {
 		var i, firstToken, secondToken;
 
@@ -773,11 +1147,7 @@
 				secondToken.base.toLowerCase() === 'o' &&
 				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
 				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				!(
-					state.structure &&
-					( state.structure.ignoredVowelIndices[ i ] ||
-						state.structure.ignoredVowelIndices[ i + 1 ] )
-				)
+				!isIgnoredVowelPair( state, i )
 			) {
 				return i;
 			}
@@ -800,11 +1170,30 @@
 				secondToken.base.toLowerCase() === 'o' &&
 				firstToken.vowelDiacritic === firstVowelDiacritic &&
 				secondToken.vowelDiacritic === secondVowelDiacritic &&
-				!(
-					state.structure &&
-					( state.structure.ignoredVowelIndices[ i ] ||
-						state.structure.ignoredVowelIndices[ i + 1 ] )
-				)
+				!isIgnoredVowelPair( state, i )
+			) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	function findHornUaPair( state ) {
+		var i, firstToken, secondToken;
+
+		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
+			firstToken = state.tokens[ i ];
+			secondToken = state.tokens[ i + 1 ];
+
+			if (
+				firstToken.isVowel &&
+				secondToken.isVowel &&
+				firstToken.base.toLowerCase() === 'u' &&
+				secondToken.base.toLowerCase() === 'a' &&
+				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+				!isIgnoredVowelPair( state, i )
 			) {
 				return i;
 			}
@@ -824,6 +1213,19 @@
 		nextState = cloneState( state );
 		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		return resultFromState( nextState );
+	}
+
+	function applyHornToUa( state ) {
+		var pairStart = findHornUaPair( state ),
+			nextState;
+
+		if ( pairStart === -1 ) {
+			return null;
+		}
+
+		nextState = cloneState( state );
+		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		return resultFromState( nextState );
 	}
 
@@ -905,6 +1307,45 @@
 		return applyVowelDiacriticToTarget( state, target, command.vowelDiacritic );
 	}
 
+	function canSwitchTokenVowelDiacritic( token, vowelDiacritic ) {
+		var lowerBase = token.base.toLowerCase();
+
+		if ( lowerBase === 'a' ) {
+			return token.vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX &&
+					vowelDiacritic === Vietnamese.VowelDiacritic.BREVE ||
+				token.vowelDiacritic === Vietnamese.VowelDiacritic.BREVE &&
+					vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX;
+		}
+
+		if ( lowerBase === 'o' ) {
+			return token.vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX &&
+					vowelDiacritic === Vietnamese.VowelDiacritic.HORN ||
+				token.vowelDiacritic === Vietnamese.VowelDiacritic.HORN &&
+					vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX;
+		}
+
+		return false;
+	}
+
+	function applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) {
+		var nextState,
+			target = resolveTonePlacement( state ),
+			token;
+
+		if ( target === -1 ) {
+			return null;
+		}
+
+		token = state.tokens[ target ];
+		if ( canSwitchTokenVowelDiacritic( token, vowelDiacritic ) ) {
+			nextState = cloneState( state );
+			nextState.tokens[ target ].vowelDiacritic = vowelDiacritic;
+			return resultFromState( nextState );
+		}
+
+		return null;
+	}
+
 	function applyVowelDiacritic( state, command ) {
 		var alternateTarget,
 			target = resolveTonePlacement( state ),
@@ -931,15 +1372,19 @@
 		if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
 			return applyHornToCircumflexUo( state ) ||
 				applyHornToUo( state ) ||
+				applyHornToUa( state ) ||
+				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
 				applySimpleVowelDiacritic( state, command );
 		}
 
 		if ( vowelDiacritic === Vietnamese.VowelDiacritic.CIRCUMFLEX ) {
 			return applyCircumflexToHornUo( state ) ||
+				applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
 				applySimpleVowelDiacritic( state, command );
 		}
 
-		return applySimpleVowelDiacritic( state, command );
+		return applySameBaseVowelDiacriticSwitch( state, vowelDiacritic ) ||
+			applySimpleVowelDiacritic( state, command );
 	}
 
 	function resolveDStrokeTarget( state ) {
@@ -1017,6 +1462,8 @@
 	 *
 	 * @param {Object} options Adapter options.
 	 * @param {Function} [options.decodeCommand] Input-method-specific command decoder.
+	 *  Decoders return either a shared semantic command or an adapter-level
+	 *  literal replacement for input-method escape keys.
 	 * @param {Object} [options.engine] Shared Vietnamese composition engine.
 	 * @param {string} options.inputMethodId Input method id passed to the engine.
 	 * @return {Function} jQuery.IME patterns function.
@@ -1035,6 +1482,13 @@
 			}
 
 			extracted = extractCandidate( input, decoded.key );
+			if ( decoded.literalOutput !== undefined ) {
+				return {
+					noop: false,
+					output: extracted.prefix + extracted.candidate + decoded.literalOutput
+				};
+			}
+
 			if ( !extracted.candidate ) {
 				return passThrough( input );
 			}
@@ -1055,6 +1509,40 @@
 		};
 	}
 
+	function escapeRegexClassCharacter( character ) {
+		if ( character === '\\' || character === ']' || character === '-' || character === '^' ) {
+			return '\\' + character;
+		}
+
+		return character;
+	}
+
+	/**
+	 * Create array-based shifted patterns that delegate back to an adapter.
+	 *
+	 * jQuery.IME gives array `patterns_shift` priority while Shift is pressed.
+	 * Vietnamese adapters use functional `patterns`, so VIQR-family shifted
+	 * punctuation needs this bridge to keep using the shared engine.
+	 *
+	 * @param {Function} adapter Functional Vietnamese patterns adapter.
+	 * @param {string[]} shiftedKeys Shifted command characters handled by adapter.
+	 * @return {Array[]} jQuery.IME array rules for `patterns_shift`.
+	 */
+	function createShiftedAdapterPatterns( adapter, shiftedKeys ) {
+		var shiftedKeyPattern = shiftedKeys.map( escapeRegexClassCharacter ).join( '' );
+
+		return [
+			[
+				'[\\s\\S]*[' + shiftedKeyPattern + ']',
+				function ( input ) {
+					var result = adapter( input, '' );
+
+					return result.noop ? input : result.output;
+				}
+			]
+		];
+	}
+
 	/**
 	 * Register a Vietnamese input method that delegates composition to the
 	 * shared adapter and engine boundary.
@@ -1063,24 +1551,32 @@
 	 * @param {string} name Human-readable input method name.
 	 * @param {string} description Input method description.
 	 * @param {Function} decodeCommand Input-method-specific command decoder.
+	 * @param {string[]} [shiftedKeys] Shifted command keys that need a patterns bridge.
 	 */
-	function registerInputMethod( inputMethodId, name, description, decodeCommand ) {
-		$.ime.register( {
-			id: inputMethodId,
-			name: name,
-			description: description,
-			date: '2026-09-01',
-			author: 'Plantaest',
-			license: 'GPLv3',
-			version: '0.2.0',
-			contextLength: DEFAULT_CONTEXT_LENGTH,
-			maxKeyLength: DEFAULT_MAX_KEY_LENGTH,
-			patterns: createAdapter( {
+	function registerInputMethod( inputMethodId, name, description, decodeCommand, shiftedKeys ) {
+		var adapter = createAdapter( {
 				inputMethodId: inputMethodId,
 				decodeCommand: decodeCommand,
 				engine: engine
-			} )
-		} );
+			} ),
+			inputMethod = {
+				id: inputMethodId,
+				name: name,
+				description: description,
+				date: '2026-09-01',
+				author: 'Plantaest',
+				license: 'GPLv3',
+				version: '0.2.0',
+				contextLength: DEFAULT_CONTEXT_LENGTH,
+				maxKeyLength: DEFAULT_MAX_KEY_LENGTH,
+				patterns: adapter
+			};
+
+		if ( shiftedKeys && shiftedKeys.length ) {
+			inputMethod.patterns_shift = createShiftedAdapterPatterns( adapter, shiftedKeys );
+		}
+
+		$.ime.register( inputMethod );
 	}
 
 	Vietnamese.CommandType = Vietnamese.CommandType || {
@@ -1166,6 +1662,9 @@
 	Vietnamese.DEFAULT_MAX_KEY_LENGTH = DEFAULT_MAX_KEY_LENGTH;
 	Vietnamese.createAdapter = createAdapter;
 	Vietnamese.decodeVNICommand = decodeVNICommand;
+	Vietnamese.decodeTelexCommand = decodeTelexCommand;
+	Vietnamese.decodeVIQRCommand = decodeVIQRCommand;
+	Vietnamese.decodeVIQRStarCommand = decodeVIQRStarCommand;
 	Vietnamese.decodeNoCommand = decodeNoCommand;
 	Vietnamese.extractCandidate = extractCandidate;
 	Vietnamese.parseCandidate = parseCandidate;
@@ -1184,13 +1683,21 @@
 	registerInputMethod(
 		'vi-telex',
 		'Vietnamese Telex',
-		'Vietnamese Telex integration scaffold',
-		decodeNoCommand
+		'Vietnamese Telex input method',
+		decodeTelexCommand
 	);
 	registerInputMethod(
 		'vi-viqr',
 		'Vietnamese VIQR',
-		'Vietnamese VIQR integration scaffold',
-		decodeNoCommand
+		'Vietnamese VIQR input method',
+		decodeVIQRCommand,
+		[ '?', '~', '^', '(', '+' ]
+	);
+	registerInputMethod(
+		'vi-viqr-star',
+		'Vietnamese VIQR*',
+		'Vietnamese VIQR* input method',
+		decodeVIQRStarCommand,
+		[ '?', '~', '^', '(', '*' ]
 	);
 }( jQuery ) );

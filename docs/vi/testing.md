@@ -25,7 +25,7 @@ test/jquery.ime.vi.test.js
 test/jquery.ime.vi.test.fixtures.js
 ```
 
-`test/index.html` loads jQuery, jQuery.IME source files, upstream fixture data, Vietnamese fixture data, QUnit, the upstream QUnit runner, then Vietnamese-specific QUnit tests.
+`test/index.html` loads jQuery, jQuery.IME source files, generic fixture data, Vietnamese fixture data, QUnit, the generic QUnit runner, then Vietnamese-specific QUnit tests.
 
 The full test task is:
 
@@ -64,14 +64,14 @@ These tests should be fast and numerous. They are the main place for edge cases.
 
 Adapter tests verify the jQuery.IME-facing boundary without simulating editable elements:
 
-* VNI, Telex, and VIQR command decoding;
+* VNI, Telex, VIQR, and VIQR* command decoding;
 * candidate extraction;
 * pass-through behavior;
 * output shape for functional `patterns`;
 * preserving unchanged prefixes in the jQuery.IME input window;
 * `maxKeyLength` and `contextLength` assumptions.
 
-The current Phase 1 scaffold tests are in this layer.
+The Phase 1 integration tests live in this layer.
 
 ### Layer 3 – jQuery.IME integration fixtures
 
@@ -95,13 +95,14 @@ d9      -> đ
 dac91   -> đác
 quoc61  -> quốc
 gieng61 -> giếng
+hua71   -> hứa
 ```
 
 Only add examples after the behavior is intentionally implemented.
 
 ### Layer 4 – full regression and manual checks
 
-Run the full repository test task before milestones and upstream review:
+Run the full repository test task before milestones and broad integration changes:
 
 ```bash
 npx grunt test
@@ -111,7 +112,7 @@ Use manual browser testing for typing feel, caret behavior, deletion, pasted tex
 
 ## Recommended test layout
 
-Keep Vietnamese-specific tests outside the upstream generic test files.
+Keep Vietnamese-specific tests outside the generic jQuery.IME test files.
 
 Use:
 
@@ -141,7 +142,7 @@ Do not add VIWP-specific fixture entries to:
 test/jquery.ime.test.fixtures.js
 ```
 
-This keeps the upstream test runner and upstream fixture corpus easy to compare against.
+This keeps the generic jQuery.IME test runner and fixture corpus easy to compare against.
 
 Recommended module names:
 
@@ -155,11 +156,12 @@ VIWP.IME – Adapter
 VIWP.IME – VNI adapter
 VIWP.IME – Telex adapter
 VIWP.IME – VIQR adapter
+VIWP.IME – VIQR* adapter
 ```
 
 ## Fixture layout
 
-Use `test/jquery.ime.vi.test.fixtures.js` for representative Vietnamese end-to-end typing sequences. The file should append Vietnamese fixtures to the existing `testFixtures` array so the upstream generic fixture runner can execute them without Vietnamese-specific changes in `test/jquery.ime.test.js`.
+Use `test/jquery.ime.vi.test.fixtures.js` for representative Vietnamese end-to-end typing sequences. The file should append Vietnamese fixtures to the existing `testFixtures` array so the generic fixture runner can execute them without Vietnamese-specific changes in `test/jquery.ime.test.js`.
 
 Group fixtures by method and behavior:
 
@@ -171,9 +173,12 @@ Vietnamese VNI – flexible composition
 Vietnamese VNI – escape
 Vietnamese Telex – adapter equivalence
 Vietnamese VIQR – adapter equivalence
+Vietnamese VIQR* – adapter equivalence
 ```
 
 Avoid huge generated fixture blocks. Generated coverage belongs in pure tests.
+
+The generic fixture runner reuses one IME instance within each fixture group. It clears the text between cases, but it does not reset the raw `context` buffer. For input methods with nonzero `contextLength`, keep focused adapter tests for context-sensitive behavior and order fixture cases deliberately.
 
 ## Focused development workflow
 
@@ -188,7 +193,7 @@ For adapter work:
 
 ```bash
 npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js src/jquery.ime.inputmethods.js
-npx grunt connect qunit --modules="VIWP.IME – Adapter"
+npx grunt connect qunit --modules="VIWP.IME – Adapter,VIWP.IME – Telex adapter,VIWP.IME – VIQR adapter,VIWP.IME – VIQR* adapter"
 ```
 
 For Vietnamese integration before a commit:
@@ -207,7 +212,7 @@ For milestone regression:
 npx grunt test
 ```
 
-Before upstream review, also run the repository's lint/default command expected by current upstream CI. If full lint reports unrelated pre-existing failures, document that separately and keep touched-file lint clean.
+Before broad distribution or integration milestones, also run the repository's lint/default command when practical. If full lint reports unrelated pre-existing failures, document that separately and keep touched-file lint clean.
 
 ## Phase 2 vertical slice coverage
 
@@ -280,7 +285,72 @@ Quoc61   -> Quốc
 THAY61   -> THẤY
 ```
 
-Do not add broad Telex or VIQR fixtures before their mapping tables are explicitly fixed.
+## Phase 4 adapter coverage
+
+Phase 4 keeps the engine coverage in Phase 2 and Phase 3, then adds adapter-focused tests for:
+
+```text
+Telex tone keys s f r x j
+Telex z tone removal
+Telex aa ee oo aw ow uw
+Telex delayed a/e/o vowel-diacritic commands after off-glides and codas
+Telex delayed w breve and same-base vowel-diacritic switches, with literal behavior after off-glides
+Telex ua-family horn behavior
+Telex protected literal rimes such as oao and oeo
+Telex uo-family switch after horn and tone
+Telex w horn command after an existing candidate
+Telex literal standalone w and [ ] safeguards
+Telex dd and delayed d-stroke after later rime material
+Telex repeated-key escape
+Telex checked-ending tone constraints
+VIQR tone punctuation keys
+VIQR ^, (, +, dd, and 0 commands
+VIQR shifted punctuation through patterns_shift
+VIQR delayed d-stroke after later rime material
+VIQR backslash escape
+VIQR* star horn key
+```
+
+Representative Phase 4 integration fixtures:
+
+```text
+tieengs    -> tiếng
+Vieetj     -> Việt
+thayas     -> thấy
+thayw      -> thayw
+thangws    -> thắng
+haamw      -> hăm
+hoposw     -> hớp
+huaws      -> hứa
+hoaos      -> hoáo
+hoeos      -> hoéo
+dduwowngf  -> đường
+dacds      -> đác
+huopwso    -> huốp
+thuongwf   -> thường
+mats       -> mát
+matj       -> mạt
+matf       -> matf
+matx       -> matx
+quocos     -> quốc
+gienges    -> giếng
+toansz     -> toan
+ass        -> as
+ww         -> ww
+w          -> w
+[          -> [
+]          -> ]
+tie^'ng    -> tiếng
+Vie^.t     -> Việt
+ddu+o+`ng  -> đường
+dacd'      -> đác
+tan\?      -> tan?
+Shifted VIQR punctuation sequence -> á à ả ã â ư ă đ
+ddu*o*`ng  -> đường
+dacd'      -> đác
+o\*        -> o*
+Shifted VIQR* star sequence -> ư
+```
 
 ## Generated tests
 
@@ -314,7 +384,7 @@ Do not weaken existing tests to make implementation pass. If a test and the spec
 
 Tests must protect the assumptions from `architecture.md`:
 
-* `contextLength` remains `0` unless a focused test proves raw context is required;
+* default `contextLength` remains `0` unless a focused test proves raw context is required;
 * `maxKeyLength` is large enough for ordinary candidates and command keys;
 * adapter output includes unchanged prefix text;
 * decomposed Unicode does not silently fall outside the usable window.
@@ -327,7 +397,7 @@ The testing strategy is working when:
 
 * pure engine tests can run without DOM input simulation;
 * adapter tests prove the jQuery.IME `patterns` contract;
-* fixtures prove representative real typing for VNI, Telex, and VIQR;
+* fixtures prove representative real typing for VNI, Telex, VIQR, and VIQR*;
 * generated coverage does not slow the integration suite unnecessarily;
 * manual testing can inspect typing feel and caret behavior;
-* the complete relevant upstream suite passes before review.
+* the complete relevant repository suite passes before milestones.

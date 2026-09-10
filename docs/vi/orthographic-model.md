@@ -148,11 +148,27 @@ huop6 -> huôp
 huop7 -> hươp
 ```
 
+The unmarked `ua` precursor can become `ưa` when horn is explicitly applied to the `u` before `a`:
+
+```text
+hua7  -> hưa
+huaws -> hứa
+```
+
 The engine also supports the narrow family switch between rendered `uô` and `ươ` while preserving tone:
 
 ```text
 hướp6 -> huốp
 huốp7 -> hướp
+```
+
+The engine supports narrow same-base vowel-diacritic switches while preserving tone:
+
+```text
+hâm8 -> hăm
+hắm6 -> hấm
+hốp7 -> hớp
+hớp6 -> hốp
 ```
 
 Rare `uya` is modeled as a `uy`-based rime whose tone target is `y`:
@@ -165,6 +181,13 @@ Extended `oo` spellings are not inferred automatically from unmarked `oo`, but e
 
 ```text
 lo6o62ng -> lôồng
+```
+
+Covered extended rimes such as `oao` and `oeo` should keep their final `o` literal during Telex delayed-command detection:
+
+```text
+hoaos -> hoáo
+hoeos -> hoéo
 ```
 
 The exact grammar inventory should become machine-readable data as the engine grows. Do not encode the complete model as an ordered list of overlapping regex replacements.
@@ -438,4 +461,5 @@ These questions must be resolved by implementation experiments or explicit decis
 
 * whether the machine-readable rime inventory should be expanded to full generated coverage;
 * how strict initial structural validation should be;
-* treatment of rare, borrowed, dialectal, minority-language, and expressive spellings.
+* treatment of rare, borrowed, dialectal, minority-language, and expressive spellings;
+* how much literal-rime protection is needed before a full rime inventory exists.

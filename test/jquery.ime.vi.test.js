@@ -19,8 +19,8 @@
 	QUnit.test( 'Vietnamese input methods are registered through shared source metadata', ( assert ) => {
 		assert.deepEqual(
 			$.ime.languages.vi.inputmethods,
-			[ 'vi-vni', 'vi-telex', 'vi-viqr' ],
-			'Vietnamese exposes VNI, Telex, and VIQR input methods'
+			[ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ],
+			'Vietnamese exposes VNI, Telex, VIQR, and VIQR* input methods'
 		);
 		assert.strictEqual(
 			$.ime.sources[ 'vi-vni' ].source,
@@ -36,6 +36,11 @@
 			$.ime.sources[ 'vi-viqr' ].source,
 			$.ime.sources[ 'vi-vni' ].source,
 			'VIQR uses the same shared Vietnamese rule source'
+		);
+		assert.strictEqual(
+			$.ime.sources[ 'vi-viqr-star' ].source,
+			$.ime.sources[ 'vi-vni' ].source,
+			'VIQR* uses the same shared Vietnamese rule source'
 		);
 	} );
 
@@ -59,6 +64,11 @@
 			typeof $.ime.inputmethods[ 'vi-viqr' ].patterns,
 			'function',
 			'VIQR adapter is registered by the shared source'
+		);
+		assert.strictEqual(
+			typeof $.ime.inputmethods[ 'vi-viqr-star' ].patterns,
+			'function',
+			'VIQR* adapter is registered by the shared source'
 		);
 	} );
 
@@ -104,32 +114,18 @@
 	} );
 
 	QUnit.test( 'Vietnamese adapters keep the expected input-window settings', ( assert ) => {
-		assert.strictEqual(
-			$.ime.inputmethods[ 'vi-vni' ].contextLength,
-			0,
-			'Vietnamese adapters do not depend on raw input context'
-		);
-		assert.strictEqual(
-			$.ime.inputmethods[ 'vi-vni' ].maxKeyLength,
-			$.ime.vi.DEFAULT_MAX_KEY_LENGTH,
-			'Vietnamese adapters use the shared maxKeyLength'
-		);
-		assert.deepEqual(
-			$.ime.inputmethods[ 'vi-telex' ].patterns( 'a1', '' ),
-			{
-				noop: true,
-				output: 'a1'
-			},
-			'Telex remains pass-through until its command mapping is specified'
-		);
-		assert.deepEqual(
-			$.ime.inputmethods[ 'vi-viqr' ].patterns( 'a1', '' ),
-			{
-				noop: true,
-				output: 'a1'
-			},
-			'VIQR remains pass-through until its command mapping is specified'
-		);
+		[ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ].forEach( ( inputMethodId ) => {
+			assert.strictEqual(
+				$.ime.inputmethods[ inputMethodId ].contextLength,
+				0,
+				inputMethodId + ' does not depend on raw input context'
+			);
+			assert.strictEqual(
+				$.ime.inputmethods[ inputMethodId ].maxKeyLength,
+				$.ime.vi.DEFAULT_MAX_KEY_LENGTH,
+				inputMethodId + ' uses the shared maxKeyLength'
+			);
+		} );
 	} );
 
 	QUnit.module( 'VIWP.IME – Unicode', {
@@ -324,6 +320,50 @@
 			'Applying a vowel diacritic preserves semantic tone'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hâm', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.BREVE
+			} ),
+			{
+				handled: true,
+				output: 'hăm'
+			},
+			'BREVE changes a circumflex a target to breve'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hắm', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'hấm'
+			},
+			'CIRCUMFLEX changes a breve a target to circumflex while preserving tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hốp', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.HORN
+			} ),
+			{
+				handled: true,
+				output: 'hớp'
+			},
+			'HORN changes a circumflex o target to horn while preserving tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hớp', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'hốp'
+			},
+			'CIRCUMFLEX changes a horned o target to circumflex while preserving tone'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'tuong', {
 				type: commandType.APPLY_VOWEL_DIACRITIC,
 				vowelDiacritic: vowelDiacritic.HORN
@@ -344,6 +384,17 @@
 				output: 'huơ'
 			},
 			'HORN on open uo applies to o as uơ'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hua', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.HORN
+			} ),
+			{
+				handled: true,
+				output: 'hưa'
+			},
+			'HORN applies to the ua precursor as ưa'
 		);
 		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'lôo', {
@@ -626,6 +677,28 @@
 			'uya places tone on y'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoao', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'hoáo'
+			},
+			'oao treats final o as an off-glide for tone placement'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoeo', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{
+				handled: true,
+				output: 'hoéo'
+			},
+			'oeo treats final o as an off-glide for tone placement'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'THÂY', {
 				type: commandType.APPLY_TONE,
 				tone: tone.ACUTE
@@ -865,6 +938,611 @@
 				output: 'dác9'
 			},
 			'Repeating d-stroke key escapes after a full rendered candidate'
+		);
+	} );
+
+	QUnit.module( 'VIWP.IME – Telex adapter', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'Telex adapter maps tone, vowel-diacritic, and d-stroke keys', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
+
+		assert.deepEqual(
+			telex( 'as', '' ),
+			{
+				noop: false,
+				output: 'á'
+			},
+			'Telex s applies acute tone'
+		);
+		assert.deepEqual(
+			telex( 'af', '' ),
+			{
+				noop: false,
+				output: 'à'
+			},
+			'Telex f applies grave tone'
+		);
+		assert.deepEqual(
+			telex( 'ar', '' ),
+			{
+				noop: false,
+				output: 'ả'
+			},
+			'Telex r applies hook tone'
+		);
+		assert.deepEqual(
+			telex( 'ax', '' ),
+			{
+				noop: false,
+				output: 'ã'
+			},
+			'Telex x applies tilde tone'
+		);
+		assert.deepEqual(
+			telex( 'aj', '' ),
+			{
+				noop: false,
+				output: 'ạ'
+			},
+			'Telex j applies dot tone'
+		);
+		assert.deepEqual(
+			telex( 'aa', '' ),
+			{
+				noop: false,
+				output: 'â'
+			},
+			'Telex aa applies circumflex'
+		);
+		assert.deepEqual(
+			telex( 'ee', '' ),
+			{
+				noop: false,
+				output: 'ê'
+			},
+			'Telex ee applies circumflex'
+		);
+		assert.deepEqual(
+			telex( 'oo', '' ),
+			{
+				noop: false,
+				output: 'ô'
+			},
+			'Telex oo applies circumflex'
+		);
+		assert.deepEqual(
+			telex( 'aw', '' ),
+			{
+				noop: false,
+				output: 'ă'
+			},
+			'Telex aw applies breve'
+		);
+		assert.deepEqual(
+			telex( 'cow', '' ),
+			{
+				noop: false,
+				output: 'cơ'
+			},
+			'Telex ow applies horn in a candidate'
+		);
+		assert.deepEqual(
+			telex( 'thuw', '' ),
+			{
+				noop: false,
+				output: 'thư'
+			},
+			'Telex uw applies horn in a candidate'
+		);
+		assert.deepEqual(
+			telex( 'huaw', '' ),
+			{
+				noop: false,
+				output: 'hưa'
+			},
+			'Telex w applies horn to the ua precursor before aw is read as breve'
+		);
+		assert.deepEqual(
+			telex( 'thaya', '' ),
+			{
+				noop: false,
+				output: 'thây'
+			},
+			'Telex delayed a applies circumflex before an off-glide'
+		);
+		assert.deepEqual(
+			telex( 'thâys', '' ),
+			{
+				noop: false,
+				output: 'thấy'
+			},
+			'Telex tone applies after a delayed circumflex command'
+		);
+		assert.deepEqual(
+			telex( 'thangw', '' ),
+			{
+				noop: false,
+				output: 'thăng'
+			},
+			'Telex delayed w applies breve after a coda'
+		);
+		assert.deepEqual(
+			telex( 'hâmw', '' ),
+			{
+				noop: false,
+				output: 'hăm'
+			},
+			'Telex delayed w switches circumflex a to breve'
+		);
+		assert.deepEqual(
+			telex( 'hốpw', '' ),
+			{
+				noop: false,
+				output: 'hớp'
+			},
+			'Telex w switches circumflex o to horn'
+		);
+		assert.deepEqual(
+			telex( 'hướpo', '' ),
+			{
+				noop: false,
+				output: 'huốp'
+			},
+			'Telex delayed o switches horned uo-family candidate to circumflex'
+		);
+		assert.deepEqual(
+			telex( 'quoco', '' ),
+			{
+				noop: false,
+				output: 'quôc'
+			},
+			'Telex delayed o ignores the u in qu'
+		);
+		assert.deepEqual(
+			telex( 'gienge', '' ),
+			{
+				noop: false,
+				output: 'giêng'
+			},
+			'Telex delayed e ignores the i in gi'
+		);
+		assert.deepEqual(
+			telex( 'dd', '' ),
+			{
+				noop: false,
+				output: 'đ'
+			},
+			'Telex dd applies d-stroke'
+		);
+		assert.deepEqual(
+			telex( 'dacd', '' ),
+			{
+				noop: false,
+				output: 'đac'
+			},
+			'Telex d-stroke can apply after later rime material'
+		);
+	} );
+
+	QUnit.test( 'Telex adapter supports removal, repeated-key escape, and literal safeguards', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
+
+		assert.deepEqual(
+			telex( 'toánz', '' ),
+			{
+				noop: false,
+				output: 'toan'
+			},
+			'Telex z removes a tone'
+		);
+		assert.deepEqual(
+			telex( 'ás', '' ),
+			{
+				noop: false,
+				output: 'as'
+			},
+			'Repeating a Telex tone key escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'âa', '' ),
+			{
+				noop: false,
+				output: 'aa'
+			},
+			'Repeating a Telex circumflex key escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'ưw', '' ),
+			{
+				noop: false,
+				output: 'uw'
+			},
+			'Repeating a Telex horn key escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'thươngw', '' ),
+			{
+				noop: false,
+				output: 'thuongw'
+			},
+			'Repeating Telex w after a horned uo-family candidate escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'đd', '' ),
+			{
+				noop: false,
+				output: 'dd'
+			},
+			'Repeating a Telex d-stroke key escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'đácd', '' ),
+			{
+				noop: false,
+				output: 'dácd'
+			},
+			'Repeating a Telex d-stroke key escapes after a full rendered candidate'
+		);
+		assert.deepEqual(
+			telex( 'thuongw', '' ),
+			{
+				noop: false,
+				output: 'thương'
+			},
+			'Telex w applies horn to an eligible candidate'
+		);
+		assert.deepEqual(
+			telex( 'thayw', '' ),
+			{
+				noop: true,
+				output: 'thayw'
+			},
+			'Telex w remains literal after an off-glide candidate'
+		);
+		assert.deepEqual(
+			telex( 'hoao', '' ),
+			{
+				noop: true,
+				output: 'hoao'
+			},
+			'Telex final o remains literal in the covered oao rime'
+		);
+		assert.deepEqual(
+			telex( 'hoeo', '' ),
+			{
+				noop: true,
+				output: 'hoeo'
+			},
+			'Telex final o remains literal in the covered oeo rime'
+		);
+		assert.deepEqual(
+			telex( 'w', '' ),
+			{
+				noop: true,
+				output: 'w'
+			},
+			'Standalone Telex w remains literal'
+		);
+		assert.deepEqual(
+			telex( '[', '' ),
+			{
+				noop: true,
+				output: '['
+			},
+			'Telex [ remains literal'
+		);
+		assert.deepEqual(
+			telex( ']', '' ),
+			{
+				noop: true,
+				output: ']'
+			},
+			'Telex ] remains literal'
+		);
+		assert.deepEqual(
+			telex( 'ww', '' ),
+			{
+				noop: true,
+				output: 'ww'
+			},
+			'Telex ww remains literal when standalone w is not a quick key'
+		);
+	} );
+
+	QUnit.test( 'Telex adapter follows checked-ending tone constraints', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
+
+		assert.deepEqual(
+			telex( 'mats', '' ),
+			{
+				noop: false,
+				output: 'mát'
+			},
+			'Telex checked syllables accept acute tone'
+		);
+		assert.deepEqual(
+			telex( 'matj', '' ),
+			{
+				noop: false,
+				output: 'mạt'
+			},
+			'Telex checked syllables accept dot tone'
+		);
+		assert.deepEqual(
+			telex( 'matf', '' ),
+			{
+				noop: true,
+				output: 'matf'
+			},
+			'Telex checked syllables reject grave tone conservatively'
+		);
+		assert.deepEqual(
+			telex( 'matx', '' ),
+			{
+				noop: true,
+				output: 'matx'
+			},
+			'Telex checked syllables reject tilde tone conservatively'
+		);
+	} );
+
+	QUnit.test( 'Telex adapter does not infer IÊ-family vowel diacritics', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
+
+		assert.deepEqual(
+			telex( 'Vietj', 'et' ),
+			{
+				noop: false,
+				output: 'Viẹt'
+			},
+			'Telex j applies only tone; it does not infer iê from ie'
+		);
+		assert.deepEqual(
+			telex( 'Viêtj', 'et' ),
+			{
+				noop: false,
+				output: 'Việt'
+			},
+			'Explicit Telex ee produces Việt before tone placement'
+		);
+	} );
+
+	QUnit.module( 'VIWP.IME – VIQR adapter', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'VIQR adapter maps tone, vowel-diacritic, and d-stroke keys', ( assert ) => {
+		var viqr = $.ime.inputmethods[ 'vi-viqr' ].patterns;
+
+		assert.deepEqual(
+			viqr( 'a\'', '' ),
+			{
+				noop: false,
+				output: 'á'
+			},
+			'VIQR apostrophe applies acute tone'
+		);
+		assert.deepEqual(
+			viqr( 'a`', '' ),
+			{
+				noop: false,
+				output: 'à'
+			},
+			'VIQR grave accent applies grave tone'
+		);
+		assert.deepEqual(
+			viqr( 'a?', '' ),
+			{
+				noop: false,
+				output: 'ả'
+			},
+			'VIQR question mark applies hook tone'
+		);
+		assert.deepEqual(
+			viqr( 'a~', '' ),
+			{
+				noop: false,
+				output: 'ã'
+			},
+			'VIQR tilde applies tilde tone'
+		);
+		assert.deepEqual(
+			viqr( 'a.', '' ),
+			{
+				noop: false,
+				output: 'ạ'
+			},
+			'VIQR full stop applies dot tone'
+		);
+		assert.deepEqual(
+			viqr( 'a^', '' ),
+			{
+				noop: false,
+				output: 'â'
+			},
+			'VIQR circumflex applies circumflex'
+		);
+		assert.deepEqual(
+			viqr( 'a(', '' ),
+			{
+				noop: false,
+				output: 'ă'
+			},
+			'VIQR open parenthesis applies breve'
+		);
+		assert.deepEqual(
+			viqr( 'o+', '' ),
+			{
+				noop: false,
+				output: 'ơ'
+			},
+			'VIQR plus applies horn'
+		);
+		assert.deepEqual(
+			viqr( 'dd', '' ),
+			{
+				noop: false,
+				output: 'đ'
+			},
+			'VIQR dd applies d-stroke'
+		);
+		assert.deepEqual(
+			viqr( 'dacd', '' ),
+			{
+				noop: false,
+				output: 'đac'
+			},
+			'VIQR d-stroke can apply after later rime material'
+		);
+	} );
+
+	QUnit.test( 'VIQR adapter supports tone removal and escape key', ( assert ) => {
+		var viqr = $.ime.inputmethods[ 'vi-viqr' ].patterns;
+
+		assert.deepEqual(
+			viqr( 'á0', '' ),
+			{
+				noop: false,
+				output: 'a'
+			},
+			'VIQR 0 removes a tone'
+		);
+		assert.deepEqual(
+			viqr( 'tan?', '' ),
+			{
+				noop: false,
+				output: 'tản'
+			},
+			'VIQR question mark remains a tone key without escape'
+		);
+		assert.deepEqual(
+			viqr( 'tan\\?', '' ),
+			{
+				noop: false,
+				output: 'tan?'
+			},
+			'VIQR backslash escapes a command key'
+		);
+		assert.deepEqual(
+			viqr( 'a\\^', '' ),
+			{
+				noop: false,
+				output: 'a^'
+			},
+			'VIQR backslash escapes vowel-diacritic keys'
+		);
+		assert.deepEqual(
+			viqr( 'đd', '' ),
+			{
+				noop: true,
+				output: 'đd'
+			},
+			'VIQR delayed d-stroke does not add repeated-key escape'
+		);
+	} );
+
+	QUnit.test( 'VIQR shifted patterns bridge delegates to the shared adapter', ( assert ) => {
+		var viqrShift = $.ime.inputmethods[ 'vi-viqr' ].patterns_shift[ 0 ][ 1 ],
+			viqrStarShift = $.ime.inputmethods[ 'vi-viqr-star' ].patterns_shift[ 0 ][ 1 ];
+
+		assert.strictEqual(
+			viqrShift( 'a?' ),
+			'ả',
+			'VIQR shifted question mark applies hook tone'
+		);
+		assert.strictEqual(
+			viqrShift( 'a~' ),
+			'ã',
+			'VIQR shifted tilde applies tilde tone'
+		);
+		assert.strictEqual(
+			viqrShift( 'a^' ),
+			'â',
+			'VIQR shifted circumflex applies circumflex'
+		);
+		assert.strictEqual(
+			viqrShift( 'u+' ),
+			'ư',
+			'VIQR shifted plus applies horn'
+		);
+		assert.strictEqual(
+			viqrShift( 'a(' ),
+			'ă',
+			'VIQR shifted open parenthesis applies breve'
+		);
+		assert.strictEqual(
+			viqrShift( 'tan\\?' ),
+			'tan?',
+			'VIQR shifted bridge preserves backslash escape behavior'
+		);
+		assert.strictEqual(
+			viqrStarShift( 'u*' ),
+			'ư',
+			'VIQR* shifted star applies horn through the same bridge'
+		);
+		assert.strictEqual(
+			viqrStarShift( 'o\\*' ),
+			'o*',
+			'VIQR* shifted bridge preserves star escape behavior'
+		);
+	} );
+
+	QUnit.module( 'VIWP.IME – VIQR* adapter', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'VIQR* adapter uses star as the horn key', ( assert ) => {
+		var viqrStar = $.ime.inputmethods[ 'vi-viqr-star' ].patterns;
+
+		assert.deepEqual(
+			viqrStar( 'o*', '' ),
+			{
+				noop: false,
+				output: 'ơ'
+			},
+			'VIQR* star applies horn to o'
+		);
+		assert.deepEqual(
+			viqrStar( 'u*', '' ),
+			{
+				noop: false,
+				output: 'ư'
+			},
+			'VIQR* star applies horn to u'
+		);
+		assert.deepEqual(
+			viqrStar( 'dacd', '' ),
+			{
+				noop: false,
+				output: 'đac'
+			},
+			'VIQR* shares delayed d-stroke behavior'
+		);
+		assert.deepEqual(
+			viqrStar( 'o+', '' ),
+			{
+				noop: true,
+				output: 'o+'
+			},
+			'VIQR* leaves plus as literal input'
+		);
+		assert.deepEqual(
+			viqrStar( 'tan\\?', '' ),
+			{
+				noop: false,
+				output: 'tan?'
+			},
+			'VIQR* keeps the VIQR escape key'
+		);
+		assert.deepEqual(
+			viqrStar( 'o\\*', '' ),
+			{
+				noop: false,
+				output: 'o*'
+			},
+			'VIQR* backslash escapes star'
 		);
 	} );
 }( jQuery ) );

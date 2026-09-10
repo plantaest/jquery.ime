@@ -1110,6 +1110,10 @@
 			name: 'Vietnamese VIQR',
 			source: 'rules/vi/vi.js'
 		},
+		'vi-viqr-star': {
+			name: 'Vietnamese VIQR*',
+			source: 'rules/vi/vi.js'
+		},
 		'vi-vni': {
 			name: 'Vietnamese VNI',
 			source: 'rules/vi/vi.js'
@@ -1964,7 +1968,7 @@
 		},
 		vi: {
 			autonym: 'Tiếng Việt',
-			inputmethods: [ 'vi-vni', 'vi-telex', 'vi-viqr' ]
+			inputmethods: [ 'vi-vni', 'vi-telex', 'vi-viqr', 'vi-viqr-star' ]
 		},
 		wlx: {
 			autonym: 'Waale',

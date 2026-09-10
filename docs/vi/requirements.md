@@ -4,20 +4,24 @@ This document defines the user-visible behavior required for Vietnamese input me
 
 ## Requirement levels
 
-* **MUST**: required for the first upstream-ready implementation.
+* **MUST**: required for the first stable implementation.
 * **SHOULD**: strongly preferred, but may be delayed if a documented technical constraint appears.
 * **MAY**: optional or future behavior.
 * **UNRESOLVED**: not safe to implement by guessing; requires an explicit decision or experiment.
 
 ## Supported input methods
 
-The first upstream-ready implementation MUST support:
+The first stable implementation MUST support:
 
 * VNI
 * Telex
 * VIQR
 
-All three input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
+The current implementation also supports:
+
+* VIQR* as a VIQR variant using `*` for horn
+
+All Vietnamese input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
 
 ## Core composition behavior
 
@@ -80,6 +84,7 @@ o6 -> ô
 o7 -> ơ
 u7 -> ư
 huo7 -> huơ
+hua7 -> hưa
 
 a8 -> ă
 
@@ -92,33 +97,138 @@ dac9 -> đac
 
 The Telex adapter MUST support the common Vietnamese Telex operations for tones, vowel diacritics, and `đ`.
 
-The exact first-version mapping table for Telex is UNRESOLVED until implementation work verifies the intended compatibility target. The expected starting point is the common Telex family:
+The Phase 4 Telex adapter supports this mapping:
+
+| Key or sequence | Semantic command or adapter behavior |
+| --- | --- |
+| `s` | `APPLY_TONE(acute)` |
+| `f` | `APPLY_TONE(grave)` |
+| `r` | `APPLY_TONE(hook)` |
+| `x` | `APPLY_TONE(tilde)` |
+| `j` | `APPLY_TONE(dot)` |
+| `z` | `REMOVE_TONE` |
+| `aa` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `a` |
+| `ee` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `e` |
+| `oo` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `o` |
+| `aw` | `APPLY_VOWEL_DIACRITIC(breve)` |
+| `ow` | `APPLY_VOWEL_DIACRITIC(horn)` on `o` |
+| `uw` | `APPLY_VOWEL_DIACRITIC(horn)` on `u` |
+| `w` after a candidate with an eligible `o` or `u` target | `APPLY_VOWEL_DIACRITIC(horn)` |
+| `w` after a candidate with a covered `ua` precursor | `APPLY_VOWEL_DIACRITIC(horn)` as `ưa` |
+| `w` after a candidate with an eligible `a` target before a consonantal ending | `APPLY_VOWEL_DIACRITIC(breve)` |
+| `o` after a horned `uo`-family candidate | `APPLY_VOWEL_DIACRITIC(circumflex)` |
+| `dd` | `APPLY_D_STROKE` |
+| `d` after a candidate with an initial `d` target | `APPLY_D_STROKE` |
+
+Examples:
 
 ```text
-s f r x j      tones
-z              tone or mark removal, exact scope unresolved
-aa ee oo       circumflex
-aw             breve
-ow uw w        horn behavior, exact accepted forms unresolved
-dd             d-stroke
+as       -> á
+af       -> à
+aa       -> â
+aw       -> ă
+cow      -> cơ
+thuw     -> thư
+thaya    -> thây
+thayas   -> thấy
+thangw   -> thăng
+thangws  -> thắng
+haamw    -> hăm
+hoposw   -> hớp
+thayw    -> thayw
+quocos   -> quốc
+gienges  -> giếng
+thuongw  -> thương
+thuongwf -> thường
+huopwso  -> huốp
+huaws    -> hứa
+hoaos    -> hoáo
+hoeos    -> hoéo
+dd       -> đ
+dacds    -> đác
+tieengs  -> tiếng
+Vieetj   -> Việt
+dduwowngf -> đường
+mats     -> mát
+matj     -> mạt
+matf     -> matf
+matx     -> matx
+toansz   -> toan
+w        -> w
+[        -> [
+]        -> ]
 ```
 
-Before Telex behavior is implemented, convert this section into a fixed table with examples and escape behavior.
+Telex does not infer IÊ-family vowel diacritics from unmarked `ie`, `ye`, or `uye`. Type the vowel diacritic explicitly, such as `Vieetj -> Việt`.
+
+Telex vowel-diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`. Delayed Telex `w` for breve is narrower: it should apply when the A-family target does not have an off-glide ending, such as `thangw -> thăng` and `haamw -> hăm`, but remain literal after off-glide candidates such as `thayw`.
+
+Telex delayed-command detection SHOULD protect covered literal rimes that would otherwise be misread as a final command key. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies.
+
+Current `z` behavior removes tone only. Whether `z` should also remove vowel diacritics is UNRESOLVED.
 
 ## VIQR mapping
 
 The VIQR adapter MUST support ordinary VIQR-style commands for tones, vowel diacritics, and `đ`.
 
-The exact first-version VIQR table is UNRESOLVED until implementation work verifies the intended compatibility target. The expected starting point is the common VIQR family:
+The Phase 4 VIQR adapter supports this mapping:
+
+| Key or sequence | Semantic command or adapter behavior |
+| --- | --- |
+| `'` | `APPLY_TONE(acute)` |
+| `` ` `` | `APPLY_TONE(grave)` |
+| `?` | `APPLY_TONE(hook)` |
+| `~` | `APPLY_TONE(tilde)` |
+| `.` | `APPLY_TONE(dot)` |
+| `0` | `REMOVE_TONE` |
+| `^` | `APPLY_VOWEL_DIACRITIC(circumflex)` |
+| `(` | `APPLY_VOWEL_DIACRITIC(breve)` |
+| `+` | `APPLY_VOWEL_DIACRITIC(horn)` |
+| `dd` | `APPLY_D_STROKE` |
+| `d` after a candidate with an initial `d` target | `APPLY_D_STROKE` |
+| `\` before a covered VIQR command key | literal escaped key |
+
+Examples:
 
 ```text
-' ` ? ~ .      tones
-^              circumflex
-(              breve
-+              horn
+a'        -> á
+a`        -> à
+a?        -> ả
+a~        -> ã
+a.        -> ạ
+a^        -> â
+a(        -> ă
+o+        -> ơ
+dd        -> đ
+dacd'     -> đác
+tie^'ng   -> tiếng
+Vie^.t    -> Việt
+ddu+o+`ng -> đường
+tan?      -> tản
+tan\?     -> tan?
+toan'0    -> toan
 ```
 
-The exact `đ` command and literal escape behavior must be specified before VIQR behavior is implemented. VIQR punctuation keys may also require a jQuery.IME experiment because shifted punctuation can interact with functional `patterns`.
+VIQR punctuation commands MUST work through functional `patterns` and through the `patterns_shift` bridge used by physical shifted keys such as `?`, `~`, `^`, `(`, and `+`.
+
+VIQR delayed `d`-stroke SHOULD work after later rime material has already been typed when the current rendered candidate identifies an initial `d` target, such as `dacd' -> đác`. This does not add repeated-key escape for VIQR `d`; VIQR's escape behavior remains backslash-based for covered command punctuation.
+
+## VIQR* mapping
+
+VIQR* MUST reuse the VIQR adapter behavior except that `*` replaces `+` for horn.
+
+Examples:
+
+```text
+u*        -> ư
+o*        -> ơ
+ddu*o*`ng -> đường
+dacd'     -> đác
+tan\?     -> tan?
+o\*       -> o*
+```
+
+VIQR* MUST use the same shifted-key bridge for `?`, `~`, `^`, `(`, and `*`.
 
 ## Tone behavior
 
@@ -176,7 +286,16 @@ Example:
 á6 -> ấ
 ```
 
-Replacement among vowel-diacritic forms, such as `â <-> ă` or `ô <-> ơ`, is UNRESOLVED. Do not implement broad replacement behavior until the rule is specified with examples.
+The engine supports narrow same-base vowel-diacritic switches on the same target:
+
+```text
+hâm8 -> hăm
+hăm6 -> hâm
+hốp7 -> hớp
+hớp6 -> hốp
+```
+
+Broad replacement among unrelated vowel-diacritic forms remains UNRESOLVED. Do not implement arbitrary replacement behavior until the rule is specified with examples.
 
 The first VNI implementation supports the narrow `uô <-> ươ` family switch needed for equivalent composition order:
 
@@ -185,6 +304,7 @@ huop61  -> huốp
 huop71  -> hướp
 huop617 -> hướp
 huop716 -> huốp
+hua7    -> hưa
 ```
 
 This does not imply broad arbitrary replacement among all vowel-diacritic forms.
@@ -234,6 +354,25 @@ huop617 -> hướp
 huop716 -> huốp
 ```
 
+Telex examples:
+
+```text
+thayas   -> thấy
+thangws  -> thắng
+haamw    -> hăm
+hoposw   -> hớp
+huaws    -> hứa
+hoaos    -> hoáo
+hoeos    -> hoéo
+quocos   -> quốc
+gienges  -> giếng
+thuongwf -> thường
+mats     -> mát
+matj     -> mạt
+matf     -> matf
+matx     -> matx
+```
+
 The exact maximum editable range is constrained by jQuery.IME `maxKeyLength` and must be covered by tests.
 
 ## Repeated-key escape
@@ -262,7 +401,31 @@ lo6o62ng -> lôồng
 
 VNI `9` SHOULD also be able to apply to an initial `d` after later rime material has been typed, so equivalent orders such as `d9ac1` and `dac91` converge to `đác`.
 
-The exact repeated-key behavior for Telex/VIQR is UNRESOLVED until each adapter has a fixed mapping table.
+Telex uses repeated-key escape for covered command keys:
+
+```text
+as  -> á
+ass -> as
+aa  -> â
+aaa -> aa
+uw  -> ư
+uww -> uw
+thuongw  -> thương
+thuongww -> thuongw
+dd  -> đ
+ddd -> dd
+```
+
+VIQR and VIQR* use backslash escape for covered command keys:
+
+```text
+tan?   -> tản
+tan\?  -> tan?
+a^     -> â
+a\^    -> a^
+o*     -> ơ
+o\*    -> o*
+```
 
 ## Special Vietnamese structures
 
@@ -299,6 +462,8 @@ The first priority is correct Vietnamese composition. Conservative protection ag
 
 The architecture SHOULD allow stricter structural validation later, but VIWP.IME MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental transformations.
 
+Foreign-like candidates such as `david` and `droid` are Phase 5 structural-validation questions. They should not be handled by hard-coded word exceptions.
+
 ## jQuery.IME compatibility
 
 Vietnamese support SHOULD be implemented through existing jQuery.IME extension mechanisms.
@@ -317,7 +482,7 @@ Every stable Vietnamese behavior MUST have automated tests.
 
 Core engine behavior SHOULD be tested without DOM keyboard simulation.
 
-jQuery.IME integration fixtures MUST cover representative complete typing sequences for VNI, Telex, and VIQR.
+jQuery.IME integration fixtures MUST cover representative complete typing sequences for VNI, Telex, VIQR, and VIQR*.
 
 Tests MUST cover at least:
 
@@ -335,4 +500,4 @@ Tests MUST cover at least:
 * Unicode normalization;
 * pass-through behavior for unrecognized input.
 
-Before upstream submission, the complete relevant upstream test suite must pass.
+Before closing a milestone, the complete relevant repository test suite must pass.

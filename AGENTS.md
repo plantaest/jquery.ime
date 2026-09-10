@@ -9,22 +9,36 @@ The target input methods are:
 * VNI
 * Telex
 * VIQR
+* VIQR* as a VIQR variant using `*` for horn
 
-All three must share one Vietnamese composition engine.
+All Vietnamese input methods must share one Vietnamese composition engine.
 
 VNI is the preferred method for examples and early implementation work when only one method-specific path is needed.
 
 ## Current status
 
-The current branch contains the Phase 3 VNI shared-engine path:
+The current branch contains the Phase 4 shared-engine integration path:
 
-* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, and `vi-viqr`.
-* The three input methods share one Vietnamese rule source.
+* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, `vi-viqr`, and `vi-viqr-star`.
+* The Vietnamese input methods share one Vietnamese rule source.
 * Functional `patterns` rules can call a shared engine boundary.
 * VNI has a rime-aware shared-engine path for tones, vowel diacritics, `d`/`đ`, common tone-placement structures, `qu`, `gi`, checked endings, repeated-key escape, and case-preserving output.
-* Telex and VIQR remain pass-through scaffolds until their mapping tables and escape behavior are specified.
+* Telex, VIQR, and VIQR* have Phase 4 adapter mappings over the shared engine.
+* VIQR and VIQR* support backslash escape for covered command keys.
+* VIQR and VIQR* support shifted punctuation command keys through a `patterns_shift` bridge.
+* VIQR and VIQR* support delayed d-stroke input such as `dacd' -> đác`.
+* Telex supports repeated-key escape for covered tone, vowel-diacritic, and `d`/`đ` commands.
+* Telex supports delayed vowel-diacritic commands such as `thayas -> thấy`.
+* Telex supports delayed d-stroke input such as `dacds -> đác`.
+* Telex supports the covered A-family switch sequence `haamw -> hăm`.
+* Telex supports the covered O-family switch sequence `hoposw -> hớp`.
+* Telex keeps `w` literal after off-glide candidates such as `thayw`.
+* Telex supports the covered `uo`-family switch sequence `huopwso -> huốp`.
+* Telex supports the covered `ua`-family horn sequence `huaws -> hứa`.
+* Telex keeps final `o` literal in covered rimes such as `hoaos -> hoáo` and `hoeos -> hoéo`.
+* Telex leaves standalone `w`, `[`, and `]` as literal input; `w` still works as a horn command when it can transform an existing candidate.
 
-Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broad generated coverage and manual upstream hardening are still Phase 5 work.
+Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broader coverage, structural-validation hardening, and engine documentation are still Phase 5 work.
 
 ## Required reading
 
@@ -50,9 +64,9 @@ The active plan is:
 * Phase 2 – shared engine vertical slice with VNI.
 * Phase 3 – complete shared Vietnamese behavior for the VNI path.
 * Phase 4 – Telex and VIQR adapters.
-* Phase 5 – coverage, playground, and upstream hardening.
+* Phase 5 – engine hardening and documentation.
 
-The next implementation work should normally be Phase 4: specifying and implementing Telex and VIQR adapters over the shared engine.
+The next implementation work should normally be Phase 5: broader coverage, manual typing hardening, structural-validation tuning, engine simplification where useful, and documentation polish. Playground work and upstream submission preparation are outside the current Phase 5 scope unless the project direction explicitly brings them back.
 
 ## Architectural constraints
 
@@ -68,6 +82,7 @@ Conceptually:
 VNI 1
 Telex s
 VIQR '
+VIQR* '
     ->
 APPLY_TONE(ACUTE)
 ```
@@ -192,13 +207,13 @@ A core change should only be considered when:
 1. a concrete Vietnamese requirement cannot be implemented correctly through existing extension mechanisms;
 2. the limitation can be demonstrated with a minimal reproducible case;
 3. the blocker is documented;
-4. upstream discussion is appropriate before substantial work proceeds.
+4. project-level design discussion is appropriate before substantial work proceeds.
 
 If a core limitation is discovered, report it rather than immediately working around it with fragile Vietnamese-specific behavior.
 
 ## Packaging
 
-The Phase 1 spike confirmed that the smallest upstream-compatible packaging is one shared Vietnamese rule source:
+The Phase 1 spike confirmed that the smallest jQuery.IME-compatible packaging is one shared Vietnamese rule source:
 
 ```text
 rules/vi/vi.js
@@ -210,6 +225,7 @@ with metadata entries for:
 vi-vni
 vi-telex
 vi-viqr
+vi-viqr-star
 ```
 
 all pointing to that source.
@@ -232,7 +248,7 @@ Keep VIWP-specific fixture data in:
 test/jquery.ime.vi.test.fixtures.js
 ```
 
-Do not add Vietnamese-specific QUnit modules or fixture entries to the upstream generic test files unless an upstream review explicitly asks for that layout.
+Do not add Vietnamese-specific QUnit modules or fixture entries to the generic jQuery.IME test files unless a future integration review explicitly asks for that layout.
 
 Use pure engine tests for:
 
@@ -254,11 +270,11 @@ A confirmed bug should receive a deterministic automated regression test.
 
 Prefer the smallest test that reproduces the actual failure.
 
-### Preserve upstream tests
+### Preserve repository tests
 
 Before a substantial change is considered complete, run focused Vietnamese tests.
 
-Before milestones, upstream review, or broad integration changes, run the full relevant repository suite:
+Before milestones or broad integration changes, run the full relevant repository suite:
 
 ```bash
 npx grunt test
@@ -271,7 +287,7 @@ If full lint/default tasks fail because of unrelated pre-existing issues, keep t
 Do not:
 
 * remove unrelated assertions;
-* skip failing upstream tests without explanation;
+* skip failing repository tests without explanation;
 * relax Vietnamese requirements merely because the current implementation is difficult.
 
 If a test and the specification genuinely disagree, identify the specification issue explicitly and update the relevant doc.
@@ -309,9 +325,9 @@ Use:
 
 Do not place major architectural decisions only in source-code comments.
 
-## Upstream mindset
+## jQuery.IME integration mindset
 
-Assume the final implementation will be reviewed by jQuery.IME maintainers who may not know Vietnamese.
+Keep the implementation understandable to future jQuery.IME maintainers and VIWP.IME contributors who may not know Vietnamese.
 
 Prefer:
 

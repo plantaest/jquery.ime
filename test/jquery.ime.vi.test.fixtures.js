@@ -28,6 +28,7 @@ testFixtures.push( {
 		{ input: 'thay16', output: 'thấy', description: 'Vietnamese VNI tone before circumflex converges' },
 		{ input: 'khuay61', output: 'khuấy', description: 'Vietnamese VNI uay circumflex and tone placement' },
 		{ input: 'huo7', output: 'huơ', description: 'Vietnamese VNI open uo plus horn' },
+		{ input: 'hua71', output: 'hứa', description: 'Vietnamese VNI ua plus horn and tone' },
 		{ input: 'huop61', output: 'huốp', description: 'Vietnamese VNI uop plus circumflex and tone' },
 		{ input: 'huop71', output: 'hướp', description: 'Vietnamese VNI uop plus horn and tone' },
 		{ input: 'huop617', output: 'hướp', description: 'Vietnamese VNI uô changes to ươ' },
@@ -46,5 +47,129 @@ testFixtures.push( {
 		{ input: 'd99', output: 'd9', description: 'Vietnamese VNI repeated d-stroke key escape' },
 		{ input: 'tuong7', output: 'tương', description: 'Vietnamese VNI uo7 -> ươ' },
 		{ input: 'tuong72', output: 'tường', description: 'Vietnamese VNI uo7 plus tone' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese Telex adapter test',
+	inputmethod: 'vi-telex',
+	tests: [
+		{ input: 'tieengs', output: 'tiếng', description: 'Vietnamese Telex tieengs -> tiếng' },
+		{ input: 'Vieetj', output: 'Việt', description: 'Vietnamese Telex Vieetj -> Việt' },
+		{ input: 'thayas', output: 'thấy', description: 'Vietnamese Telex delayed circumflex before off-glide' },
+		{ input: 'thayw', output: 'thayw', description: 'Vietnamese Telex w stays literal after off-glide' },
+		{ input: 'thangws', output: 'thắng', description: 'Vietnamese Telex delayed breve after coda' },
+		{ input: 'haamw', output: 'hăm', description: 'Vietnamese Telex switches circumflex a to breve' },
+		{ input: 'hoposw', output: 'hớp', description: 'Vietnamese Telex switches circumflex o to horn' },
+		{ input: 'huaws', output: 'hứa', description: 'Vietnamese Telex ua plus horn and tone' },
+		{ input: 'hoaos', output: 'hoáo', description: 'Vietnamese Telex keeps oao rime before tone' },
+		{ input: 'hoeos', output: 'hoéo', description: 'Vietnamese Telex keeps oeo rime before tone' },
+		{ input: 'dduwowngf', output: 'đường', description: 'Vietnamese Telex dduwowngf -> đường' },
+		{ input: 'dacds', output: 'đác', description: 'Vietnamese Telex delayed d-stroke after rime material' },
+		{ input: 'huopwso', output: 'huốp', description: 'Vietnamese Telex uo-family switch after horn and tone' },
+		{ input: 'thuongwf', output: 'thường', description: 'Vietnamese Telex delayed w horn plus tone' },
+		{ input: 'hoaf', output: 'hòa', description: 'Vietnamese Telex traditional tone placement' },
+		{ input: 'quoocs', output: 'quốc', description: 'Vietnamese Telex qu special onset' },
+		{ input: 'quocos', output: 'quốc', description: 'Vietnamese Telex delayed o with qu special onset' },
+		{ input: 'gieengs', output: 'giếng', description: 'Vietnamese Telex gi special onset' },
+		{ input: 'gienges', output: 'giếng', description: 'Vietnamese Telex delayed e with gi special onset' },
+		{ input: 'mats', output: 'mát', description: 'Vietnamese Telex checked syllable acute tone' },
+		{ input: 'matj', output: 'mạt', description: 'Vietnamese Telex checked syllable dot tone' },
+		{ input: 'matf', output: 'matf', description: 'Vietnamese Telex checked syllable grave pass-through' },
+		{ input: 'matx', output: 'matx', description: 'Vietnamese Telex checked syllable tilde pass-through' },
+		{ input: 'toansz', output: 'toan', description: 'Vietnamese Telex z removes tone' },
+		{ input: 'ass', output: 'as', description: 'Vietnamese Telex repeated tone key escape' },
+		{ input: 'aaa', output: 'aa', description: 'Vietnamese Telex repeated circumflex key escape' },
+		{ input: 'uww', output: 'uw', description: 'Vietnamese Telex repeated horn key escape' },
+		{ input: 'ww', output: 'ww', description: 'Vietnamese Telex standalone w remains literal' },
+		{ input: 'ddd', output: 'dd', description: 'Vietnamese Telex repeated d-stroke key escape' },
+		{ input: 'w', output: 'w', description: 'Vietnamese Telex standalone w remains literal' },
+		{ input: '[', output: '[', description: 'Vietnamese Telex [ remains literal' },
+		{ input: ']', output: ']', description: 'Vietnamese Telex ] remains literal' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese VIQR adapter test',
+	inputmethod: 'vi-viqr',
+	tests: [
+		{ input: 'tie^\'ng', output: 'tiếng', description: 'Vietnamese VIQR tie^\'ng -> tiếng' },
+		{ input: 'Vie^.t', output: 'Việt', description: 'Vietnamese VIQR Vie^.t -> Việt' },
+		{ input: 'ddu+o+`ng', output: 'đường', description: 'Vietnamese VIQR ddu+o+`ng -> đường' },
+		{ input: 'dacd\'', output: 'đác', description: 'Vietnamese VIQR delayed d-stroke before tone' },
+		{ input: 'tan?', output: 'tản', description: 'Vietnamese VIQR question-mark tone' },
+		{ input: 'tan\\?', output: 'tan?', description: 'Vietnamese VIQR backslash escapes question mark' },
+		{
+			input: [
+				[ 'a', false ],
+				[ '\'', false ],
+				[ ' ', false ],
+				[ 'a', false ],
+				[ '`', false ],
+				[ ' ', false ],
+				[ 'a', false ],
+				[ '?', false, true ],
+				[ ' ', false ],
+				[ 'a', false ],
+				[ '~', false, true ],
+				[ ' ', false ],
+				[ 'a', false ],
+				[ '^', false, true ],
+				[ ' ', false ],
+				[ 'u', false ],
+				[ '+', false, true ],
+				[ ' ', false ],
+				[ 'a', false ],
+				[ '(', false, true ],
+				[ ' ', false ],
+				[ 'd', false ],
+				[ 'd', false ]
+			],
+			output: 'á à ả ã â ư ă đ',
+			description: 'Vietnamese VIQR shifted punctuation works through patterns_shift'
+		},
+		{
+			input: [
+				[ 't', false ],
+				[ 'a', false ],
+				[ 'n', false ],
+				[ '\\', false ],
+				[ '?', false, true ]
+			],
+			output: 'tan?',
+			description: 'Vietnamese VIQR shifted punctuation preserves backslash escape'
+		},
+		{ input: 'toan\'0', output: 'toan', description: 'Vietnamese VIQR 0 removes tone' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese VIQR* adapter test',
+	inputmethod: 'vi-viqr-star',
+	tests: [
+		{ input: 'ddu*o*`ng', output: 'đường', description: 'Vietnamese VIQR* ddu*o*`ng -> đường' },
+		{ input: 'dacd\'', output: 'đác', description: 'Vietnamese VIQR* delayed d-stroke before tone' },
+		{ input: 'u*', output: 'ư', description: 'Vietnamese VIQR* u* -> ư' },
+		{ input: 'o*', output: 'ơ', description: 'Vietnamese VIQR* o* -> ơ' },
+		{ input: 'tan?', output: 'tản', description: 'Vietnamese VIQR* question-mark tone' },
+		{ input: 'tan\\?', output: 'tan?', description: 'Vietnamese VIQR* backslash escapes question mark' },
+		{
+			input: [
+				[ 'u', false ],
+				[ '*', false, true ]
+			],
+			output: 'ư',
+			description: 'Vietnamese VIQR* shifted star works through patterns_shift'
+		},
+		{
+			input: [
+				[ 'o', false ],
+				[ '\\', false ],
+				[ '*', false, true ]
+			],
+			output: 'o*',
+			description: 'Vietnamese VIQR* shifted star preserves backslash escape'
+		},
+		{ input: 'o\\*', output: 'o*', description: 'Vietnamese VIQR* backslash escapes star' }
 	]
 } );
