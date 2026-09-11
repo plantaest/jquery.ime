@@ -71,7 +71,7 @@ Started in Phase 5:
 * Tone reflow after ordinary letter extension for covered VNI examples, such as `to1an -> toán` and `hoa2n -> hoàn`.
 * Reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*, such as `vi-vni-reformed`.
 * Structural-validation hardening for covered foreign-like Telex runs whose written structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
-* A finite rime recognizer for covered Vietnamese composition states, with separate handling for complete rimes and composition only precursors where tests require it.
+* A finite rime recognizer for covered Vietnamese composition states, with separate handling for complete rimes and composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families.
 * Additional e/ê precursor coverage for examples such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
 * Transform output validation so a semantic command that would create an unrecognized rime passes through instead.
 * Telex delayed-command disambiguation based on recognized literal structure rather than hard-coded `oao` and `oeo` exceptions.

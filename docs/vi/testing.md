@@ -398,22 +398,27 @@ Reformed fixtures should be representative only. Pure engine tests own the broad
 Covered structural-validation examples:
 
 ```text
-recognizeRime: oa -> COMPLETE_AND_PREFIX
-recognizeRime: oao, oeo, uong, êng -> COMPLETE
-recognizeRime: iêu, êch -> COMPLETE
-recognizeRime: eu, ieu, ue, enh, ech, uenh, uech -> COMPOSABLE
-recognizeRime: uâ -> PREFIX
+recognizeRime: oao, oeo, iêu, uông, ương, êch -> COMPLETE
+recognizeRime: oa, uê -> COMPLETE_AND_PREFIX
+recognizeRime: iê, uô, ươ, uâ, uyê -> PREFIX
+recognizeRime: eu, ie, ieu, iem, ien, ieng, iec, iet, iep -> COMPOSABLE
+recognizeRime: ue, uye, uyen, uyet, enh, ech, uenh, uech -> COMPOSABLE
+recognizeRime: ye, yeu, yem, yen, yeng, yet -> COMPOSABLE
+recognizeRime: uo, uoi, uou, uom, uon, uong, uoc, uot, uop -> COMPOSABLE
+recognizeRime: ưo, ưoi, ưom, ưon, ưong, ưoc, ưot, ưop -> COMPOSABLE
+recognizeRime: uan, uang, uat -> COMPOSABLE
 recognizeRime: aya, oco -> INVALID
 
 parser: br, bro, davi, droi, node, wa, brow, browse -> UNRECOGNIZED
 parser: n, ng, ngh, q, qu, tr -> INTERMEDIATE
-parser: ba, thay, thuong, gieng, quoc, hoao, hoeo -> STRUCTURALLY_VALID
-parser: dieu, kenh, nghech, huech, huenh -> INTERMEDIATE
-parser: diêu, kênh, nghêch, huêch, huênh -> STRUCTURALLY_VALID
+parser: ba, thay, gieng, quoc, hoao, hoeo -> STRUCTURALLY_VALID
+parser: dieu, tieng, thuong, tuong, Viet, kenh, nghech, huech, huenh -> INTERMEDIATE
+parser: diêu, tiêng, tường, kênh, nghêch, huêch, huênh -> STRUCTURALLY_VALID
 
 transform: APPLY_VOWEL_DIACRITIC(breve) on thay -> handled false
 transform: APPLY_VOWEL_DIACRITIC(circumflex) on dieu -> diêu
 transform: APPLY_VOWEL_DIACRITIC(circumflex) on nghech -> nghêch
+transform: tieng -> tiêng, uyen -> uyên, huop -> huôp/hươp preserve composition after recognizer reclassification
 
 vi-vni: d9ieu62  -> điều
 vi-vni: nghech61 -> nghếch

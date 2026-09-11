@@ -279,106 +279,83 @@
 	} );
 
 	QUnit.test( 'Vietnamese rime recognizer classifies finite composition inventory', ( assert ) => {
-		var rimeStatus = $.ime.vi.RimeStatus;
+		var rimeStatus = $.ime.vi.RimeStatus,
+			expectedStatuses = [
+				[ 'oa', rimeStatus.COMPLETE_AND_PREFIX ],
+				[ 'uê', rimeStatus.COMPLETE_AND_PREFIX ],
+				[ 'oao', rimeStatus.COMPLETE ],
+				[ 'oeo', rimeStatus.COMPLETE ],
+				[ 'iêu', rimeStatus.COMPLETE ],
+				[ 'uông', rimeStatus.COMPLETE ],
+				[ 'ương', rimeStatus.COMPLETE ],
+				[ 'êch', rimeStatus.COMPLETE ],
+				[ 'iê', rimeStatus.PREFIX ],
+				[ 'uô', rimeStatus.PREFIX ],
+				[ 'ươ', rimeStatus.PREFIX ],
+				[ 'uâ', rimeStatus.PREFIX ],
+				[ 'uyê', rimeStatus.PREFIX ],
+				[ 'ie', rimeStatus.COMPOSABLE ],
+				[ 'ieu', rimeStatus.COMPOSABLE ],
+				[ 'iem', rimeStatus.COMPOSABLE ],
+				[ 'ien', rimeStatus.COMPOSABLE ],
+				[ 'ieng', rimeStatus.COMPOSABLE ],
+				[ 'iec', rimeStatus.COMPOSABLE ],
+				[ 'iet', rimeStatus.COMPOSABLE ],
+				[ 'iep', rimeStatus.COMPOSABLE ],
+				[ 'eu', rimeStatus.COMPOSABLE ],
+				[ 'ue', rimeStatus.COMPOSABLE ],
+				[ 'uye', rimeStatus.COMPOSABLE ],
+				[ 'uyen', rimeStatus.COMPOSABLE ],
+				[ 'uyet', rimeStatus.COMPOSABLE ],
+				[ 'enh', rimeStatus.COMPOSABLE ],
+				[ 'ech', rimeStatus.COMPOSABLE ],
+				[ 'uenh', rimeStatus.COMPOSABLE ],
+				[ 'uech', rimeStatus.COMPOSABLE ],
+				[ 'ye', rimeStatus.COMPOSABLE ],
+				[ 'yeu', rimeStatus.COMPOSABLE ],
+				[ 'yem', rimeStatus.COMPOSABLE ],
+				[ 'yen', rimeStatus.COMPOSABLE ],
+				[ 'yeng', rimeStatus.COMPOSABLE ],
+				[ 'yet', rimeStatus.COMPOSABLE ],
+				[ 'uo', rimeStatus.COMPOSABLE ],
+				[ 'uoi', rimeStatus.COMPOSABLE ],
+				[ 'uou', rimeStatus.COMPOSABLE ],
+				[ 'uom', rimeStatus.COMPOSABLE ],
+				[ 'uon', rimeStatus.COMPOSABLE ],
+				[ 'uong', rimeStatus.COMPOSABLE ],
+				[ 'uoc', rimeStatus.COMPOSABLE ],
+				[ 'uot', rimeStatus.COMPOSABLE ],
+				[ 'uop', rimeStatus.COMPOSABLE ],
+				[ 'ưo', rimeStatus.COMPOSABLE ],
+				[ 'ưoi', rimeStatus.COMPOSABLE ],
+				[ 'ưom', rimeStatus.COMPOSABLE ],
+				[ 'ưon', rimeStatus.COMPOSABLE ],
+				[ 'ưong', rimeStatus.COMPOSABLE ],
+				[ 'ưoc', rimeStatus.COMPOSABLE ],
+				[ 'ưot', rimeStatus.COMPOSABLE ],
+				[ 'ưop', rimeStatus.COMPOSABLE ],
+				[ 'uan', rimeStatus.COMPOSABLE ],
+				[ 'uang', rimeStatus.COMPOSABLE ],
+				[ 'uat', rimeStatus.COMPOSABLE ],
+				[ 'aya', rimeStatus.INVALID ],
+				[ 'oco', rimeStatus.INVALID ]
+			];
 
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'oa' ).status,
-			rimeStatus.COMPLETE_AND_PREFIX,
-			'oa is both an open rime and a prefix for longer covered rimes'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'oao' ).status,
-			rimeStatus.COMPLETE,
-			'oao is recognized by finite rime data'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'oeo' ).status,
-			rimeStatus.COMPLETE,
-			'oeo is recognized by finite rime data'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'uong' ).status,
-			rimeStatus.COMPLETE,
-			'uong remains recognized for existing uo-family composition behavior'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'êng' ).status,
-			rimeStatus.COMPLETE,
-			'êng is recognized for the special gi onset in giêng'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'iêu' ).status,
-			rimeStatus.COMPLETE,
-			'iêu is recognized as a complete rime'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'ieu' ).status,
-			rimeStatus.COMPOSABLE,
-			'ieu is recognized as a composition-only precursor for iêu'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'eu' ).status,
-			rimeStatus.COMPOSABLE,
-			'eu is recognized as a composition-only precursor for êu'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'êch' ).status,
-			rimeStatus.COMPLETE,
-			'êch is recognized as a complete rime'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'ech' ).status,
-			rimeStatus.COMPOSABLE,
-			'ech is recognized as a composition-only precursor for êch'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'enh' ).status,
-			rimeStatus.COMPOSABLE,
-			'enh is recognized as a composition-only precursor for ênh'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'ue' ).status,
-			rimeStatus.COMPOSABLE,
-			'ue is recognized as a composition-only precursor for uê'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'uenh' ).status,
-			rimeStatus.COMPOSABLE,
-			'uenh is recognized as a composition-only precursor for uênh'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'uech' ).status,
-			rimeStatus.COMPOSABLE,
-			'uech is recognized as a composition-only precursor for uêch'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'uâ' ).status,
-			rimeStatus.PREFIX,
-			'uâ is an intermediate prefix for covered rimes'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'ưo' ).status,
-			rimeStatus.COMPLETE_AND_PREFIX,
-			'ưo is recognized as a pre-horn composition state for ươ'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'aya' ).status,
-			rimeStatus.INVALID,
-			'aya is not a covered Vietnamese rime'
-		);
-		assert.strictEqual(
-			$.ime.vi.recognizeRime( 'oco' ).status,
-			rimeStatus.INVALID,
-			'oco is not a covered Vietnamese rime'
-		);
+		expectedStatuses.forEach( ( expected ) => {
+			assert.strictEqual(
+				$.ime.vi.recognizeRime( expected[ 0 ] ).status,
+				expected[ 1 ],
+				expected[ 0 ] + ' has the expected finite-recognizer status'
+			);
+		} );
 	} );
 
 	QUnit.test( 'Vietnamese parser rejects structurally impossible Latin candidates', ( assert ) => {
 		var stateType = $.ime.vi.StateType;
 
 		[
-			'ba', 'thay', 'thuong', 'gieng', 'quoc', 'hoao', 'hoeo',
-			'diêu', 'kênh', 'nghêch', 'huêch', 'huênh'
+			'ba', 'thay', 'gieng', 'quoc', 'hoao', 'hoeo',
+			'diêu', 'tiêng', 'tường', 'kênh', 'nghêch', 'huêch', 'huênh'
 		].forEach( ( candidate ) => {
 			assert.strictEqual(
 				$.ime.vi.parseCandidate( candidate ).status,
@@ -395,7 +372,10 @@
 			);
 		} );
 
-		[ 'dieu', 'kenh', 'nghech', 'huech', 'huenh' ].forEach( ( candidate ) => {
+		[
+			'dieu', 'tieng', 'thuong', 'tuong', 'Viet', 'kenh', 'nghech',
+			'huech', 'huenh'
+		].forEach( ( candidate ) => {
 			assert.strictEqual(
 				$.ime.vi.parseCandidate( candidate ).status,
 				stateType.INTERMEDIATE,
@@ -775,6 +755,28 @@
 			},
 			'CIRCUMFLEX composes uech into uêch'
 		);
+		[
+			[ 'tieng', vowelDiacritic.CIRCUMFLEX, 'tiêng' ],
+			[ 'Viet', vowelDiacritic.CIRCUMFLEX, 'Viêt' ],
+			[ 'uyen', vowelDiacritic.CIRCUMFLEX, 'uyên' ],
+			[ 'yeu', vowelDiacritic.CIRCUMFLEX, 'yêu' ],
+			[ 'huop', vowelDiacritic.CIRCUMFLEX, 'huôp' ],
+			[ 'huop', vowelDiacritic.HORN, 'hươp' ],
+			[ 'ruou', vowelDiacritic.HORN, 'rươu' ],
+			[ 'thuat', vowelDiacritic.CIRCUMFLEX, 'thuât' ]
+		].forEach( ( testCase ) => {
+			assert.deepEqual(
+				$.ime.vi.engine.transformCandidate( testCase[ 0 ], {
+					type: commandType.APPLY_VOWEL_DIACRITIC,
+					vowelDiacritic: testCase[ 1 ]
+				} ),
+				{
+					handled: true,
+					output: testCase[ 2 ]
+				},
+				testCase[ 0 ] + ' remains composable after recognizer reclassification'
+			);
+		} );
 		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'tháy', {
 				type: commandType.APPLY_VOWEL_DIACRITIC,

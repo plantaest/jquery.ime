@@ -352,7 +352,7 @@ The parser attaches a rime-aware `structure` object to parsed candidates. It inc
 
 The Phase 5 classifier uses a finite rime recognizer to reject candidates whose rime shape is impossible in the current orthographic model. It does not identify foreign words. It checks whether no-vowel candidates are onset prefixes, whether a rime is complete, whether a rime is accepted only as a composition precursor, and whether a rime is an intermediate prefix of a covered longer rime.
 
-Composition precursors are source spellings that can receive a later semantic command but are not treated as complete Vietnamese rimes. For example, `ieu` and `ech` are accepted as intermediate states so VNI can produce `d9ieu62 -> điều` and `nghech61 -> nghếch`; `iêu` and `êch` are the complete rimes recognized after the transform.
+Composition precursors are source spellings that can receive a later semantic command but are not treated as complete Vietnamese rimes. For example, `ieu`, `ech`, `uong`, and `uyen` are accepted as intermediate states so VNI and Telex can continue composition; `iêu`, `êch`, `ương`, and `uyên` are complete rimes recognized after the transform.
 
 Semantic command output is parsed and classified again before it is accepted. A transformation that would produce an unrecognized rime returns `handled: false`, which lets the adapter pass through the user's literal input.
 
@@ -482,7 +482,7 @@ Confirmed:
 * traditional and reformed tone-placement policies can be exposed as separate input-method ids without jQuery.IME core changes;
 * structural-validation hardening can pass through covered foreign-like Telex runs such as `droid`, `david`, `browser`, `nodejs`, and `washington` without dictionary data, hard-coded word exceptions, raw key history, or jQuery.IME core changes;
 * a finite rime recognizer can replace the broad vowel-block classifier while preserving covered Vietnamese composition states;
-* the recognizer can distinguish complete rimes from composition only precursors for covered e/ê cases such as `ieu -> iêu` and `ech -> êch`;
+* the recognizer can distinguish complete rimes from composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families;
 * semantic transform output can be rejected when the resulting rime is unrecognized, without changing jQuery.IME core;
 * incompatible checked-tone commands can pass through without jQuery.IME core changes;
 * Telex can prefer recognized literal structure during delayed-command disambiguation, so rimes such as `oao` and `oeo` do not need hard-coded adapter exceptions.

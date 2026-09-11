@@ -644,30 +644,27 @@
 				// Open and off-glide rimes.
 				'a', 'ă', 'â', 'e', 'ê', 'i', 'o', 'ô', 'ơ', 'u', 'ư', 'y',
 				'ai', 'ao', 'au', 'ay', 'âu', 'ây', 'eo', 'êu',
-				'ia', 'ie', 'iê', 'iêu', 'iu',
+				'ia', 'iêu', 'iu',
 				'oi', 'ôi', 'ơi',
 				'oa', 'oai', 'oao', 'oay', 'oe', 'oeo', 'oo',
-				'ua', 'uay', 'uây', 'uê', 'ui', 'uo', 'uoi', 'uou', 'uôi', 'uơ',
-				'uy', 'uya', 'uye', 'uyê', 'uyu',
-				'ưa', 'ưi', 'ưoi', 'ưu', 'ưo', 'ươi', 'ươu',
-				'ya', 'ye', 'yeu', 'yê', 'yêu',
+				'ua', 'uay', 'uây', 'uê', 'ui', 'uôi', 'uơ',
+				'uy', 'uya', 'uyu',
+				'ưa', 'ưi', 'ưu', 'ươi', 'ươu',
+				'ya', 'yêu',
 
 				// Rimes ending in m.
 				'am', 'ăm', 'âm', 'em', 'êm', 'im', 'om', 'ôm', 'ơm', 'um', 'ưm',
-				'iem', 'iêm', 'oam', 'oăm', 'oem', 'uom', 'uôm', 'ưom', 'ươm',
-				'yem', 'yêm',
+				'iêm', 'oam', 'oăm', 'oem', 'uôm', 'ươm', 'yêm',
 
 				// Rimes ending in n.
 				'an', 'ăn', 'ân', 'en', 'ên', 'in', 'on', 'ôn', 'ơn', 'un', 'ưn',
-				'ien', 'iên', 'oan', 'oăn', 'oen',
-				'uan', 'uân', 'uon', 'uôn', 'ưon',
-				'uyn', 'uyen', 'uyên', 'ươn', 'yen', 'yên',
+				'iên', 'oan', 'oăn', 'oen',
+				'uân', 'uôn', 'uyn', 'uyên', 'ươn', 'yên',
 
 				// Rimes ending in ng.
 				'ang', 'ăng', 'âng', 'eng', 'êng', 'ong', 'ông', 'ung', 'ưng',
-				'ieng', 'iêng', 'oang', 'oăng', 'oong',
-				'uang', 'uâng', 'uong', 'uông', 'ưong', 'ương',
-				'yeng', 'yêng',
+				'iêng', 'oang', 'oăng', 'oong',
+				'uâng', 'uông', 'ương', 'yêng',
 
 				// Rimes ending in nh.
 				'anh', 'ênh', 'inh', 'oanh', 'uênh', 'uynh',
@@ -677,27 +674,32 @@
 
 				// Rimes ending in c.
 				'ac', 'ăc', 'âc', 'ec', 'oc', 'ôc', 'uc', 'ưc',
-				'iec', 'iêc', 'oac', 'oăc', 'ooc',
-				'uoc', 'uôc', 'ưoc', 'ươc',
+				'iêc', 'oac', 'oăc', 'ooc',
+				'uôc', 'ươc',
 
 				// Rimes ending in t.
 				'at', 'ăt', 'ât', 'et', 'êt', 'it', 'ot', 'ôt', 'ơt', 'ut', 'ưt',
-				'iet', 'iêt', 'oat', 'oăt', 'oet',
-				'uat', 'uât', 'uot', 'uôt', 'ưot',
-				'uyt', 'uyet', 'uyêt', 'ươt', 'yet', 'yêt',
+				'iêt', 'oat', 'oăt', 'oet',
+				'uât', 'uôt', 'uyt', 'uyêt', 'ươt', 'yêt',
 
 				// Rimes ending in p.
 				'ap', 'ăp', 'âp', 'ep', 'êp', 'ip', 'op', 'ôp', 'ơp', 'up',
-				'iep', 'iêp', 'oap',
-				'uop', 'uôp', 'ưop', 'uyp', 'ươp',
+				'iêp', 'oap', 'uôp', 'uyp', 'ươp',
 
 				// Project-supported explicit extended spellings.
 				'uu', 'ôo', 'ôô', 'ôôn', 'ôông'
 			],
 			composable: [
-				// Composition-only e/ê precursors for trailing diacritic commands.
-				'eu', 'ieu', 'ue',
-				'enh', 'ech', 'uenh', 'uech'
+				// Composition-only e/ê and iê-family precursors.
+				'eu', 'ie', 'ieu', 'iem', 'ien', 'ieng', 'iec', 'iet', 'iep',
+				'ue', 'uye', 'uyen', 'uyet',
+				'enh', 'ech', 'uenh', 'uech',
+				'ye', 'yeu', 'yem', 'yen', 'yeng', 'yet',
+
+				// Composition-only uô/ươ and uâ-family precursors.
+				'uo', 'uoi', 'uou', 'uom', 'uon', 'uong', 'uoc', 'uot', 'uop',
+				'ưo', 'ưoi', 'ưom', 'ưon', 'ưong', 'ưoc', 'ưot', 'ưop',
+				'uan', 'uang', 'uat'
 			]
 		};
 	}

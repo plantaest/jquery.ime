@@ -190,7 +190,7 @@ hoaos -> hoáo
 hoeos -> hoéo
 ```
 
-The Phase 5 engine uses a machine-readable finite rime recognizer for covered composition states. The recognizer separates complete Vietnamese rimes from source spellings that are only accepted as intermediate composition precursors where tests require that distinction.
+The Phase 5 engine uses a machine-readable finite rime recognizer for covered composition states. The recognizer separates complete Vietnamese rimes from source spellings that are only accepted as intermediate composition precursors where that distinction matters for composition.
 
 Examples:
 
@@ -201,6 +201,10 @@ ieu  -> composition precursor
 ech  -> composition precursor
 uênh -> complete rime
 uenh -> composition precursor
+ương -> complete rime
+uong -> composition precursor
+uyên -> complete rime
+uyen -> composition precursor
 ```
 
 The inventory also includes a few explicit project-supported extended spellings such as `oao`, `oeo`, and explicit double-`oo` forms.
@@ -420,13 +424,21 @@ while preserving nearby Vietnamese composition states such as:
 ```text
 ba
 thay
-thuong
 gieng
 quoc
 hoao
 hoeo
 diêu
 nghêch
+```
+
+and treats source spellings such as these as intermediate composition states:
+
+```text
+tieng
+thuong
+tuong
+Viet
 ```
 
 This is still not a full generated rime inventory. Ambiguous Telex sequences that are also plausible Vietnamese structure remain outside grammar-only disambiguation.
