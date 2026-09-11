@@ -338,6 +338,20 @@ candidate surface text
 
 The engine should be deterministic. If parsing is ambiguous, resolve the ambiguity through explicit orthographic data or documented priority rules, not accidental regex order.
 
+### Recognizer status flow
+
+The finite rime recognizer is a structural gate between parsing and transformation:
+
+| Rime status | Candidate state | Main use |
+| --- | --- | --- |
+| `COMPLETE` | `STRUCTURALLY_VALID` | Accept final looking Vietnamese rimes. |
+| `COMPLETE_AND_PREFIX` | `STRUCTURALLY_VALID` | Accept final looking rimes that can also grow into longer covered rimes, such as `oa`. |
+| `COMPOSABLE` | `INTERMEDIATE` | Allow source spellings that still need a semantic command, such as `uong -> ương`. |
+| `PREFIX` | `INTERMEDIATE` | Allow partial complex nuclei while typing, such as `uô` before `uôn`. |
+| `INVALID` | `UNRECOGNIZED` | Pass through structures outside the current Vietnamese composition model. |
+
+This split matters for Telex. Delayed command disambiguation prefers literal input only when the candidate including the new key is `STRUCTURALLY_VALID`; semantic transforms can still operate on `INTERMEDIATE` candidates. That is why `hoaos -> hoáo` can keep the final `o` literal, while `thuongwf -> thường` can still transform through an intermediate `uong` precursor.
+
 ## State model
 
 The rendered candidate near the caret is the primary source of truth.
@@ -353,6 +367,8 @@ The parser attaches a rime-aware `structure` object to parsed candidates. It inc
 The Phase 5 classifier uses a finite rime recognizer to reject candidates whose rime shape is impossible in the current orthographic model. It does not identify foreign words. It checks whether no-vowel candidates are onset prefixes, whether a rime is complete, whether a rime is accepted only as a composition precursor, and whether a rime is an intermediate prefix of a covered longer rime.
 
 Composition precursors are source spellings that can receive a later semantic command but are not treated as complete Vietnamese rimes. For example, `ieu`, `ech`, `uong`, and `uyen` are accepted as intermediate states so VNI and Telex can continue composition; `iêu`, `êch`, `ương`, and `uyên` are complete rimes recognized after the transform.
+
+The recognizer's `complete` and `composable` inventories intentionally serve different call sites. Complete rimes classify a candidate as `STRUCTURALLY_VALID`, so Telex delayed-command disambiguation can keep a newly typed letter literal when the whole candidate already has a complete Vietnamese structure. Composable rimes classify a candidate as `INTERMEDIATE`, so semantic transforms can still proceed while foreign-like Latin runs with invalid rimes pass through unchanged.
 
 Semantic command output is parsed and classified again before it is accepted. A transformation that would produce an unrecognized rime returns `handled: false`, which lets the adapter pass through the user's literal input.
 
@@ -483,6 +499,8 @@ Confirmed:
 * structural-validation hardening can pass through covered foreign-like Telex runs such as `droid`, `david`, `browser`, `nodejs`, and `washington` without dictionary data, hard-coded word exceptions, raw key history, or jQuery.IME core changes;
 * a finite rime recognizer can replace the broad vowel-block classifier while preserving covered Vietnamese composition states;
 * the recognizer can distinguish complete rimes from composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families;
+* the complete rime inventory is audited by pure tests against the current Hieu Thi–based table data;
+* representative manual typing can be smoke-tested through the functional adapters without a browser DOM;
 * semantic transform output can be rejected when the resulting rime is unrecognized, without changing jQuery.IME core;
 * incompatible checked-tone commands can pass through without jQuery.IME core changes;
 * Telex can prefer recognized literal structure during delayed-command disambiguation, so rimes such as `oao` and `oeo` do not need hard-coded adapter exceptions.

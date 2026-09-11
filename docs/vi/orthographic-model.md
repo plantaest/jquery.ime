@@ -209,6 +209,8 @@ uyen -> composition precursor
 
 The inventory also includes a few explicit project-supported extended spellings such as `oao`, `oeo`, and explicit double-`oo` forms.
 
+Pure tests audit the current complete rime inventory against the Hieu Thi–based table data used by the project. This guards against accidentally dropping a structural rime while keeping the runtime recognizer finite and readable.
+
 The recognizer is not a generated word list and should not become an ordered list of overlapping regex replacements.
 
 The model is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIWP.IME does not copy a generated syllable list into runtime validation.

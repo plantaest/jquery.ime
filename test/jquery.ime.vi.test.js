@@ -25,6 +25,129 @@
 		};
 	}
 
+	function getHieuThiCompleteRimeGroups() {
+		return [
+			{
+				name: 'open',
+				rimes: [
+					'a', 'e', 'ê', 'i', 'o', 'ô', 'ơ', 'u', 'ư', 'y',
+					'oa', 'oe', 'uê', 'uơ', 'uy'
+				]
+			},
+			{
+				name: 'vowel off-glides',
+				rimes: [
+					'ia', 'ua', 'ưa', 'uya',
+					'ai', 'oi', 'ôi', 'ơi', 'ui', 'ưi', 'oai', 'uôi', 'ươi',
+					'ao', 'eo', 'oao', 'oeo',
+					'au', 'âu', 'êu', 'iu', 'ưu', 'iêu', 'uyu', 'ươu', 'yêu',
+					'ay', 'ây', 'oay', 'uây'
+				]
+			},
+			{
+				name: 'm endings',
+				rimes: [
+					'am', 'ăm', 'âm', 'em', 'êm', 'im', 'om', 'ôm', 'ơm', 'um', 'ưm',
+					'iêm', 'oam', 'oăm', 'oem', 'uôm', 'ươm', 'yêm'
+				]
+			},
+			{
+				name: 'n endings',
+				rimes: [
+					'an', 'ăn', 'ân', 'en', 'ên', 'in', 'on', 'ôn', 'ơn', 'un', 'ưn',
+					'iên', 'oan', 'oăn', 'oen', 'uân', 'uôn', 'uyn', 'ươn', 'uyên',
+					'yên'
+				]
+			},
+			{
+				name: 'ng endings',
+				rimes: [
+					'ang', 'ăng', 'âng', 'eng', 'êng', 'ong', 'ông', 'ung', 'ưng',
+					'iêng', 'oang', 'oăng', 'oong', 'uâng', 'uông', 'ương', 'yêng'
+				]
+			},
+			{
+				name: 'nh endings',
+				rimes: [ 'anh', 'ênh', 'inh', 'oanh', 'uênh', 'uynh' ]
+			},
+			{
+				name: 'ch endings',
+				rimes: [ 'ach', 'êch', 'ich', 'oach', 'uêch', 'uych' ]
+			},
+			{
+				name: 'c endings',
+				rimes: [
+					'ac', 'ăc', 'âc', 'ec', 'oc', 'ôc', 'uc', 'ưc',
+					'iêc', 'oac', 'oăc', 'ooc', 'uôc', 'ươc'
+				]
+			},
+			{
+				name: 't endings',
+				rimes: [
+					'at', 'ăt', 'ât', 'et', 'êt', 'it', 'ot', 'ôt', 'ơt', 'ut', 'ưt',
+					'iêt', 'oat', 'oăt', 'oet', 'uât', 'uôt', 'uyt', 'ươt', 'uyêt',
+					'yêt'
+				]
+			},
+			{
+				name: 'p endings',
+				rimes: [
+					'ap', 'ăp', 'âp', 'ep', 'êp', 'ip', 'op', 'ôp', 'ơp', 'up',
+					'iêp', 'oap', 'uôp', 'uyp', 'ươp'
+				]
+			}
+		];
+	}
+
+	function flattenRimeGroups( groups ) {
+		var rimes = [];
+
+		groups.forEach( ( group ) => {
+			rimes = rimes.concat( group.rimes );
+		} );
+
+		return rimes;
+	}
+
+	function assertUniqueRimes( assert, rimes, message ) {
+		var seen = {},
+			duplicates = [];
+
+		rimes.forEach( ( rime ) => {
+			if ( seen[ rime ] && !duplicates.includes( rime ) ) {
+				duplicates.push( rime );
+			}
+
+			seen[ rime ] = true;
+		} );
+
+		assert.deepEqual( duplicates, [], message );
+	}
+
+	function isCompleteRimeStatus( status ) {
+		return status === $.ime.vi.RimeStatus.COMPLETE ||
+			status === $.ime.vi.RimeStatus.COMPLETE_AND_PREFIX;
+	}
+
+	function typeWithInputMethod( inputMethodId, input ) {
+		var i, key, inputMethod, inputWindow, result,
+			text = '';
+
+		inputMethod = $.ime.inputmethods[ inputMethodId ];
+		for ( i = 0; i < input.length; i++ ) {
+			key = input.charAt( i );
+			text += key;
+			inputWindow = text.slice( -( inputMethod.maxKeyLength || input.length ) );
+			result = inputMethod.patterns( inputWindow, '' );
+
+			if ( result && !result.noop ) {
+				text = text.slice( 0, text.length - inputWindow.length ) + result.output;
+			}
+		}
+
+		return text;
+	}
+
 	QUnit.module( 'VIWP.IME – Phase 1 integration spike', {
 		before: loadVietnameseSource
 	} );
@@ -278,74 +401,63 @@
 		assert.true( parsedMat.structure.checked, 'mat is recognized as a checked syllable' );
 	} );
 
-	QUnit.test( 'Vietnamese rime recognizer classifies finite composition inventory', ( assert ) => {
+	QUnit.test( 'Vietnamese rime recognizer covers table rimes and composition precursors', ( assert ) => {
 		var rimeStatus = $.ime.vi.RimeStatus,
-			expectedStatuses = [
-				[ 'oa', rimeStatus.COMPLETE_AND_PREFIX ],
-				[ 'uê', rimeStatus.COMPLETE_AND_PREFIX ],
-				[ 'oao', rimeStatus.COMPLETE ],
-				[ 'oeo', rimeStatus.COMPLETE ],
-				[ 'iêu', rimeStatus.COMPLETE ],
-				[ 'uông', rimeStatus.COMPLETE ],
-				[ 'ương', rimeStatus.COMPLETE ],
-				[ 'êch', rimeStatus.COMPLETE ],
-				[ 'iê', rimeStatus.PREFIX ],
-				[ 'uô', rimeStatus.PREFIX ],
-				[ 'ươ', rimeStatus.PREFIX ],
-				[ 'uâ', rimeStatus.PREFIX ],
-				[ 'uyê', rimeStatus.PREFIX ],
-				[ 'ie', rimeStatus.COMPOSABLE ],
-				[ 'ieu', rimeStatus.COMPOSABLE ],
-				[ 'iem', rimeStatus.COMPOSABLE ],
-				[ 'ien', rimeStatus.COMPOSABLE ],
-				[ 'ieng', rimeStatus.COMPOSABLE ],
-				[ 'iec', rimeStatus.COMPOSABLE ],
-				[ 'iet', rimeStatus.COMPOSABLE ],
-				[ 'iep', rimeStatus.COMPOSABLE ],
-				[ 'eu', rimeStatus.COMPOSABLE ],
-				[ 'ue', rimeStatus.COMPOSABLE ],
-				[ 'uye', rimeStatus.COMPOSABLE ],
-				[ 'uyen', rimeStatus.COMPOSABLE ],
-				[ 'uyet', rimeStatus.COMPOSABLE ],
-				[ 'enh', rimeStatus.COMPOSABLE ],
-				[ 'ech', rimeStatus.COMPOSABLE ],
-				[ 'uenh', rimeStatus.COMPOSABLE ],
-				[ 'uech', rimeStatus.COMPOSABLE ],
-				[ 'ye', rimeStatus.COMPOSABLE ],
-				[ 'yeu', rimeStatus.COMPOSABLE ],
-				[ 'yem', rimeStatus.COMPOSABLE ],
-				[ 'yen', rimeStatus.COMPOSABLE ],
-				[ 'yeng', rimeStatus.COMPOSABLE ],
-				[ 'yet', rimeStatus.COMPOSABLE ],
-				[ 'uo', rimeStatus.COMPOSABLE ],
-				[ 'uoi', rimeStatus.COMPOSABLE ],
-				[ 'uou', rimeStatus.COMPOSABLE ],
-				[ 'uom', rimeStatus.COMPOSABLE ],
-				[ 'uon', rimeStatus.COMPOSABLE ],
-				[ 'uong', rimeStatus.COMPOSABLE ],
-				[ 'uoc', rimeStatus.COMPOSABLE ],
-				[ 'uot', rimeStatus.COMPOSABLE ],
-				[ 'uop', rimeStatus.COMPOSABLE ],
-				[ 'ưo', rimeStatus.COMPOSABLE ],
-				[ 'ưoi', rimeStatus.COMPOSABLE ],
-				[ 'ưom', rimeStatus.COMPOSABLE ],
-				[ 'ưon', rimeStatus.COMPOSABLE ],
-				[ 'ưong', rimeStatus.COMPOSABLE ],
-				[ 'ưoc', rimeStatus.COMPOSABLE ],
-				[ 'ưot', rimeStatus.COMPOSABLE ],
-				[ 'ưop', rimeStatus.COMPOSABLE ],
-				[ 'uan', rimeStatus.COMPOSABLE ],
-				[ 'uang', rimeStatus.COMPOSABLE ],
-				[ 'uat', rimeStatus.COMPOSABLE ],
-				[ 'aya', rimeStatus.INVALID ],
-				[ 'oco', rimeStatus.INVALID ]
-			];
+			completeRimeGroups = getHieuThiCompleteRimeGroups(),
+			completeRimes = flattenRimeGroups( completeRimeGroups ),
+			prefixRimes = [ 'iê', 'uô', 'ươ', 'uâ', 'uyê' ],
+			composableRimes = [
+				'ie', 'ieu', 'iem', 'ien', 'ieng', 'iec', 'iet', 'iep',
+				'eu', 'ue', 'uye', 'uyen', 'uyet',
+				'enh', 'ech', 'uenh', 'uech',
+				'ye', 'yeu', 'yem', 'yen', 'yeng', 'yet',
+				'uo', 'uoi', 'uou', 'uom', 'uon', 'uong', 'uoc', 'uot', 'uop',
+				'ưo', 'ưoi', 'ưom', 'ưon', 'ưong', 'ưoc', 'ưot', 'ưop',
+				'uan', 'uang', 'uat'
+			],
+			invalidRimes = [ 'aya', 'oco' ];
 
-		expectedStatuses.forEach( ( expected ) => {
+		assertUniqueRimes(
+			assert,
+			completeRimes,
+			'Complete rime audit data does not duplicate table entries'
+		);
+		assertUniqueRimes(
+			assert,
+			composableRimes,
+			'Composable rime audit data does not duplicate precursor entries'
+		);
+
+		completeRimeGroups.forEach( ( group ) => {
+			group.rimes.forEach( ( rime ) => {
+				assert.true(
+					isCompleteRimeStatus( $.ime.vi.recognizeRime( rime ).status ),
+					rime + ' is recognized as a complete rime in the ' + group.name + ' group'
+				);
+			} );
+		} );
+
+		prefixRimes.forEach( ( rime ) => {
 			assert.strictEqual(
-				$.ime.vi.recognizeRime( expected[ 0 ] ).status,
-				expected[ 1 ],
-				expected[ 0 ] + ' has the expected finite-recognizer status'
+				$.ime.vi.recognizeRime( rime ).status,
+				rimeStatus.PREFIX,
+				rime + ' is recognized as a prefix for longer covered rimes'
+			);
+		} );
+
+		composableRimes.forEach( ( rime ) => {
+			assert.strictEqual(
+				$.ime.vi.recognizeRime( rime ).status,
+				rimeStatus.COMPOSABLE,
+				rime + ' is recognized only as a composition precursor'
+			);
+		} );
+
+		invalidRimes.forEach( ( rime ) => {
+			assert.strictEqual(
+				$.ime.vi.recognizeRime( rime ).status,
+				rimeStatus.INVALID,
+				rime + ' is not a covered Vietnamese rime'
 			);
 		} );
 	} );
@@ -1198,6 +1310,46 @@
 
 	QUnit.module( 'VIWP.IME – Adapter', {
 		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'Vietnamese adapters handle representative manual typing smoke cases', ( assert ) => {
+		[
+			[ 'vi-vni', 'to1an', 'toán' ],
+			[ 'vi-vni', 'hoa2n', 'hoàn' ],
+			[ 'vi-vni', 'd9ieu62', 'điều' ],
+			[ 'vi-vni', 'nghech61', 'nghếch' ],
+			[ 'vi-vni', 'huop617', 'hướp' ],
+			[ 'vi-vni', 'huop716', 'huốp' ],
+			[ 'vi-vni', 'lo6o62ng', 'lôồng' ],
+			[ 'vi-telex', 'thayas', 'thấy' ],
+			[ 'vi-telex', 'thuongwf', 'thường' ],
+			[ 'vi-telex', 'huopwso', 'huốp' ],
+			[ 'vi-telex', 'haamw', 'hăm' ],
+			[ 'vi-telex', 'hoposw', 'hớp' ],
+			[ 'vi-telex', 'huaws', 'hứa' ],
+			[ 'vi-telex', 'hoaos', 'hoáo' ],
+			[ 'vi-telex', 'hoeos', 'hoéo' ],
+			[ 'vi-telex', 'dacds', 'đác' ],
+			[ 'vi-telex', 'droid', 'droid' ],
+			[ 'vi-telex', 'david', 'david' ],
+			[ 'vi-telex', 'browser', 'browser' ],
+			[ 'vi-telex', 'nodejs', 'nodejs' ],
+			[ 'vi-telex', 'washington', 'washington' ],
+			[ 'vi-viqr', 'tie^\'ng', 'tiếng' ],
+			[ 'vi-viqr', 'ddu+o+`ng', 'đường' ],
+			[ 'vi-viqr', 'dacd\'', 'đác' ],
+			[ 'vi-viqr', 'tan\\?', 'tan?' ],
+			[ 'vi-viqr-star', 'ddu*o*`ng', 'đường' ],
+			[ 'vi-viqr-star', 'o\\*', 'o*' ],
+			[ 'vi-vni-reformed', 'hoa2n', 'hoàn' ],
+			[ 'vi-telex-reformed', 'hoaf', 'hoà' ]
+		].forEach( ( testCase ) => {
+			assert.strictEqual(
+				typeWithInputMethod( testCase[ 0 ], testCase[ 1 ] ),
+				testCase[ 2 ],
+				testCase[ 0 ] + ' manual typing ' + testCase[ 1 ] + ' -> ' + testCase[ 2 ]
+			);
+		} );
 	} );
 
 	QUnit.test( 'VNI adapter calls the shared engine for the Phase 2 vertical slice', ( assert ) => {

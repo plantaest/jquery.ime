@@ -41,6 +41,7 @@ The current branch contains the Phase 5 shared-engine hardening path:
 * Phase 5 also exposes reformed tone-placement variants, such as `vi-vni-reformed`, while keeping traditional placement as the default.
 * Phase 5 structural-validation hardening passes through covered foreign-like Telex runs whose candidate structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
 * Phase 5 uses a finite rime recognizer for covered Vietnamese composition states, with separate handling for complete rimes and composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families.
+* Phase 5 has pure test audit coverage for the complete rimes in the current Hieu Thi–based composition inventory, plus representative manual typing smoke coverage through the adapters.
 * Phase 5 covers additional e/ê precursor gaps, such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
 * Semantic transform output is rejected when the resulting rime is unrecognized, so invalid transformations pass through rather than being rendered.
 * Telex delayed-command disambiguation prefers recognized literal structure, so covered rimes such as `oao` and `oeo` no longer need hard-coded adapter exceptions.

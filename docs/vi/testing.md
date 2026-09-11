@@ -398,6 +398,8 @@ Reformed fixtures should be representative only. Pure engine tests own the broad
 Covered structural-validation examples:
 
 ```text
+complete rime audit: all current Hieu Thi–based complete rimes -> COMPLETE or COMPLETE_AND_PREFIX
+
 recognizeRime: oao, oeo, iêu, uông, ương, êch -> COMPLETE
 recognizeRime: oa, uê -> COMPLETE_AND_PREFIX
 recognizeRime: iê, uô, ươ, uâ, uyê -> PREFIX
@@ -441,6 +443,8 @@ vi-telex: hoeos   -> hoéo
 These are paired tests: every guarded foreign-like case should sit near Vietnamese cases that must continue to compose. The runtime implementation must not use the foreign-like examples as a word exception list.
 
 Structural hardening should prefer finite orthographic data and transform-output validation over adapter-local one-off exceptions. For example, `oao` and `oeo` are recognized rimes, while `aya` and `oco` are not recognized rimes.
+
+Representative manual typing smoke tests should run through the functional adapters one key at a time. They cover the examples users are likely to try in `examples/index.html`, while still avoiding the cost of broad DOM fixture duplication.
 
 ## Generated tests
 
