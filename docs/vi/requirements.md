@@ -119,30 +119,24 @@ nghech61 -> nghếch
 
 The Telex adapter MUST support the common Vietnamese Telex operations for tones, vowel diacritics, and `đ`.
 
-The Phase 4 Telex adapter supports this mapping:
+The current Telex profile maps input to visible behavior as follows:
 
-| Key or sequence | Semantic command or adapter behavior |
+| Input | Semantic command or adapter behavior |
 | --- | --- |
 | `s` | `APPLY_TONE(acute)` |
 | `f` | `APPLY_TONE(grave)` |
 | `r` | `APPLY_TONE(hook)` |
 | `x` | `APPLY_TONE(tilde)` |
 | `j` | `APPLY_TONE(dot)` |
-| `z` | `REMOVE_TONE` |
+| `z` | `REMOVE_TONE`, preserving vowel diacritics and complex nuclei |
 | `aa` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `a` |
 | `ee` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `e` |
 | `oo` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `o` |
-| `aw` | `APPLY_VOWEL_DIACRITIC(breve)` |
-| `ow` | `APPLY_VOWEL_DIACRITIC(horn)` on `o` |
-| `uw` | `APPLY_VOWEL_DIACRITIC(horn)` on `u` |
-| `w` after a candidate with an eligible `o` or `u` target | `APPLY_VOWEL_DIACRITIC(horn)` |
-| `w` after a candidate with a covered `ua` precursor | `APPLY_VOWEL_DIACRITIC(horn)` as `ưa` |
-| `w` after a candidate with an eligible `a` target whose breve result remains recognized | `APPLY_VOWEL_DIACRITIC(breve)` |
-| `o` after a horned `uo`-family candidate | `APPLY_VOWEL_DIACRITIC(circumflex)` |
+| `w` | `APPLY_VOWEL_DIACRITIC(breve)` or `APPLY_VOWEL_DIACRITIC(horn)` when structurally compatible; literal otherwise |
 | `dd` | `APPLY_D_STROKE` |
 | `d` after a candidate with an initial `d` target | `APPLY_D_STROKE` |
 
-Examples:
+Basic examples:
 
 ```text
 as       -> á
@@ -151,41 +145,59 @@ aa       -> â
 aw       -> ă
 cow      -> cơ
 thuw     -> thư
+dd       -> đ
+```
+
+Flexible composition examples:
+
+```text
 thaya    -> thây
 thayas   -> thấy
 thangw   -> thăng
 thangws  -> thắng
 haamw    -> hăm
 hoposw   -> hớp
-thayw    -> thayw
 quocos   -> quốc
 gienges  -> giếng
 thuongw  -> thương
 thuongwf -> thường
 huopwso  -> huốp
 huaws    -> hứa
-hoaos    -> hoáo
-hoeos    -> hoéo
-dd       -> đ
-dacds    -> đác
 tieengs  -> tiếng
 Vieetj   -> Việt
 dduwowngf -> đường
+dacds    -> đác
+```
+
+Literal and constraint examples:
+
+```text
+thayw    -> thayw
+hoaos    -> hoáo
+hoeos    -> hoéo
 mats     -> mát
 matj     -> mạt
 matf     -> matf
 matx     -> matx
 toansz   -> toan
+ấz       -> â
 w        -> w
+ww       -> ww
 [        -> [
 ]        -> ]
 ```
 
 Telex does not infer IÊ-family vowel diacritics from unmarked `ie`, `ye`, or `uye`. Type the vowel diacritic explicitly, such as `Vieetj -> Việt`.
 
-Telex vowel-diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`. Delayed Telex `w` for breve is constrained by structural recognition: it should apply when the resulting candidate remains recognized, such as `thangw -> thăng` and `haamw -> hăm`, but remain literal when the breve result would create an unrecognized rime, such as `thayw`.
+Telex vowel diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`.
 
-Telex delayed-command detection SHOULD prefer literal input when the full candidate including the latest key is already a recognized Vietnamese composition structure. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies, without requiring `oao` and `oeo` to be hard-coded in the Telex adapter.
+Telex `w` is intentionally candidate sensitive. It SHOULD apply breve to structurally compatible `a` targets, such as `aw -> ă`, `thangw -> thăng`, and `haamw -> hăm`. If breve is not compatible, it SHOULD fall back to horn for structurally compatible `o`, `u`, or covered `ua` targets, such as `cow -> cơ`, `thuw -> thư`, and `huaw -> hưa`. If neither result is recognized, it MUST remain literal, such as `thayw -> thayw`.
+
+The current Telex profile does not use standalone `w`, `[`, or `]` as quick keys. They remain literal unless `w` can transform the current candidate through the shared engine.
+
+The engine SHOULD support covered vowel family switches while preserving tone. For example, a typed `o` after a horned `uo` family candidate can switch `ươ` back to `uô`, as in `huopwso -> huốp`.
+
+Telex delayed command detection SHOULD prefer literal input when the full candidate including the latest key is already a recognized Vietnamese composition structure. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies, without requiring `oao` and `oeo` to be hard coded in the Telex adapter.
 
 Telex `z` MUST remove only the semantic tone, matching VNI `0`. It MUST preserve vowel diacritics and complex nuclei.
 
