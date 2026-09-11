@@ -1,4 +1,4 @@
-# VIWP.IME testing
+# VIME testing
 
 This document defines how Vietnamese input behavior should be tested in the current jQuery.IME repository.
 
@@ -36,7 +36,7 @@ npx grunt test
 Focused QUnit modules can be run through Grunt. The Phase 1 spike verified this form:
 
 ```bash
-npx grunt connect qunit --modules="VIWP.IME – Phase 1 integration spike"
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike"
 ```
 
 Use the current module name when the tests are renamed.
@@ -132,13 +132,13 @@ test/jquery.ime.vi.test.fixtures.js
 
 for representative Vietnamese end-to-end typing fixtures.
 
-Do not add VIWP-specific QUnit modules to:
+Do not add VIME QUnit modules to:
 
 ```text
 test/jquery.ime.test.js
 ```
 
-Do not add VIWP-specific fixture entries to:
+Do not add VIME fixture entries to:
 
 ```text
 test/jquery.ime.test.fixtures.js
@@ -149,16 +149,16 @@ This keeps the generic jQuery.IME test runner and fixture corpus easy to compare
 Recommended module names:
 
 ```text
-VIWP.IME – Unicode
-VIWP.IME – Parser
-VIWP.IME – Transform
-VIWP.IME – Tone placement
-VIWP.IME – Renderer
-VIWP.IME – Adapter
-VIWP.IME – VNI adapter
-VIWP.IME – Telex adapter
-VIWP.IME – VIQR adapter
-VIWP.IME – VIQR* adapter
+VIME – Unicode
+VIME – Parser
+VIME – Transform
+VIME – Tone placement
+VIME – Renderer
+VIME – Adapter
+VIME – VNI adapter
+VIME – Telex adapter
+VIME – VIQR adapter
+VIME – VIQR* adapter
 ```
 
 ## Fixture layout
@@ -192,23 +192,23 @@ For one engine behavior:
 
 ```bash
 npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js
-npx grunt connect qunit --modules="VIWP.IME – Transform"
+npx grunt connect qunit --modules="VIME – Transform"
 ```
 
 For adapter work:
 
 ```bash
 npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js test/jquery.ime.vi.test.fixtures.js
-npx grunt connect qunit --modules="VIWP.IME – Adapter,VIWP.IME – Telex adapter,VIWP.IME – VIQR adapter,VIWP.IME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
-When adapter work touches `src/jquery.ime.inputmethods.js`, inspect that diff separately and run broader lint when practical. That upstream metadata file may contain unrelated lint failures outside VIWP.IME changes.
+When adapter work touches `src/jquery.ime.inputmethods.js`, inspect that diff separately and run broader lint when practical. That upstream metadata file may contain unrelated lint failures outside VIME changes.
 
 For tone-placement policy work:
 
 ```bash
 npx eslint rules/vi/vi.js test/jquery.ime.vi.test.js test/jquery.ime.vi.test.fixtures.js
-npx grunt connect qunit --modules="VIWP.IME – Tone placement,VIWP.IME – Adapter,jquery.ime - input method rules tests"
+npx grunt connect qunit --modules="VIME – Tone placement,VIME – Adapter,jquery.ime - input method rules tests"
 ```
 
 For Vietnamese integration before a commit:

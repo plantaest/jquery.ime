@@ -1,4 +1,4 @@
-# VIWP.IME terminology
+# VIME terminology
 
 This document defines the canonical terms used in code, tests, and developer documentation. It is not a full linguistic description of Vietnamese.
 
@@ -6,7 +6,7 @@ Use the English terms here for source identifiers and test names. Vietnamese not
 
 ## Core rule
 
-VIWP.IME models written Vietnamese orthography, not full Vietnamese phonology.
+VIME models written Vietnamese orthography, not full Vietnamese phonology.
 
 The terms below are engineering terms for parsing and rendering Quốc Ngữ input. If a linguistic analysis and a simpler written-text model disagree, prefer the model that correctly describes the visible input behavior and can be tested.
 

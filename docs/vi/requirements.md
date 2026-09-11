@@ -1,4 +1,4 @@
-# VIWP.IME requirements
+# VIME requirements
 
 This document defines the user-visible behavior required for Vietnamese input methods in jQuery.IME. It says what the input methods must do; `architecture.md` says how the code is structured.
 
@@ -517,7 +517,7 @@ Normal composition MUST NOT produce malformed combining-mark sequences or duplic
 
 The first priority is correct Vietnamese composition. Conservative protection against all foreign words, code identifiers, or technical text is not required for the first engine slice.
 
-The architecture SHOULD allow stricter structural validation later, but VIWP.IME MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental transformations.
+The architecture SHOULD allow stricter structural validation later, but VIME MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental transformations.
 
 Phase 5 structural-validation hardening SHOULD pass through a continuous Latin candidate when its written structure is impossible as one Vietnamese orthographic syllable in the current model.
 
@@ -542,7 +542,7 @@ quocos  -> quốc
 gienges -> giếng
 ```
 
-VIWP.IME does not attempt to infer user intent when a raw Telex sequence is structurally ambiguous. For example, `bar` and `gas` may still compose because `ba` and `ga` are Vietnamese candidates before the final Telex tone key. Strong Telex sequences such as `aa`, `ee`, `oo`, `aw`, `ow`, `uw`, and `dd` may also still compose when their command interpretation is structurally valid.
+VIME does not attempt to infer user intent when a raw Telex sequence is structurally ambiguous. For example, `bar` and `gas` may still compose because `ba` and `ga` are Vietnamese candidates before the final Telex tone key. Strong Telex sequences such as `aa`, `ee`, `oo`, `aw`, `ow`, `uw`, and `dd` may also still compose when their command interpretation is structurally valid.
 
 ## jQuery.IME compatibility
 

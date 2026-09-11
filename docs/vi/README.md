@@ -1,6 +1,6 @@
-# VIWP.IME developer map
+# VIME developer map
 
-VIWP.IME adds Vietnamese input methods to jQuery.IME.
+VIME means Vietnamese Input Method Engine. It adds Vietnamese input methods to jQuery.IME.
 
 The supported input methods are:
 
@@ -80,7 +80,7 @@ Started in Phase 5:
 
 ## Current implementation boundary
 
-The current Phase 5 target is a hardened Vietnamese composition engine for the covered VNI, Telex, VIQR, VIQR*, and reformed variants. It is appropriate for focused manual evaluation in `examples/index.html` and for iterating toward a stable VIWP.IME implementation.
+The current Phase 5 target is a hardened Vietnamese composition engine for the covered VNI, Telex, VIQR, VIQR*, and reformed variants. It is appropriate for focused manual evaluation in `examples/index.html` and for iterating toward a stable VIME implementation.
 
 It is not a Vietnamese spell checker, dictionary, broad foreign word detector, minority language orthography model, or upstream submission package. Those directions require separate decisions and tests.
 
@@ -115,7 +115,7 @@ Keep these constraints intact unless a documented blocker proves otherwise:
 
 ### Phase 0 – baseline and project spec
 
-Set up the repository, verify the jQuery.IME baseline, and define the initial VIWP.IME documentation and agent instructions.
+Set up the repository, verify the jQuery.IME baseline, and define the initial VIME documentation and agent instructions.
 
 Status: complete.
 

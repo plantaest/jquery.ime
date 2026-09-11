@@ -2,7 +2,7 @@
 
 ## Project context
 
-This repository contains VIWP.IME, an effort to add Vietnamese input methods to jQuery.IME.
+This repository contains VIME, the Vietnamese Input Method Engine effort to add Vietnamese input methods to jQuery.IME.
 
 The target input methods are:
 
@@ -171,7 +171,7 @@ Do not reject a composition merely because its current surface form is not valid
 
 ### Keep structural and lexical validity separate
 
-VIWP.IME is not a Vietnamese dictionary or lexical spell checker.
+VIME is not a Vietnamese dictionary or lexical spell checker.
 
 Do not introduce a dictionary dependency merely to determine ordinary Vietnamese composition behavior.
 
@@ -257,13 +257,13 @@ Keep this packaging until tests or implementation size prove that a split is wor
 
 Read `docs/vi/testing.md` before changing test infrastructure.
 
-Keep VIWP-specific unit and adapter tests in:
+Keep VIME unit and adapter tests in:
 
 ```text
 test/jquery.ime.vi.test.js
 ```
 
-Keep VIWP-specific fixture data in:
+Keep VIME fixture data in:
 
 ```text
 test/jquery.ime.vi.test.fixtures.js
@@ -348,7 +348,7 @@ Do not place major architectural decisions only in source-code comments.
 
 ## jQuery.IME integration mindset
 
-Keep the implementation understandable to future jQuery.IME maintainers and VIWP.IME contributors who may not know Vietnamese.
+Keep the implementation understandable to future jQuery.IME maintainers and VIME contributors who may not know Vietnamese.
 
 Prefer:
 

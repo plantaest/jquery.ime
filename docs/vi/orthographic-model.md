@@ -1,6 +1,6 @@
 # Vietnamese orthographic model
 
-This document defines the written Vietnamese model used by VIWP.IME. It is a practical model for input composition, not a complete linguistic theory or a dictionary.
+This document defines the written Vietnamese model used by VIME. It is a practical model for input composition, not a complete linguistic theory or a dictionary.
 
 The engine receives a short candidate near the caret and must answer:
 
@@ -213,7 +213,7 @@ Pure tests audit the current complete rime inventory against the Hieu Thi–base
 
 The recognizer is not a generated word list and should not become an ordered list of overlapping regex replacements.
 
-The model is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIWP.IME does not copy a generated syllable list into runtime validation.
+The model is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIME does not copy a generated syllable list into runtime validation.
 
 The practical grouping matters because tone placement and vowel-diacritic commands depend on whether a written vowel is a nucleus, medial, or ending. For example, `coi`, `kheo`, `thay`, and `khuay` must not place tone on the final off-glide.
 
@@ -523,7 +523,7 @@ When behavior is uncertain, prefer sources in this order:
 3. educational or linguistic descriptions of spelling conventions;
 4. established Vietnamese input-method behavior when the question is typing convention;
 5. computational syllable inventories as coverage resources;
-6. explicit VIWP.IME decisions when sources do not uniquely determine behavior.
+6. explicit VIME decisions when sources do not uniquely determine behavior.
 
 Existing IME behavior should not automatically override Vietnamese orthographic structure. Likewise, a linguistic analysis should not force an awkward implementation if a simpler written-text model produces correct behavior.
 

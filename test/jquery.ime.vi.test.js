@@ -7,7 +7,7 @@
 		$.ime.load( 'vi-vni' ).then( () => {
 			done();
 		}, () => {
-			assert.true( false, 'Vietnamese shared source loads before VIWP.IME tests run' );
+			assert.true( false, 'Vietnamese shared source loads before VIME tests run' );
 			done();
 		} );
 	}
@@ -148,7 +148,7 @@
 		return text;
 	}
 
-	QUnit.module( 'VIWP.IME – Phase 1 integration spike', {
+	QUnit.module( 'VIME – Phase 1 integration spike', {
 		before: loadVietnameseSource
 	} );
 
@@ -331,7 +331,7 @@
 		} );
 	} );
 
-	QUnit.module( 'VIWP.IME – Unicode', {
+	QUnit.module( 'VIME – Unicode', {
 		before: loadVietnameseSource
 	} );
 
@@ -371,7 +371,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – Parser', {
+	QUnit.module( 'VIME – Parser', {
 		before: loadVietnameseSource
 	} );
 
@@ -504,7 +504,7 @@
 		} );
 	} );
 
-	QUnit.module( 'VIWP.IME – Transform', {
+	QUnit.module( 'VIME – Transform', {
 		before: loadVietnameseSource
 	} );
 
@@ -1117,7 +1117,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – Tone placement', {
+	QUnit.module( 'VIME – Tone placement', {
 		before: loadVietnameseSource
 	} );
 
@@ -1308,7 +1308,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – Adapter', {
+	QUnit.module( 'VIME – Adapter', {
 		before: loadVietnameseSource
 	} );
 
@@ -1558,7 +1558,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – Telex adapter', {
+	QUnit.module( 'VIME – Telex adapter', {
 		before: loadVietnameseSource
 	} );
 
@@ -2019,7 +2019,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – VIQR adapter', {
+	QUnit.module( 'VIME – VIQR adapter', {
 		before: loadVietnameseSource
 	} );
 
@@ -2226,7 +2226,7 @@
 		);
 	} );
 
-	QUnit.module( 'VIWP.IME – VIQR* adapter', {
+	QUnit.module( 'VIME – VIQR* adapter', {
 		before: loadVietnameseSource
 	} );
 

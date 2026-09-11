@@ -1,4 +1,4 @@
-# VIWP.IME architecture
+# VIME architecture
 
 This document defines the software architecture for Vietnamese input methods in jQuery.IME.
 
@@ -13,7 +13,7 @@ jQuery.IME host
 
 ## Architectural goals
 
-VIWP.IME must:
+VIME must:
 
 * implement Vietnamese input methods through one shared Vietnamese engine;
 * keep method-specific key mapping out of Vietnamese orthographic logic;
