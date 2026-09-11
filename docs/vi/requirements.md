@@ -187,7 +187,7 @@ Telex vowel-diacritic commands SHOULD also work after later rime material has al
 
 Telex delayed-command detection SHOULD prefer literal input when the full candidate including the latest key is already a recognized Vietnamese composition structure. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies, without requiring `oao` and `oeo` to be hard-coded in the Telex adapter.
 
-Current `z` behavior removes tone only. Whether `z` should also remove vowel diacritics is UNRESOLVED.
+Telex `z` MUST remove only the semantic tone, matching VNI `0`. It MUST preserve vowel diacritics and complex nuclei.
 
 ## VIQR mapping
 

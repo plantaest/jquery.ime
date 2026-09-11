@@ -503,6 +503,7 @@ Confirmed:
 * the recognizer can distinguish complete rimes from composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families;
 * the complete rime inventory is audited by pure tests against the current Hieu Thi–based table data;
 * representative manual typing can be smoke-tested through the functional adapters without a browser DOM;
+* Telex `z` is the same semantic tone-removal command as VNI `0`; it removes tone only and preserves vowel diacritics;
 * Telex `w` handling can rely on shared delayed-command validation plus horn fallback, without a separate `ua` adapter precheck;
 * semantic transform output can be rejected when the resulting rime is unrecognized, without changing jQuery.IME core;
 * incompatible checked-tone commands can pass through without jQuery.IME core changes;
@@ -510,7 +511,6 @@ Confirmed:
 
 Unresolved:
 
-* whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
 * whether a future file split is worth the extra loader complexity;
 * how much further structural validation should go beyond the covered impossible Latin runs.
 

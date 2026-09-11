@@ -1755,6 +1755,14 @@
 			'Telex z removes a tone'
 		);
 		assert.deepEqual(
+			telex( 'ấz', '' ),
+			{
+				noop: false,
+				output: 'â'
+			},
+			'Telex z preserves vowel diacritics while removing a tone'
+		);
+		assert.deepEqual(
 			telex( 'ás', '' ),
 			{
 				noop: false,

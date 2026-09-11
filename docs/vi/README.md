@@ -173,13 +173,6 @@ Stabilize the current algorithm:
 
 Playground work and upstream submission preparation are outside the current Phase 5 scope unless the project direction explicitly brings them back.
 
-## Current open decisions
-
-Do not guess these while implementing:
-
-* whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
-* how much further the finite rime recognizer should expand beyond covered composition behavior;
-
 ## Documentation ownership
 
 Update the smallest document that owns the decision:

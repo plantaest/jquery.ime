@@ -27,6 +27,7 @@ The current branch contains the Phase 5 shared-engine hardening path:
 * VIQR and VIQR* support backslash escape for covered command keys.
 * VIQR and VIQR* support shifted punctuation command keys through a `patterns_shift` bridge.
 * VIQR and VIQR* support delayed d-stroke input such as `dacd' -> đác`.
+* Telex `z` removes tone only, matching VNI `0`, and preserves vowel diacritics.
 * Telex supports repeated-key escape for covered tone, vowel-diacritic, and `d`/`đ` commands.
 * Telex supports delayed vowel-diacritic commands such as `thayas -> thấy`.
 * Telex supports delayed d-stroke input such as `dacds -> đác`.
