@@ -19,6 +19,8 @@
 		rimeRecognitionMaps,
 		engine;
 
+	// General helpers and command factories.
+
 	function normalizeText( text, form ) {
 		if ( typeof text.normalize === 'function' ) {
 			return text.normalize( form );
@@ -95,6 +97,8 @@
 			literalOutput: literalOutput
 		};
 	}
+
+	// Input method command decoders.
 
 	/**
 	 * Decode a VNI key into a shared Vietnamese semantic command.
@@ -333,6 +337,8 @@
 		return decodeVIQRCommandWithHornKey( input, '*' );
 	}
 
+	// Adapter side candidate helpers.
+
 	/**
 	 * Normalize an optional tone-placement policy.
 	 *
@@ -512,6 +518,8 @@
 		};
 	}
 
+	// Tokenization and Unicode helpers.
+
 	function isCombiningMark( character ) {
 		var code = character.charCodeAt( 0 );
 
@@ -610,6 +618,8 @@
 
 		return output;
 	}
+
+	// Finite rime recognizer.
 
 	/**
 	 * Get the finite rime inventory used by the structural recognizer.
@@ -772,6 +782,8 @@
 			status: Vietnamese.RimeStatus.INVALID
 		};
 	}
+
+	// Orthographic structure analysis.
 
 	function hasVowelFromIndex( state, startIndex ) {
 		var i;
@@ -1081,6 +1093,8 @@
 		return state;
 	}
 
+	// Candidate parsing and rendering.
+
 	function isValidVowelDiacritic( base, vowelDiacritic ) {
 		var lowerBase = base.toLowerCase();
 
@@ -1262,6 +1276,8 @@
 			state.tokens[ i ].tone = i === toneTarget ? tone : Vietnamese.Tone.NONE;
 		}
 	}
+
+	// Semantic transformations.
 
 	function canApplyTone( state, tone, tonePlacement ) {
 		if ( resolveTonePlacement( state, tonePlacement ) === -1 ) {
@@ -1687,6 +1703,8 @@
 		return null;
 	}
 
+	// jQuery.IME adapter and registration helpers.
+
 	/**
 	 * Create a jQuery.IME patterns function backed by a shared Vietnamese engine.
 	 *
@@ -1843,6 +1861,8 @@
 		$.ime.register( inputMethod );
 	}
 
+	// Namespace constants and lookup tables.
+
 	Vietnamese.CommandType = Vietnamese.CommandType || {
 		APPLY_TONE: 'apply-tone',
 		REMOVE_TONE: 'remove-tone',
@@ -1908,6 +1928,8 @@
 	markToVowelDiacritic[ COMBINING_CIRCUMFLEX ] = Vietnamese.VowelDiacritic.CIRCUMFLEX;
 	markToVowelDiacritic[ COMBINING_BREVE ] = Vietnamese.VowelDiacritic.BREVE;
 	markToVowelDiacritic[ COMBINING_HORN ] = Vietnamese.VowelDiacritic.HORN;
+
+	// Shared engine boundary.
 
 	engine = Vietnamese.engine || {
 		/**
@@ -1977,6 +1999,8 @@
 		}
 	};
 
+	// Test-facing namespace exports.
+
 	Vietnamese.DEFAULT_CONTEXT_LENGTH = DEFAULT_CONTEXT_LENGTH;
 	Vietnamese.DEFAULT_MAX_KEY_LENGTH = DEFAULT_MAX_KEY_LENGTH;
 	Vietnamese.createAdapter = createAdapter;
@@ -1993,6 +2017,8 @@
 	Vietnamese.engine = engine;
 
 	$.ime.vi = Vietnamese;
+
+	// Input method registration.
 
 	registerInputMethod(
 		'vi-vni',
