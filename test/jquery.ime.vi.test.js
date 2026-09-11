@@ -1659,7 +1659,7 @@
 				noop: false,
 				output: 'hưa'
 			},
-			'Telex w applies horn to the ua precursor before aw is read as breve'
+			'Telex w applies horn to the ua precursor after delayed breve is rejected'
 		);
 		assert.deepEqual(
 			telex( 'thaya', '' ),

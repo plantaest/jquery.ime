@@ -157,6 +157,8 @@ Adapters must not contain Vietnamese tone-placement rules, parser logic, `qu` ha
 
 For ambiguous Telex letters such as `a`, `e`, `o`, `w`, and `d`, the adapter may inspect the parsed target from the shared engine to decide whether the key is a delayed command or literal input. The transformation itself still belongs to the shared engine.
 
+For Telex `w`, the adapter first lets the shared validation helpers decide whether `w` can be a delayed breve command. If not, `w` falls back to a horn command and the engine either accepts a recognized transformation such as `huaw -> hưa` or passes the input through. This avoids a separate adapter precheck for the `ua` family.
+
 ### Shared Vietnamese engine
 
 The shared engine owns:
@@ -501,6 +503,7 @@ Confirmed:
 * the recognizer can distinguish complete rimes from composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families;
 * the complete rime inventory is audited by pure tests against the current Hieu Thi–based table data;
 * representative manual typing can be smoke-tested through the functional adapters without a browser DOM;
+* Telex `w` handling can rely on shared delayed-command validation plus horn fallback, without a separate `ua` adapter precheck;
 * semantic transform output can be rejected when the resulting rime is unrecognized, without changing jQuery.IME core;
 * incompatible checked-tone commands can pass through without jQuery.IME core changes;
 * Telex can prefer recognized literal structure during delayed-command disambiguation, so rimes such as `oao` and `oeo` do not need hard-coded adapter exceptions.

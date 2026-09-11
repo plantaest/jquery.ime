@@ -153,13 +153,10 @@
 				x: Vietnamese.Tone.TILDE,
 				j: Vietnamese.Tone.DOT
 			},
-			vowelDiacriticCommands = {
+			repeatedVowelDiacriticCommands = {
 				aa: Vietnamese.VowelDiacritic.CIRCUMFLEX,
 				ee: Vietnamese.VowelDiacritic.CIRCUMFLEX,
-				oo: Vietnamese.VowelDiacritic.CIRCUMFLEX,
-				aw: Vietnamese.VowelDiacritic.BREVE,
-				ow: Vietnamese.VowelDiacritic.HORN,
-				uw: Vietnamese.VowelDiacritic.HORN
+				oo: Vietnamese.VowelDiacritic.CIRCUMFLEX
 			},
 			delayedVowelDiacriticCommands = {
 				a: {
@@ -183,7 +180,7 @@
 			key = input.slice( -1 ),
 			lowerKey = key.toLowerCase(),
 			tonePlacement = options && options.tonePlacement,
-			vowelDiacriticCommand = vowelDiacriticCommands[ lowerInput.slice( -2 ) ],
+			vowelDiacriticCommand = repeatedVowelDiacriticCommands[ lowerInput.slice( -2 ) ],
 			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ];
 
 		if ( toneCommands[ lowerKey ] ) {
@@ -196,10 +193,6 @@
 
 		if ( lowerInput.slice( -2 ) === 'dd' ) {
 			return createDStrokeCommand( key );
-		}
-
-		if ( lowerKey === 'w' && candidateCanReceiveHornUaFamily( input, key ) ) {
-			return createVowelDiacriticCommand( key, Vietnamese.VowelDiacritic.HORN );
 		}
 
 		if ( vowelDiacriticCommand ) {
@@ -450,16 +443,6 @@
 		}
 
 		return canSwitchTokenVowelDiacritic( token, vowelDiacritic );
-	}
-
-	function candidateCanReceiveHornUaFamily( input, commandKey ) {
-		var state = parseExtractedCandidate( input, commandKey );
-
-		return !!(
-			state &&
-			state.status !== Vietnamese.StateType.UNRECOGNIZED &&
-			findHornUaPair( state ) !== -1
-		);
 	}
 
 	/**

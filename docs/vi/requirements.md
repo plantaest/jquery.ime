@@ -37,6 +37,12 @@ VIQR* (đặt dấu kiểu mới)
 
 All Vietnamese input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
 
+## Current implementation boundary
+
+The current Phase 5 implementation SHOULD be treated as a hardened composition engine for covered modern Vietnamese typing behavior. It supports practical evaluation of VNI, Telex, VIQR, VIQR*, and their reformed tone placement variants in the current jQuery.IME example and test infrastructure.
+
+The current implementation MUST NOT be described as a Vietnamese spell checker, a dictionary backed validator, a broad foreign word detector, a minority language orthography model, or an upstream ready package. Those scopes require explicit future design work.
+
 ## Core composition behavior
 
 The engine MUST support ordinary modern Vietnamese Quốc Ngữ composition:

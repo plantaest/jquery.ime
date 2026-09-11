@@ -446,6 +446,8 @@ Structural hardening should prefer finite orthographic data and transform-output
 
 Representative manual typing smoke tests should run through the functional adapters one key at a time. They cover the examples users are likely to try in `examples/index.html`, while still avoiding the cost of broad DOM fixture duplication.
 
+For simplification work, keep regression tests near the behavior being simplified. For example, Telex `huaw -> hưa`, `aw -> ă`, `cow -> cơ`, `thayw -> thayw`, and `huaws -> hứa` protect the shared `w` decision path after removing the older `ua` adapter precheck.
+
 ## Generated tests
 
 Generated or data-driven tests are useful for:

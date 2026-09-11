@@ -45,6 +45,8 @@ The current branch contains the Phase 5 shared-engine hardening path:
 * Phase 5 covers additional e/ê precursor gaps, such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
 * Semantic transform output is rejected when the resulting rime is unrecognized, so invalid transformations pass through rather than being rendered.
 * Telex delayed-command disambiguation prefers recognized literal structure, so covered rimes such as `oao` and `oeo` no longer need hard-coded adapter exceptions.
+* Telex `w` handling relies on shared delayed-command validation plus horn fallback, without a separate `ua` adapter precheck.
+* The current Phase 5 boundary is a hardened composition engine for covered behavior, not a spell checker, broad foreign word detector, minority language orthography model, or upstream submission package.
 
 Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broader coverage, further recognizer expansion, and engine documentation are still Phase 5 work.
 

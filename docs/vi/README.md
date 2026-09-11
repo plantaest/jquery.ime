@@ -76,6 +76,13 @@ Started in Phase 5:
 * Additional e/ê precursor coverage for examples such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
 * Transform output validation so a semantic command that would create an unrecognized rime passes through instead.
 * Telex delayed-command disambiguation based on recognized literal structure rather than hard-coded `oao` and `oeo` exceptions.
+* Telex `w` handling now relies on shared delayed-command validation plus horn fallback, rather than a separate `ua` adapter precheck.
+
+## Current implementation boundary
+
+The current Phase 5 target is a hardened Vietnamese composition engine for the covered VNI, Telex, VIQR, VIQR*, and reformed variants. It is appropriate for focused manual evaluation in `examples/index.html` and for iterating toward a stable VIWP.IME implementation.
+
+It is not a Vietnamese spell checker, dictionary, broad foreign word detector, minority language orthography model, or upstream submission package. Those directions require separate decisions and tests.
 
 ## Read order
 
