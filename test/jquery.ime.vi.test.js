@@ -278,10 +278,108 @@
 		assert.true( parsedMat.structure.checked, 'mat is recognized as a checked syllable' );
 	} );
 
+	QUnit.test( 'Vietnamese rime recognizer classifies finite composition inventory', ( assert ) => {
+		var rimeStatus = $.ime.vi.RimeStatus;
+
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'oa' ).status,
+			rimeStatus.COMPLETE_AND_PREFIX,
+			'oa is both an open rime and a prefix for longer covered rimes'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'oao' ).status,
+			rimeStatus.COMPLETE,
+			'oao is recognized by finite rime data'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'oeo' ).status,
+			rimeStatus.COMPLETE,
+			'oeo is recognized by finite rime data'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'uong' ).status,
+			rimeStatus.COMPLETE,
+			'uong remains recognized for existing uo-family composition behavior'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'êng' ).status,
+			rimeStatus.COMPLETE,
+			'êng is recognized for the special gi onset in giêng'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'iêu' ).status,
+			rimeStatus.COMPLETE,
+			'iêu is recognized as a complete rime'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'ieu' ).status,
+			rimeStatus.COMPOSABLE,
+			'ieu is recognized as a composition-only precursor for iêu'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'eu' ).status,
+			rimeStatus.COMPOSABLE,
+			'eu is recognized as a composition-only precursor for êu'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'êch' ).status,
+			rimeStatus.COMPLETE,
+			'êch is recognized as a complete rime'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'ech' ).status,
+			rimeStatus.COMPOSABLE,
+			'ech is recognized as a composition-only precursor for êch'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'enh' ).status,
+			rimeStatus.COMPOSABLE,
+			'enh is recognized as a composition-only precursor for ênh'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'ue' ).status,
+			rimeStatus.COMPOSABLE,
+			'ue is recognized as a composition-only precursor for uê'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'uenh' ).status,
+			rimeStatus.COMPOSABLE,
+			'uenh is recognized as a composition-only precursor for uênh'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'uech' ).status,
+			rimeStatus.COMPOSABLE,
+			'uech is recognized as a composition-only precursor for uêch'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'uâ' ).status,
+			rimeStatus.PREFIX,
+			'uâ is an intermediate prefix for covered rimes'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'ưo' ).status,
+			rimeStatus.COMPLETE_AND_PREFIX,
+			'ưo is recognized as a pre-horn composition state for ươ'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'aya' ).status,
+			rimeStatus.INVALID,
+			'aya is not a covered Vietnamese rime'
+		);
+		assert.strictEqual(
+			$.ime.vi.recognizeRime( 'oco' ).status,
+			rimeStatus.INVALID,
+			'oco is not a covered Vietnamese rime'
+		);
+	} );
+
 	QUnit.test( 'Vietnamese parser rejects structurally impossible Latin candidates', ( assert ) => {
 		var stateType = $.ime.vi.StateType;
 
-		[ 'ba', 'thay', 'thuong', 'gieng', 'quoc', 'hoao', 'hoeo' ].forEach( ( candidate ) => {
+		[
+			'ba', 'thay', 'thuong', 'gieng', 'quoc', 'hoao', 'hoeo',
+			'diêu', 'kênh', 'nghêch', 'huêch', 'huênh'
+		].forEach( ( candidate ) => {
 			assert.strictEqual(
 				$.ime.vi.parseCandidate( candidate ).status,
 				stateType.STRUCTURALLY_VALID,
@@ -294,6 +392,14 @@
 				$.ime.vi.parseCandidate( candidate ).status,
 				stateType.INTERMEDIATE,
 				candidate + ' remains a valid intermediate onset candidate'
+			);
+		} );
+
+		[ 'dieu', 'kenh', 'nghech', 'huech', 'huenh' ].forEach( ( candidate ) => {
+			assert.strictEqual(
+				$.ime.vi.parseCandidate( candidate ).status,
+				stateType.INTERMEDIATE,
+				candidate + ' remains a valid composition-only precursor'
 			);
 		} );
 
@@ -550,6 +656,16 @@
 			'CIRCUMFLEX applies to the nucleus before an off-glide'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'thay', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.BREVE
+			} ),
+			{
+				handled: false
+			},
+			'BREVE does not produce an unrecognized off-glide rime'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'khuay', {
 				type: commandType.APPLY_VOWEL_DIACRITIC,
 				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
@@ -581,6 +697,83 @@
 				output: 'giêng'
 			},
 			'CIRCUMFLEX ignores the i in gi and applies to e'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'keu', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'kêu'
+			},
+			'CIRCUMFLEX composes eu into êu'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'dieu', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'diêu'
+			},
+			'CIRCUMFLEX composes ieu into iêu'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hue', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'huê'
+			},
+			'CIRCUMFLEX composes ue into uê'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'kenh', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'kênh'
+			},
+			'CIRCUMFLEX composes enh into ênh'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'nghech', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'nghêch'
+			},
+			'CIRCUMFLEX composes ech into êch'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huenh', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'huênh'
+			},
+			'CIRCUMFLEX composes uenh into uênh'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huech', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'huêch'
+			},
+			'CIRCUMFLEX composes uech into uêch'
 		);
 		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'tháy', {
@@ -1477,7 +1670,7 @@
 				noop: true,
 				output: 'hoao'
 			},
-			'Telex final o remains literal in the covered oao rime'
+			'Telex final o remains literal in a recognized oao rime'
 		);
 		assert.deepEqual(
 			telex( 'hoeo', '' ),
@@ -1485,7 +1678,7 @@
 				noop: true,
 				output: 'hoeo'
 			},
-			'Telex final o remains literal in the covered oeo rime'
+			'Telex final o remains literal in a recognized oeo rime'
 		);
 		assert.deepEqual(
 			telex( 'w', '' ),

@@ -23,6 +23,9 @@ The terms below are engineering terms for parsing and rendering Quốc Ngữ inp
 | `ending` | The part after the nucleus. It may be a consonantal coda such as `n`, `ng`, `ch`, or an off-glide written with a vowel letter. |
 | `coda` | A consonantal ending. Do not use it for every final written vowel letter. |
 | `candidate` | The short text segment near the caret that may be transformed by the engine. |
+| `composition inventory` | The finite rime data the engine recognizes for current composition behavior. It may distinguish complete rimes from composition precursors. This is structural data, not a word list. |
+| `composition precursor` | A source spelling that is not treated as a complete Vietnamese rime, but can still receive a later semantic command, such as `ech` before `êch`. |
+| `rime recognizer` | The engine component that classifies a rime as invalid, a prefix, a composition precursor, complete, or both complete and a prefix. |
 
 Use `rime`, not `rhyme`.
 
@@ -130,6 +133,7 @@ applyDStroke()
 resolveTonePlacement()
 renderCandidate()
 validateStructure()
+recognizeRime()
 ```
 
 Suggested enums:
@@ -153,6 +157,14 @@ VowelDiacritic.HORN
 ```text
 TonePlacement.TRADITIONAL
 TonePlacement.REFORMED
+```
+
+```text
+RimeStatus.INVALID
+RimeStatus.PREFIX
+RimeStatus.COMPOSABLE
+RimeStatus.COMPLETE
+RimeStatus.COMPLETE_AND_PREFIX
 ```
 
 ## Terms to avoid

@@ -16,6 +16,7 @@
 		markToTone,
 		vowelDiacriticToMark,
 		markToVowelDiacritic,
+		rimeRecognitionMaps,
 		engine;
 
 	function normalizeText( text, form ) {
@@ -175,7 +176,6 @@
 				},
 				w: {
 					bases: [ 'a' ],
-					excludeOffGlideEnding: true,
 					vowelDiacritic: Vietnamese.VowelDiacritic.BREVE
 				}
 			},
@@ -184,8 +184,7 @@
 			lowerKey = key.toLowerCase(),
 			tonePlacement = options && options.tonePlacement,
 			vowelDiacriticCommand = vowelDiacriticCommands[ lowerInput.slice( -2 ) ],
-			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ],
-			delayedOptions;
+			delayedCommand = delayedVowelDiacriticCommands[ lowerKey ];
 
 		if ( toneCommands[ lowerKey ] ) {
 			return createToneCommand( key, toneCommands[ lowerKey ] );
@@ -211,15 +210,8 @@
 			return createDStrokeCommand( key );
 		}
 
-		if ( lowerKey === 'o' && candidateHasProtectedLiteralRime( input ) ) {
+		if ( delayedCommand && candidateHasRecognizedLiteralStructure( input, tonePlacement ) ) {
 			return null;
-		}
-
-		if ( delayedCommand ) {
-			delayedOptions = {
-				excludeOffGlideEnding: delayedCommand.excludeOffGlideEnding,
-				tonePlacement: tonePlacement
-			};
 		}
 
 		if ( delayedCommand && (
@@ -235,7 +227,9 @@
 				key,
 				delayedCommand.vowelDiacritic,
 				delayedCommand.bases,
-				delayedOptions
+				{
+					tonePlacement: tonePlacement
+				}
 			)
 		) ) {
 			return createVowelDiacriticCommand( key, delayedCommand.vowelDiacritic );
@@ -426,15 +420,6 @@
 			return false;
 		}
 
-		if (
-			options &&
-			options.excludeOffGlideEnding &&
-			state.structure &&
-			'i y o u'.split( ' ' ).includes( state.structure.ending )
-		) {
-			return false;
-		}
-
 		target = resolveVowelDiacriticTarget( state, vowelDiacritic );
 		if ( target === -1 ) {
 			return canSwitchSameBaseVowelDiacritic( state, vowelDiacritic, bases ) ||
@@ -477,7 +462,18 @@
 		);
 	}
 
-	function candidateHasProtectedLiteralRime( input ) {
+	/**
+	 * Check whether the literal text including the latest key is already a
+	 * recognized Vietnamese composition structure.
+	 *
+	 * This lets ambiguous Telex vowel letters remain literal in structures such
+	 * as `oao` and `oeo` without hard-coding those rimes in the adapter.
+	 *
+	 * @param {string} input Text window ending with the latest typed key.
+	 * @param {string} [tonePlacement] Tone-placement policy.
+	 * @return {boolean} True if the latest key should stay literal.
+	 */
+	function candidateHasRecognizedLiteralStructure( input, tonePlacement ) {
 		var extracted = extractCandidate( input, '' ),
 			state;
 
@@ -485,14 +481,8 @@
 			return false;
 		}
 
-		state = parseCandidate( extracted.candidate );
-		return state.status !== Vietnamese.StateType.UNRECOGNIZED &&
-			state.structure &&
-			isProtectedLiteralRime( state.structure.rime );
-	}
-
-	function isProtectedLiteralRime( rime ) {
-		return rime === 'oao' || rime === 'oeo';
+		state = parseCandidate( extracted.candidate, tonePlacement );
+		return state.status === Vietnamese.StateType.STRUCTURALLY_VALID;
 	}
 
 	function isCandidateCodeUnit( character ) {
@@ -557,7 +547,7 @@
 	}
 
 	function createToken( character ) {
-		if ( character === '\u0111' ) {
+		if ( character === 'đ' ) {
 			return {
 				base: 'd',
 				dStroke: true,
@@ -567,7 +557,7 @@
 			};
 		}
 
-		if ( character === '\u0110' ) {
+		if ( character === 'Đ' ) {
 			return {
 				base: 'D',
 				dStroke: true,
@@ -617,7 +607,7 @@
 
 	function getTokenIdentity( token ) {
 		if ( token.dStroke ) {
-			return token.base === 'D' ? '\u0110' : '\u0111';
+			return token.base === 'D' ? 'Đ' : 'đ';
 		}
 
 		if ( token.isVowel ) {
@@ -636,6 +626,166 @@
 		}
 
 		return output;
+	}
+
+	/**
+	 * Get the finite rime inventory used by the structural recognizer.
+	 *
+	 * The inventory separates complete Vietnamese rimes from source spellings
+	 * that are only accepted as intermediate composition precursors.
+	 *
+	 * It is intentionally structural data, not a word list.
+	 *
+	 * @return {Object} Recognized complete rimes and composition precursors.
+	 */
+	function getRimeInventory() {
+		return {
+			complete: [
+				// Open and off-glide rimes.
+				'a', 'ă', 'â', 'e', 'ê', 'i', 'o', 'ô', 'ơ', 'u', 'ư', 'y',
+				'ai', 'ao', 'au', 'ay', 'âu', 'ây', 'eo', 'êu',
+				'ia', 'ie', 'iê', 'iêu', 'iu',
+				'oi', 'ôi', 'ơi',
+				'oa', 'oai', 'oao', 'oay', 'oe', 'oeo', 'oo',
+				'ua', 'uay', 'uây', 'uê', 'ui', 'uo', 'uoi', 'uou', 'uôi', 'uơ',
+				'uy', 'uya', 'uye', 'uyê', 'uyu',
+				'ưa', 'ưi', 'ưoi', 'ưu', 'ưo', 'ươi', 'ươu',
+				'ya', 'ye', 'yeu', 'yê', 'yêu',
+
+				// Rimes ending in m.
+				'am', 'ăm', 'âm', 'em', 'êm', 'im', 'om', 'ôm', 'ơm', 'um', 'ưm',
+				'iem', 'iêm', 'oam', 'oăm', 'oem', 'uom', 'uôm', 'ưom', 'ươm',
+				'yem', 'yêm',
+
+				// Rimes ending in n.
+				'an', 'ăn', 'ân', 'en', 'ên', 'in', 'on', 'ôn', 'ơn', 'un', 'ưn',
+				'ien', 'iên', 'oan', 'oăn', 'oen',
+				'uan', 'uân', 'uon', 'uôn', 'ưon',
+				'uyn', 'uyen', 'uyên', 'ươn', 'yen', 'yên',
+
+				// Rimes ending in ng.
+				'ang', 'ăng', 'âng', 'eng', 'êng', 'ong', 'ông', 'ung', 'ưng',
+				'ieng', 'iêng', 'oang', 'oăng', 'oong',
+				'uang', 'uâng', 'uong', 'uông', 'ưong', 'ương',
+				'yeng', 'yêng',
+
+				// Rimes ending in nh.
+				'anh', 'ênh', 'inh', 'oanh', 'uênh', 'uynh',
+
+				// Rimes ending in ch.
+				'ach', 'êch', 'ich', 'oach', 'uêch', 'uych',
+
+				// Rimes ending in c.
+				'ac', 'ăc', 'âc', 'ec', 'oc', 'ôc', 'uc', 'ưc',
+				'iec', 'iêc', 'oac', 'oăc', 'ooc',
+				'uoc', 'uôc', 'ưoc', 'ươc',
+
+				// Rimes ending in t.
+				'at', 'ăt', 'ât', 'et', 'êt', 'it', 'ot', 'ôt', 'ơt', 'ut', 'ưt',
+				'iet', 'iêt', 'oat', 'oăt', 'oet',
+				'uat', 'uât', 'uot', 'uôt', 'ưot',
+				'uyt', 'uyet', 'uyêt', 'ươt', 'yet', 'yêt',
+
+				// Rimes ending in p.
+				'ap', 'ăp', 'âp', 'ep', 'êp', 'ip', 'op', 'ôp', 'ơp', 'up',
+				'iep', 'iêp', 'oap',
+				'uop', 'uôp', 'ưop', 'uyp', 'ươp',
+
+				// Project-supported explicit extended spellings.
+				'uu', 'ôo', 'ôô', 'ôôn', 'ôông'
+			],
+			composable: [
+				// Composition-only e/ê precursors for trailing diacritic commands.
+				'eu', 'ieu', 'ue',
+				'enh', 'ech', 'uenh', 'uech'
+			]
+		};
+	}
+
+	function buildRimeRecognitionMaps() {
+		var i, j, rime, inventoryList,
+			inventory = getRimeInventory(),
+			complete = {},
+			composable = {},
+			prefix = {};
+
+		function addInventory( source, target ) {
+			for ( i = 0; i < source.length; i++ ) {
+				rime = normalizeText( source[ i ], 'NFC' );
+				target[ rime ] = true;
+
+				for ( j = 1; j < rime.length; j++ ) {
+					prefix[ rime.slice( 0, j ) ] = true;
+				}
+			}
+		}
+
+		inventoryList = inventory.complete || [];
+		addInventory( inventoryList, complete );
+		inventoryList = inventory.composable || [];
+		addInventory( inventoryList, composable );
+
+		return {
+			complete: complete,
+			composable: composable,
+			prefix: prefix
+		};
+	}
+
+	function getRimeRecognitionMaps() {
+		if ( !rimeRecognitionMaps ) {
+			rimeRecognitionMaps = buildRimeRecognitionMaps();
+		}
+
+		return rimeRecognitionMaps;
+	}
+
+	/**
+	 * Recognize a rime against the finite Vietnamese composition inventory.
+	 *
+	 * @param {string} rime Candidate rime text.
+	 * @return {Object} Recognition result with a RimeStatus value.
+	 */
+	function recognizeRime( rime ) {
+		var maps = getRimeRecognitionMaps(),
+			normalizedRime = normalizeText( rime, 'NFC' ).toLowerCase(),
+			isComplete = !!maps.complete[ normalizedRime ],
+			isComposable = !!maps.composable[ normalizedRime ],
+			isPrefix = !!maps.prefix[ normalizedRime ];
+
+		if ( !normalizedRime ) {
+			return {
+				status: Vietnamese.RimeStatus.INVALID
+			};
+		}
+
+		if ( isComplete && isPrefix ) {
+			return {
+				status: Vietnamese.RimeStatus.COMPLETE_AND_PREFIX
+			};
+		}
+
+		if ( isComplete ) {
+			return {
+				status: Vietnamese.RimeStatus.COMPLETE
+			};
+		}
+
+		if ( isComposable ) {
+			return {
+				status: Vietnamese.RimeStatus.COMPOSABLE
+			};
+		}
+
+		if ( isPrefix ) {
+			return {
+				status: Vietnamese.RimeStatus.PREFIX
+			};
+		}
+
+		return {
+			status: Vietnamese.RimeStatus.INVALID
+		};
 	}
 
 	function hasVowelFromIndex( state, startIndex ) {
@@ -665,7 +815,7 @@
 			'b',
 			'c',
 			'd',
-			'\u0111',
+			'đ',
 			'g',
 			'h',
 			'k',
@@ -777,26 +927,22 @@
 		return ending === 'c' || ending === 'ch' || ending === 'p' || ending === 't';
 	}
 
-	function isConsonantalEnding( ending ) {
-		return 'm n ng nh p t c ch'.split( ' ' ).includes( ending );
-	}
-
 	function findRimePatternToneTarget( structure ) {
 		var i, pattern,
 			patterns = [
-				{ text: 'uy\u00ea', offset: 2, prefix: true },
+				{ text: 'uyê', offset: 2, prefix: true },
 				{ text: 'uye', offset: 2, prefix: true },
 				{ text: 'uya', offset: 1 },
-				{ text: 'i\u00ea', offset: 1, prefix: true },
-				{ text: 'y\u00ea', offset: 1, prefix: true },
-				{ text: 'u\u00f4', offset: 1, prefix: true },
-				{ text: '\u01b0\u01a1', offset: 1, prefix: true },
-				{ text: 'u\u00e2', offset: 1, prefix: true },
-				{ text: 'u\u0103', offset: 1, prefix: true },
+				{ text: 'iê', offset: 1, prefix: true },
+				{ text: 'yê', offset: 1, prefix: true },
+				{ text: 'uô', offset: 1, prefix: true },
+				{ text: 'ươ', offset: 1, prefix: true },
+				{ text: 'uâ', offset: 1, prefix: true },
+				{ text: 'uă', offset: 1, prefix: true },
 				{ text: 'ie', offset: 1, prefix: true },
 				{ text: 'ye', offset: 1, prefix: true },
 				{ text: 'uo', offset: 1, prefix: true },
-				{ text: '\u01b0a', offset: 0 },
+				{ text: 'ưa', offset: 0 },
 				{ text: 'ua', offset: 0 },
 				{ text: 'ia', offset: 0 },
 				{ text: 'ya', offset: 0 }
@@ -890,49 +1036,38 @@
 			vowels = collectEligibleVowels( state, onset.ignoredVowelIndices ),
 			rimeText = lowerText.slice( onset.end ),
 			ending = findEnding( rimeText ),
+			rimeRecognition = recognizeRime( rimeText ),
 			structure = {
 				checked: false,
 				ending: ending,
 				ignoredVowelIndices: onset.ignoredVowelIndices,
 				onset: onset.text,
 				rime: rimeText,
+				rimeRecognition: rimeRecognition,
+				rimeStatus: rimeRecognition.status,
 				rimeStart: onset.end,
 				toneTargetIndex: -1,
 				vowels: vowels
-		};
+			};
 
 		structure.checked = isCheckedEnding( ending );
 		structure.toneTargetIndex = findToneTarget( state, structure, tonePlacement );
 		return structure;
 	}
 
-	function hasOnlyVowelsBetween( state, startIndex, endIndex ) {
-		var i;
-
-		for ( i = startIndex; i <= endIndex; i++ ) {
-			if ( !state.tokens[ i ].isVowel ) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	/**
 	 * Classify a candidate by its written structure, without lexical lookup.
 	 *
-	 * This keeps Telex command keys literal once a Latin run can no longer be
-	 * one Vietnamese orthographic syllable in the current model.
+	 * This keeps Telex command keys literal once a Latin run cannot be
+	 * recognized by the finite Vietnamese composition inventory.
 	 *
 	 * @param {Object} state Composition state with analyzed structure.
 	 * @return {string} StateType value.
 	 */
 	function classifyStructure( state ) {
-		var firstVowelIndex,
-			lastVowelIndex,
+		var rimeStatus,
 			vowels = state.structure.vowels.indices,
-			lowerText = getLowerText( state ),
-			suffix;
+			lowerText = getLowerText( state );
 
 		if ( vowels.length === 0 ) {
 			return isOnsetPrefix( lowerText ) ?
@@ -940,18 +1075,16 @@
 				Vietnamese.StateType.UNRECOGNIZED;
 		}
 
-		firstVowelIndex = vowels[ 0 ];
-		lastVowelIndex = vowels[ vowels.length - 1 ];
-		if (
-			firstVowelIndex !== state.structure.rimeStart ||
-			!hasOnlyVowelsBetween( state, firstVowelIndex, lastVowelIndex )
-		) {
+		rimeStatus = state.structure.rimeStatus;
+		if ( rimeStatus === Vietnamese.RimeStatus.INVALID ) {
 			return Vietnamese.StateType.UNRECOGNIZED;
 		}
 
-		suffix = lowerText.slice( lastVowelIndex + 1 );
-		if ( suffix && !isConsonantalEnding( suffix ) ) {
-			return Vietnamese.StateType.UNRECOGNIZED;
+		if (
+			rimeStatus === Vietnamese.RimeStatus.PREFIX ||
+			rimeStatus === Vietnamese.RimeStatus.COMPOSABLE
+		) {
+			return Vietnamese.StateType.INTERMEDIATE;
 		}
 
 		return Vietnamese.StateType.STRUCTURALLY_VALID;
@@ -1073,7 +1206,7 @@
 		var output;
 
 		if ( token.dStroke ) {
-			return token.base === 'D' ? '\u0110' : '\u0111';
+			return token.base === 'D' ? 'Đ' : 'đ';
 		}
 
 		output = token.base;
@@ -1510,7 +1643,7 @@
 		if (
 			!token ||
 			!state.structure ||
-			( state.structure.onset !== 'd' && state.structure.onset !== '\u0111' )
+			( state.structure.onset !== 'd' && state.structure.onset !== 'đ' )
 		) {
 			return -1;
 		}
@@ -1754,6 +1887,14 @@
 		STRUCTURALLY_VALID: 'structurally-valid'
 	};
 
+	Vietnamese.RimeStatus = Vietnamese.RimeStatus || {
+		INVALID: 'invalid',
+		PREFIX: 'prefix',
+		COMPOSABLE: 'composable',
+		COMPLETE: 'complete',
+		COMPLETE_AND_PREFIX: 'complete-and-prefix'
+	};
+
 	Vietnamese.TonePlacement = Vietnamese.TonePlacement || {
 		TRADITIONAL: 'traditional',
 		REFORMED: 'reformed'
@@ -1799,7 +1940,10 @@
 				state = parseCandidate( candidate, tonePlacement );
 
 			transformResult = transformState( state, command, tonePlacement );
-			if ( !transformResult ) {
+			if (
+				!transformResult ||
+				transformResult.state.status === Vietnamese.StateType.UNRECOGNIZED
+			) {
 				return {
 					handled: false
 				};
@@ -1858,6 +2002,7 @@
 	Vietnamese.decodeNoCommand = decodeNoCommand;
 	Vietnamese.extractCandidate = extractCandidate;
 	Vietnamese.parseCandidate = parseCandidate;
+	Vietnamese.recognizeRime = recognizeRime;
 	Vietnamese.renderCandidate = renderCandidate;
 	Vietnamese.resolveTonePlacement = resolveTonePlacement;
 	Vietnamese.engine = engine;

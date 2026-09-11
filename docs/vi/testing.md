@@ -313,7 +313,7 @@ Telex aa ee oo aw ow uw
 Telex delayed a/e/o vowel-diacritic commands after off-glides and codas
 Telex delayed w breve and same-base vowel-diacritic switches, with literal behavior after off-glides
 Telex ua-family horn behavior
-Telex protected literal rimes such as oao and oeo
+Telex recognized literal rimes such as oao and oeo
 Telex uo-family switch after horn and tone
 Telex w horn command after an existing candidate
 Telex literal standalone w and [ ] safeguards
@@ -398,9 +398,25 @@ Reformed fixtures should be representative only. Pure engine tests own the broad
 Covered structural-validation examples:
 
 ```text
+recognizeRime: oa -> COMPLETE_AND_PREFIX
+recognizeRime: oao, oeo, uong, êng -> COMPLETE
+recognizeRime: iêu, êch -> COMPLETE
+recognizeRime: eu, ieu, ue, enh, ech, uenh, uech -> COMPOSABLE
+recognizeRime: uâ -> PREFIX
+recognizeRime: aya, oco -> INVALID
+
 parser: br, bro, davi, droi, node, wa, brow, browse -> UNRECOGNIZED
 parser: n, ng, ngh, q, qu, tr -> INTERMEDIATE
 parser: ba, thay, thuong, gieng, quoc, hoao, hoeo -> STRUCTURALLY_VALID
+parser: dieu, kenh, nghech, huech, huenh -> INTERMEDIATE
+parser: diêu, kênh, nghêch, huêch, huênh -> STRUCTURALLY_VALID
+
+transform: APPLY_VOWEL_DIACRITIC(breve) on thay -> handled false
+transform: APPLY_VOWEL_DIACRITIC(circumflex) on dieu -> diêu
+transform: APPLY_VOWEL_DIACRITIC(circumflex) on nghech -> nghêch
+
+vi-vni: d9ieu62  -> điều
+vi-vni: nghech61 -> nghếch
 
 vi-telex: droid      -> droid
 vi-telex: david      -> david
@@ -412,9 +428,14 @@ vi-telex: dacds   -> đác
 vi-telex: thayas  -> thấy
 vi-telex: quocos  -> quốc
 vi-telex: gienges -> giếng
+vi-telex: thayw   -> thayw
+vi-telex: hoaos   -> hoáo
+vi-telex: hoeos   -> hoéo
 ```
 
-These are paired tests: every protected foreign-like case should sit near Vietnamese cases that must continue to compose. The runtime implementation must not use the foreign-like examples as a word exception list.
+These are paired tests: every guarded foreign-like case should sit near Vietnamese cases that must continue to compose. The runtime implementation must not use the foreign-like examples as a word exception list.
+
+Structural hardening should prefer finite orthographic data and transform-output validation over adapter-local one-off exceptions. For example, `oao` and `oeo` are recognized rimes, while `aya` and `oco` are not recognized rimes.
 
 ## Generated tests
 

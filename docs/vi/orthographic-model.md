@@ -190,9 +190,24 @@ hoaos -> hoáo
 hoeos -> hoéo
 ```
 
-The exact grammar inventory should become machine-readable data as the engine grows. Do not encode the complete model as an ordered list of overlapping regex replacements.
+The Phase 5 engine uses a machine-readable finite rime recognizer for covered composition states. The recognizer separates complete Vietnamese rimes from source spellings that are only accepted as intermediate composition precursors where tests require that distinction.
 
-The Phase 3 engine uses a compact rime-aware model rather than a full syllable dictionary. It is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIWP.IME does not copy the generated syllable list into runtime validation.
+Examples:
+
+```text
+iêu  -> complete rime
+ieu  -> composition precursor
+êch  -> complete rime
+ech  -> composition precursor
+uênh -> complete rime
+uenh -> composition precursor
+```
+
+The inventory also includes a few explicit project-supported extended spellings such as `oao`, `oeo`, and explicit double-`oo` forms.
+
+The recognizer is not a generated word list and should not become an ordered list of overlapping regex replacements.
+
+The model is informed by orthography-based onset and rime inventories such as Luong Hieu Thi's "All syllables in Vietnamese language" analysis, but VIWP.IME does not copy a generated syllable list into runtime validation.
 
 The practical grouping matters because tone placement and vowel-diacritic commands depend on whether a written vowel is a nucleus, medial, or ending. For example, `coi`, `kheo`, `thay`, and `khuay` must not place tone on the final off-glide.
 
@@ -383,9 +398,9 @@ Do not reject an input solely because the current surface form is not valid fina
 The current Phase 5 classifier is a structural recognizer, not a word list. It accepts:
 
 * no-vowel candidates only when they are prefixes of recognized Vietnamese onsets, such as `n`, `ng`, `ngh`, `q`, `qu`, and `tr`;
-* candidates whose rime begins with an eligible vowel after the onset;
-* candidates whose vowel block is contiguous before any consonantal ending;
-* suffixes after the vowel block only when they are covered Vietnamese consonantal endings.
+* candidates whose rime is recognized as complete by the finite rime inventory;
+* candidates whose exact rime is accepted as a composition precursor;
+* candidates whose rime is a prefix of a covered longer rime, as an intermediate composition state.
 
 This rejects structurally impossible Latin runs such as:
 
@@ -410,9 +425,13 @@ gieng
 quoc
 hoao
 hoeo
+diêu
+nghêch
 ```
 
 This is still not a full generated rime inventory. Ambiguous Telex sequences that are also plausible Vietnamese structure remain outside grammar-only disambiguation.
+
+Semantic transformations are also validated against this recognizer. If a command would create an unrecognized rime, the adapter passes the original input through unchanged. This is how Telex keeps `thayw` literal without a special off-glide exception in the adapter.
 
 ## Candidate boundary
 

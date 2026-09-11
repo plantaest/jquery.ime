@@ -71,6 +71,10 @@ Started in Phase 5:
 * Tone reflow after ordinary letter extension for covered VNI examples, such as `to1an -> toán` and `hoa2n -> hoàn`.
 * Reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*, such as `vi-vni-reformed`.
 * Structural-validation hardening for covered foreign-like Telex runs whose written structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
+* A finite rime recognizer for covered Vietnamese composition states, with separate handling for complete rimes and composition only precursors where tests require it.
+* Additional e/ê precursor coverage for examples such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
+* Transform output validation so a semantic command that would create an unrecognized rime passes through instead.
+* Telex delayed-command disambiguation based on recognized literal structure rather than hard-coded `oao` and `oeo` exceptions.
 
 ## Read order
 
@@ -151,6 +155,7 @@ Stabilize the current algorithm:
 * broaden generated or data-driven pure-engine coverage;
 * add broader representative integration fixtures for all methods;
 * harden structural validation for accidental transformations in foreign-like text;
+* expand and simplify the finite rime recognizer where tests show gaps;
 * harden tone reflow after a toned candidate is extended by ordinary letters;
 * keep traditional and reformed tone-placement policies covered by pure engine and representative adapter tests;
 * simplify parser, transformer, renderer, or adapter code where tests show the behavior is stable enough to clarify;
@@ -165,7 +170,7 @@ Playground work and upstream submission preparation are outside the current Phas
 Do not guess these while implementing:
 
 * whether Telex `z` should remove only tone, or also vowel diacritics, beyond the current tone-removal behavior;
-* how much further structural validation should go beyond covered impossible Latin runs;
+* how much further the finite rime recognizer should expand beyond covered composition behavior;
 
 ## Documentation ownership
 

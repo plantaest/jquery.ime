@@ -105,6 +105,8 @@ a8 -> ă
 d9 -> đ
 D9 -> Đ
 dac9 -> đac
+d9ieu62 -> điều
+nghech61 -> nghếch
 ```
 
 ## Telex mapping
@@ -129,7 +131,7 @@ The Phase 4 Telex adapter supports this mapping:
 | `uw` | `APPLY_VOWEL_DIACRITIC(horn)` on `u` |
 | `w` after a candidate with an eligible `o` or `u` target | `APPLY_VOWEL_DIACRITIC(horn)` |
 | `w` after a candidate with a covered `ua` precursor | `APPLY_VOWEL_DIACRITIC(horn)` as `ưa` |
-| `w` after a candidate with an eligible `a` target before a consonantal ending | `APPLY_VOWEL_DIACRITIC(breve)` |
+| `w` after a candidate with an eligible `a` target whose breve result remains recognized | `APPLY_VOWEL_DIACRITIC(breve)` |
 | `o` after a horned `uo`-family candidate | `APPLY_VOWEL_DIACRITIC(circumflex)` |
 | `dd` | `APPLY_D_STROKE` |
 | `d` after a candidate with an initial `d` target | `APPLY_D_STROKE` |
@@ -175,9 +177,9 @@ w        -> w
 
 Telex does not infer IÊ-family vowel diacritics from unmarked `ie`, `ye`, or `uye`. Type the vowel diacritic explicitly, such as `Vieetj -> Việt`.
 
-Telex vowel-diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`. Delayed Telex `w` for breve is narrower: it should apply when the A-family target does not have an off-glide ending, such as `thangw -> thăng` and `haamw -> hăm`, but remain literal after off-glide candidates such as `thayw`.
+Telex vowel-diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`. Delayed Telex `w` for breve is constrained by structural recognition: it should apply when the resulting candidate remains recognized, such as `thangw -> thăng` and `haamw -> hăm`, but remain literal when the breve result would create an unrecognized rime, such as `thayw`.
 
-Telex delayed-command detection SHOULD protect covered literal rimes that would otherwise be misread as a final command key. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies.
+Telex delayed-command detection SHOULD prefer literal input when the full candidate including the latest key is already a recognized Vietnamese composition structure. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies, without requiring `oao` and `oeo` to be hard-coded in the Telex adapter.
 
 Current `z` behavior removes tone only. Whether `z` should also remove vowel diacritics is UNRESOLVED.
 
