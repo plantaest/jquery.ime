@@ -36,10 +36,6 @@
 		};
 	}
 
-	function decodeNoCommand() {
-		return null;
-	}
-
 	function createToneCommand( key, tone ) {
 		return {
 			key: key,
@@ -1709,7 +1705,7 @@
 	 * Create a jQuery.IME patterns function backed by a shared Vietnamese engine.
 	 *
 	 * @param {Object} options Adapter options.
-	 * @param {Function} [options.decodeCommand] Input-method-specific command decoder.
+	 * @param {Function} options.decodeCommand Input-method-specific command decoder.
 	 *  Decoders return either a shared semantic command or an adapter-level
 	 *  literal replacement for input-method escape keys.
 	 * @param {Object} [options.engine] Shared Vietnamese composition engine.
@@ -1718,7 +1714,7 @@
 	 * @return {Function} jQuery.IME patterns function.
 	 */
 	function createAdapter( options ) {
-		var decodeCommand = options.decodeCommand || decodeNoCommand,
+		var decodeCommand = options.decodeCommand,
 			adapterEngine = options.engine || engine,
 			inputMethodId = options.inputMethodId,
 			tonePlacement = normalizeTonePlacement( options.tonePlacement );
@@ -2008,7 +2004,6 @@
 	Vietnamese.decodeTelexCommand = decodeTelexCommand;
 	Vietnamese.decodeVIQRCommand = decodeVIQRCommand;
 	Vietnamese.decodeVIQRStarCommand = decodeVIQRStarCommand;
-	Vietnamese.decodeNoCommand = decodeNoCommand;
 	Vietnamese.extractCandidate = extractCandidate;
 	Vietnamese.parseCandidate = parseCandidate;
 	Vietnamese.recognizeRime = recognizeRime;
