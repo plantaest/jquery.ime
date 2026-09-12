@@ -1,6 +1,11 @@
 # Vietnamese orthographic model
 
-This document defines the written Vietnamese model used by VIME. It is a practical model for input composition, not a complete linguistic theory or a dictionary.
+This document defines the written Vietnamese model used by VIME. It is a
+practical model for input composition, not a complete linguistic theory or a
+dictionary.
+
+For software boundaries, see `architecture.md`. For the current parser,
+recognizer, transformation, and rendering flow, see `algorithm.md`.
 
 The engine receives a short candidate near the caret and must answer:
 
@@ -190,7 +195,10 @@ hoaos -> hoáo
 hoeos -> hoéo
 ```
 
-The Phase 5 engine uses a machine-readable finite rime recognizer for covered composition states. The recognizer separates complete Vietnamese rimes from source spellings that are only accepted as intermediate composition precursors where that distinction matters for composition.
+VIME uses a machine-readable finite rime recognizer for covered composition
+states. The recognizer separates complete Vietnamese rimes from source spellings
+that are only accepted as intermediate composition precursors where that
+distinction matters for composition.
 
 Examples:
 
@@ -249,7 +257,7 @@ tường
 
 The default policy is traditional tone placement.
 
-The current implementation exposes reformed placement as separate input-method variants:
+VIME exposes reformed placement as separate input-method variants:
 
 ```text
 vi-vni-reformed
@@ -325,7 +333,7 @@ Contextual spellings such as `c/k`, `g/gh`, and `ng/ngh` may become validation d
 
 In Vietnamese spelling, the `u` in `qu` is not always an ordinary independent vowel. The engine must avoid transforming it as though `q` + `u` were a normal onset plus nucleus in every context.
 
-Examples covered by Phase 3:
+Examples:
 
 ```text
 quốc
@@ -333,7 +341,8 @@ quả
 quên
 ```
 
-The Phase 3 implementation models `qu` as a special onset. The written `u` in this onset is ignored for ordinary tone-target and vowel-diacritic selection.
+VIME models `qu` as a special onset. The written `u` in this onset is ignored
+for ordinary tone-target and vowel-diacritic selection.
 
 ## Special `gi`
 
@@ -341,7 +350,7 @@ The Phase 3 implementation models `qu` as a special onset. The written `u` in th
 
 The `i` in `gi` must not always be treated like an ordinary nucleus vowel.
 
-Examples covered by Phase 3:
+Examples:
 
 ```text
 già
@@ -349,7 +358,7 @@ giếng
 gió
 ```
 
-The Phase 3 implementation models `gi` as a special onset when another vowel follows it:
+VIME models `gi` as a special onset when another vowel follows it:
 
 ```text
 gia
@@ -377,7 +386,9 @@ Checked syllables ending in:
 
 are structurally compatible with acute and dot tones in standard Vietnamese orthography.
 
-The Phase 3 VNI behavior for incompatible checked-tone commands is conservative pass-through. For example, `mat2` remains literal rather than rendering a nonstandard checked syllable.
+VIME uses conservative pass-through for incompatible checked-tone commands. For
+example, `mat2` remains literal rather than rendering a nonstandard checked
+syllable.
 
 ## Complete, intermediate, and unrecognized
 
@@ -395,18 +406,22 @@ Meanings:
 
 * `UNRECOGNIZED`: leave the candidate unchanged.
 * `INTERMEDIATE`: not final Vietnamese spelling, but still composable.
-* `STRUCTURALLY_VALID`: complete enough to render as ordinary Vietnamese orthography.
+* `STRUCTURALLY_VALID`: recognized as a complete structure in the current VIME composition model.
 
 A complete syllable may remain composable. An incomplete candidate may also be composable.
 
 Do not reject an input solely because the current surface form is not valid final Vietnamese if it is a normal intermediate typing state.
 
-The current Phase 5 classifier is a structural recognizer, not a word list. It accepts:
+The classifier is a structural recognizer, not a word list. It accepts:
 
 * no-vowel candidates only when they are prefixes of recognized Vietnamese onsets, such as `n`, `ng`, `ngh`, `q`, `qu`, and `tr`;
 * candidates whose rime is recognized as complete by the finite rime inventory;
 * candidates whose exact rime is accepted as a composition precursor;
 * candidates whose rime is a prefix of a covered longer rime, as an intermediate composition state.
+
+`STRUCTURALLY_VALID` does not mean lexically valid, canonical, or common. It
+means the candidate is complete enough for the current engine to render without
+waiting for another command.
 
 This rejects structurally impossible Latin runs such as:
 
@@ -445,7 +460,10 @@ Viet
 
 This is still not a full generated rime inventory. Ambiguous Telex sequences that are also plausible Vietnamese structure remain outside grammar-only disambiguation.
 
-Semantic transformations are also validated against this recognizer. If a command would create an unrecognized rime, the adapter passes the original input through unchanged. This is how Telex keeps `thayw` literal without a special off-glide exception in the adapter.
+Semantic transformations are also validated against this recognizer. If a
+command would create an unrecognized semantic state, the adapter passes the
+original input through unchanged. This is how Telex keeps `thayw` literal
+without a special off-glide exception in the adapter.
 
 ## Candidate boundary
 
@@ -467,7 +485,7 @@ The engine must support valid Unicode Vietnamese text.
 
 Rendered output should use NFC unless a documented technical reason requires otherwise.
 
-The Phase 3 parser uses NFD internally because it simplifies extraction of:
+The parser uses NFD internally because it simplifies extraction of:
 
 * base vowel;
 * vowel diacritic;
@@ -512,7 +530,7 @@ This is different from:
 Is this an attested Vietnamese word?
 ```
 
-The last question is outside the first implementation.
+The last question is outside the current VIME composition scope.
 
 ## Source hierarchy
 
@@ -537,7 +555,9 @@ Current external references used by the model include:
 
 These questions must be resolved by implementation experiments or explicit decisions:
 
-* whether the machine-readable rime inventory should be expanded to full generated coverage;
-* how strict initial structural validation should be;
-* treatment of rare, borrowed, dialectal, minority-language, and expressive spellings;
-* how much literal-rime protection is needed before a full rime inventory exists.
+* whether the finite composition inventory should be expanded further;
+* how strict future structural validation should become;
+* how to treat rare, borrowed, dialectal, minority-language, historical, and
+  expressive spellings;
+* whether future ambiguity handling needs information beyond orthographic
+  structure.

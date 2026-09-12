@@ -1,6 +1,7 @@
 # VIME architecture
 
-This document defines the software architecture for Vietnamese input methods in jQuery.IME.
+This document defines the software boundaries for Vietnamese input methods in
+jQuery.IME. For the step-by-step engine algorithm, see `algorithm.md`.
 
 The important boundary is:
 
@@ -11,32 +12,28 @@ jQuery.IME host
             -> parser / transformer / renderer / validation data
 ```
 
-## Architectural goals
+## Goals
 
 VIME must:
 
-* implement Vietnamese input methods through one shared Vietnamese engine;
+* implement Vietnamese input methods through one shared engine;
 * keep method-specific key mapping out of Vietnamese orthographic logic;
 * model operations semantically;
 * keep the engine testable without DOM input simulation;
-* use rendered text near the caret as the primary source of composition state;
+* use rendered text near the caret as the primary composition state;
 * keep tone separate from the visible Unicode tone mark;
 * avoid a large ordered regex grammar;
 * avoid jQuery.IME core changes unless a concrete blocker is proven.
 
-## Current jQuery.IME facts
+## jQuery.IME facts
 
-The Phase 1 integration spike confirmed these repository facts.
+Input methods are listed in `src/jquery.ime.inputmethods.js` under
+`$.ime.sources`. Each source entry names a rule file.
 
-Input methods are listed in `src/jquery.ime.inputmethods.js` under `$.ime.sources`. Each source entry names a rule file.
+jQuery.IME loads a rule file through `$.ime.load( inputMethodId )`. A loaded
+rule file calls `$.ime.register( ... )`.
 
-jQuery.IME loads a rule file through `$.ime.load( inputMethodId )`. A loaded rule file calls `$.ime.register( ... )`.
-
-An input method may define `patterns` as a function.
-
-When Shift is pressed, jQuery.IME gives `patterns_shift` priority before ordinary `patterns`. In the current core, `patterns_shift` is array-based, so VIQR-family shifted punctuation uses a small array rule that delegates back to the same functional Vietnamese adapter.
-
-The relevant contract is:
+An input method may define `patterns` as a function:
 
 ```javascript
 patterns: function ( input, context ) {
@@ -44,7 +41,7 @@ patterns: function ( input, context ) {
 }
 ```
 
-The return value may be an object:
+The return value may be a replacement object:
 
 ```javascript
 {
@@ -62,38 +59,30 @@ or pass-through:
 }
 ```
 
-If `noop` is false, jQuery.IME replaces the complete `input` window before the caret with `output`. Therefore the Vietnamese adapter must return unchanged prefix text plus the transformed candidate. It must not return only the transformed syllable when the input window also contains prefix text.
+When `noop` is false, jQuery.IME replaces the whole `input` window before the
+caret. Vietnamese adapters therefore preserve unchanged prefix text and replace
+only the transformed candidate.
 
-`maxKeyLength` controls how many JavaScript string code units before the caret are included in `input` before the newest key is appended.
+When Shift is pressed, jQuery.IME gives `patterns_shift` priority before
+ordinary `patterns`. In the current core, `patterns_shift` is array-based, so
+VIQR-family shifted punctuation uses a small bridge that delegates back to the
+same functional Vietnamese adapter.
 
-`contextLength` controls raw input-key history. It is not the same thing as rendered text before the caret.
+`maxKeyLength` controls how many JavaScript string code units before the caret
+are included in `input` before the newest key is appended.
 
-The current Vietnamese implementation uses one source file, `rules/vi/vi.js`, to register VNI, Telex, VIQR, VIQR*, and their `-reformed` tone-placement variants. This matches the current jQuery.IME loader better than inventing a shared non-input-method dependency.
+`contextLength` controls raw input-key history. It is not the same thing as
+rendered text before the caret.
 
-## Current packaging recommendation
+## Packaging
 
-Use one jQuery.IME rule source for the first implementation:
+The current jQuery.IME-compatible package is one shared Vietnamese rule source:
 
 ```text
 rules/vi/vi.js
 ```
 
-That file may contain several internal modules or namespace sections:
-
-```text
-Vietnamese namespace
-├── constants and enums
-├── Unicode helpers
-├── orthographic data
-├── parser
-├── transformer
-├── tone-placement resolver
-├── renderer
-├── validator
-└── VNI / Telex / VIQR / VIQR* adapters
-```
-
-All Vietnamese metadata entries should point to this source:
+All Vietnamese metadata entries point to this source:
 
 ```text
 vi-vni                -> rules/vi/vi.js
@@ -106,9 +95,13 @@ vi-viqr-reformed      -> rules/vi/vi.js
 vi-viqr-star-reformed -> rules/vi/vi.js
 ```
 
-Reason: jQuery.IME has a simple rule-file loader. Its existing dependency support is oriented around input methods, not arbitrary shared helper modules. A single shared Vietnamese source is the smallest jQuery.IME-compatible package that preserves one engine.
+Reason: jQuery.IME has a simple rule-file loader. Its dependency support is
+oriented around input methods, not arbitrary shared helper modules. A single
+shared Vietnamese source is the smallest compatible package that preserves one
+engine.
 
-If `vi.js` becomes too large, a later split may be considered only after proving how those files will be loaded in examples, tests, and distribution builds.
+If `vi.js` becomes too large, a later split may be considered only after proving
+how those files will be loaded in examples, tests, and distribution builds.
 
 ## Layer responsibilities
 
@@ -126,9 +119,9 @@ jQuery.IME owns:
 
 Vietnamese code should not duplicate these responsibilities.
 
-### Input-method adapter
+### Input-method adapters
 
-Each adapter owns only method-specific behavior:
+Each adapter owns method-specific key decoding:
 
 ```text
 input key or key sequence
@@ -138,26 +131,22 @@ input key or key sequence
 Examples:
 
 ```text
-VNI 1    -> APPLY_TONE(ACUTE)
-Telex s  -> APPLY_TONE(ACUTE)
-VIQR '   -> APPLY_TONE(ACUTE)
-VIQR* '  -> APPLY_TONE(ACUTE)
+VNI 1    -> apply tone acute
+Telex s  -> apply tone acute
+VIQR '   -> apply tone acute
+VIQR* '  -> apply tone acute
 ```
 
-Adapters also handle the jQuery.IME `patterns` boundary and narrow method-level literal behavior such as VIQR escape:
+Adapters also own the jQuery.IME `patterns` boundary, candidate extraction at
+that boundary, and narrow method-level literal behavior such as VIQR escape.
 
-```text
-jQuery.IME input window
-    -> candidate extraction
-    -> engine call
-    -> jQuery.IME replacement object
-```
+Adapters must not contain Vietnamese tone-placement rules, parser logic, `qu`
+handling, `gi` handling, or Unicode rendering tables beyond command decoding.
 
-Adapters must not contain Vietnamese tone-placement rules, parser logic, `qu` handling, `gi` handling, or Unicode rendering tables beyond command decoding.
-
-For ambiguous Telex letters such as `a`, `e`, `o`, `w`, and `d`, the adapter may inspect the parsed target from the shared engine to decide whether the key is a delayed command or literal input. The transformation itself still belongs to the shared engine.
-
-For Telex `w`, the adapter first lets the shared validation helpers decide whether `w` can be a delayed breve command. If not, `w` falls back to a horn command and the engine either accepts a recognized transformation such as `huaw -> hưa` or passes the input through. This avoids a separate adapter precheck for the `ua` family.
+Telex has delayed-command ambiguity because ordinary letters can also be
+commands. The adapter may ask shared engine helpers whether a candidate is a
+recognized literal structure or can receive a semantic command. The actual
+transformation and validation still belong to the shared engine.
 
 ### Shared Vietnamese engine
 
@@ -172,13 +161,8 @@ The shared engine owns:
 * structural validation;
 * fallback decisions for unrecognized candidates.
 
-The engine should not depend on:
-
-* DOM APIs;
-* jQuery selectors;
-* keyboard events;
-* caret manipulation;
-* editable elements.
+The engine must not depend on DOM APIs, jQuery selectors, keyboard events, caret
+manipulation, or editable elements.
 
 ## Adapter contract
 
@@ -193,9 +177,12 @@ createAdapter( {
 } )
 ```
 
-`tonePlacement` defaults to `TonePlacement.TRADITIONAL`. Reformed input methods reuse the same adapters and pass `TonePlacement.REFORMED`; they do not duplicate Vietnamese parsing or transformation logic.
+`tonePlacement` defaults to `TonePlacement.TRADITIONAL`. Reformed input methods
+reuse the same adapters and pass `TonePlacement.REFORMED`.
 
-`decodeCommand( input, context, options )` returns either:
+`decodeCommand( input, context, options )` returns one of three forms.
+
+A shared semantic command:
 
 ```javascript
 {
@@ -208,7 +195,7 @@ createAdapter( {
 }
 ```
 
-or an adapter-level literal replacement:
+An adapter-level literal replacement:
 
 ```javascript
 {
@@ -217,46 +204,39 @@ or an adapter-level literal replacement:
 }
 ```
 
-or `null`.
+Or `null`, meaning the newest key is not a semantic command. In that case the
+adapter may ask the engine to reflow tone placement for the rendered candidate.
 
-The adapter passes these options to decoders:
+## Engine contract
 
-```javascript
-{
-    inputMethodId: inputMethodId,
-    tonePlacement: tonePlacement
-}
-```
+The adapter calls two engine entry points.
 
-Most decoders ignore the options. Telex may use `tonePlacement` only to ask shared engine helpers whether an ambiguous delayed command can apply under the current rendering policy.
-
-For semantic commands, the adapter extracts the candidate before the command key and calls:
+Semantic transformation:
 
 ```javascript
 engine.transformCandidate( candidate, command, {
     context: context,
     inputMethodId: inputMethodId,
     tonePlacement: tonePlacement
-} );
+} )
 ```
 
-For literal replacements, the adapter extracts the candidate boundary and returns:
+Tone reflow after ordinary letter extension:
 
 ```javascript
-{
-    noop: false,
-    output: prefix + candidate + literalOutput
-}
+engine.reflowCandidate( candidate, {
+    context: context,
+    inputMethodId: inputMethodId,
+    tonePlacement: tonePlacement
+} )
 ```
 
-This is intentionally limited to method-level behavior such as VIQR backslash escape. Vietnamese parsing, tone placement, `qu`, `gi`, and Unicode rendering remain in the shared engine.
-
-The engine returns:
+Both return:
 
 ```javascript
 {
     handled: true,
-    output: "transformed candidate"
+    output: "..."
 }
 ```
 
@@ -268,115 +248,30 @@ or:
 }
 ```
 
-If `handled` is false, the adapter returns pass-through:
-
-```javascript
-{
-    noop: true,
-    output: input
-}
-```
-
-If `handled` is true, the adapter returns:
-
-```javascript
-{
-    noop: false,
-    output: prefix + result.output
-}
-```
-
-This contract is intentionally small. Add fields only when a tested behavior requires them.
-
-For VNI repeated-key escape, the adapter includes the literal command key in the semantic command object. The engine still reconstructs behavior from the rendered candidate, not from raw key history.
-
-When an input-method decoder returns no command, the shared adapter may still ask the engine to reflow the extracted rendered candidate. This path is intentionally narrower than a semantic command: it re-renders an already toned candidate when ordinary letter input has changed the candidate structure and the resolved tone target changes. For example, `to1an` reaches the adapter as `tóan`, then reflows to `toán`.
-
-The reflow path receives the same `tonePlacement` option as command transformations.
+If the engine reports `handled: false`, the adapter returns jQuery.IME
+pass-through.
 
 ## Candidate extraction
 
-jQuery.IME provides a bounded input window, not a pre-parsed Vietnamese syllable.
+Candidate extraction is an adapter-boundary helper because jQuery.IME gives the
+adapter a bounded input window, not a parsed syllable.
 
-The adapter must separate:
+`extractCandidate( input, commandKey )` returns:
 
-```text
-[unchanged prefix][candidate][command key]
+```javascript
+{
+    prefix: "...",
+    candidate: "..."
+}
 ```
 
-For example:
+The adapter transforms only `candidate` and returns `prefix + output`.
 
-```text
-hello tuong1
-```
+Detailed extraction behavior is documented in `algorithm.md`.
 
-should become:
+## maxKeyLength and contextLength
 
-```text
-prefix:    "hello "
-candidate: "tuong"
-command:   APPLY_TONE(ACUTE)
-```
-
-The adapter must return `hello ` plus the transformed candidate because jQuery.IME replaces the whole input window.
-
-Candidate extraction may use small local character-class logic. The full Vietnamese parser belongs in the shared engine.
-
-## Engine execution flow
-
-The intended engine flow is:
-
-```text
-candidate surface text
-    -> normalize or decompose as needed
-    -> parse candidate
-    -> classify as unrecognized, intermediate, or structurally valid
-    -> apply semantic command
-    -> validate the new state against structural recognizer data
-    -> resolve tone placement
-    -> render Unicode output
-    -> normalize output, preferably NFC
-```
-
-The engine should be deterministic. If parsing is ambiguous, resolve the ambiguity through explicit orthographic data or documented priority rules, not accidental regex order.
-
-### Recognizer status flow
-
-The finite rime recognizer is a structural gate between parsing and transformation:
-
-| Rime status | Candidate state | Main use |
-| --- | --- | --- |
-| `COMPLETE` | `STRUCTURALLY_VALID` | Accept final looking Vietnamese rimes. |
-| `COMPLETE_AND_PREFIX` | `STRUCTURALLY_VALID` | Accept final looking rimes that can also grow into longer covered rimes, such as `oa`. |
-| `COMPOSABLE` | `INTERMEDIATE` | Allow source spellings that still need a semantic command, such as `uong -> ương`. |
-| `PREFIX` | `INTERMEDIATE` | Allow partial complex nuclei while typing, such as `uô` before `uôn`. |
-| `INVALID` | `UNRECOGNIZED` | Pass through structures outside the current Vietnamese composition model. |
-
-This split matters for Telex. Delayed command disambiguation prefers literal input only when the candidate including the new key is `STRUCTURALLY_VALID`; semantic transforms can still operate on `INTERMEDIATE` candidates. That is why `hoaos -> hoáo` can keep the final `o` literal, while `thuongwf -> thường` can still transform through an intermediate `uong` precursor.
-
-## State model
-
-The rendered candidate near the caret is the primary source of truth.
-
-The engine should reconstruct composition state from the current rendered candidate whenever practical.
-
-Do not rely on a persistent raw-keystroke buffer for ordinary transformations. Raw history is fragile because users can move the caret, delete text, paste text, or reach the same rendered output through different typing orders.
-
-`context` may be used only for narrow behaviors that cannot be represented from rendered text and have a focused test. The current Vietnamese input methods do not require raw `context`.
-
-The parser attaches a rime-aware `structure` object to parsed candidates. It includes the parsed onset, rime, ending, checked-ending flag, eligible vowel indices, resolved tone target, and rime-recognition status.
-
-The Phase 5 classifier uses a finite rime recognizer to reject candidates whose rime shape is impossible in the current orthographic model. It does not identify foreign words. It checks whether no-vowel candidates are onset prefixes, whether a rime is complete, whether a rime is accepted only as a composition precursor, and whether a rime is an intermediate prefix of a covered longer rime.
-
-Composition precursors are source spellings that can receive a later semantic command but are not treated as complete Vietnamese rimes. For example, `ieu`, `ech`, `uong`, and `uyen` are accepted as intermediate states so VNI and Telex can continue composition; `iêu`, `êch`, `ương`, and `uyên` are complete rimes recognized after the transform.
-
-The recognizer's `complete` and `composable` inventories intentionally serve different call sites. Complete rimes classify a candidate as `STRUCTURALLY_VALID`, so Telex delayed-command disambiguation can keep a newly typed letter literal when the whole candidate already has a complete Vietnamese structure. Composable rimes classify a candidate as `INTERMEDIATE`, so semantic transforms can still proceed while foreign-like Latin runs with invalid rimes pass through unchanged.
-
-Semantic command output is parsed and classified again before it is accepted. A transformation that would produce an unrecognized rime returns `handled: false`, which lets the adapter pass through the user's literal input.
-
-## `maxKeyLength` and `contextLength`
-
-Current recommendation:
+Current configuration:
 
 ```text
 contextLength:
@@ -392,16 +287,13 @@ tonePlacement:
 
 `contextLength = 0` keeps raw key history out of the main composition model.
 
-`maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese candidates plus a command key while keeping replacement scope bounded. Because this is JavaScript string length, decomposed Unicode may consume more code units than precomposed text.
+`maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese
+candidates plus a command key while keeping replacement scope bounded. Because
+this is JavaScript string length, decomposed Unicode may consume more code units
+than precomposed text.
 
-Tests must cover:
-
-* longest expected ordinary candidates;
-* decomposed Unicode input where practical;
-* command placement after a coda;
-* pass-through when the candidate is outside the available window.
-
-If tests prove `16` is too small or unnecessarily large, update this document and the constant together.
+If tests prove `16` too small or unnecessarily large, update this document and
+the implementation constant together.
 
 ## Dependency direction
 
@@ -431,98 +323,51 @@ Regular expressions are allowed for small, local tasks:
 * simple table lookups;
 * well-scoped normalization helpers.
 
-Do not implement Vietnamese composition as a large ordered regex grammar whose correctness depends on rule order.
+Do not implement Vietnamese composition as a large ordered regex grammar whose
+correctness depends on rule order.
 
 ## Public and test APIs
 
-The product surface is the jQuery.IME input methods, not a general-purpose Vietnamese library.
+The product surface is the jQuery.IME input methods, not a general-purpose
+Vietnamese library.
 
-Still, pure engine pieces should be reachable from QUnit tests. The preferred compromise is a small `$.ime.vi` namespace exposing only stable internal seams needed for tests:
+Pure engine pieces may be exposed under the small test-facing `$.ime.vi`
+namespace when they are useful for deterministic QUnit tests. Keep this
+namespace modest and document any new seam in `testing.md`.
+
+Current test-facing seams include:
+
+* constants and enums;
+* command decoders;
+* `createAdapter`;
+* `extractCandidate`;
+* `parseCandidate`;
+* `recognizeRime`;
+* `renderCandidate`;
+* tone-placement helpers;
+* `engine.transformCandidate`;
+* `engine.reflowCandidate`.
+
+## Files likely to change for Vietnamese work
+
+Normal Vietnamese work should touch only:
 
 ```text
-createAdapter()
-RimeStatus
-TonePlacement
-decodeVNICommand()
-decodeTelexCommand()
-decodeVIQRCommand()
-decodeVIQRStarCommand()
-engine.transformCandidate()
-engine.reflowCandidate()
-parseCandidate()
-recognizeRime()
-renderCandidate()
-```
-
-Avoid exposing a large public API before implementation proves it is needed.
-
-## Files expected in the current integration
-
-The minimum jQuery.IME-facing files are:
-
-```text
-rules/vi/vi.js
 src/jquery.ime.inputmethods.js
-test/index.html
+rules/vi/vi.js
 test/jquery.ime.vi.test.js
 test/jquery.ime.vi.test.fixtures.js
+docs/vi/*.md
 ```
 
-Keep Vietnamese-specific tests out of `test/jquery.ime.test.js` and `test/jquery.ime.test.fixtures.js` so the generic jQuery.IME runner and fixture corpus remain easy to compare.
+jQuery.IME core changes should be treated as blockers requiring a documented
+design discussion, not as the default way to implement Vietnamese behavior.
 
-Possible later files:
+## Examples and manual evaluation
 
-```text
-examples/
-docs/
-```
+`examples/index.html` loads jQuery.IME metadata and rule files through the same
+loader used by the rest of the project. Once the dev server is running, changing
+`rules/vi/vi.js` is normally visible after reloading the example page.
 
-Only add or modify jQuery.IME core files after documenting a concrete blocker.
-
-## Known constraints and open questions
-
-Confirmed:
-
-* one shared Vietnamese source can register VNI, Telex, VIQR, and VIQR*;
-* functional `patterns` can call a shared engine;
-* adapter output must include the unchanged prefix from the jQuery.IME input window;
-* the current Vietnamese input methods do not require raw `context`;
-* focused QUnit modules can be run through Grunt;
-* the shared engine can use NFD internally while rendering NFC output;
-* VNI repeated-key escape can be implemented from rendered text;
-* Telex repeated-key escape can be implemented from rendered text for covered tone, vowel-diacritic, and `d`/`đ` commands;
-* Telex can leave standalone `w`, `[`, and `]` as literal input without raw-context exceptions;
-* VIQR backslash escape can be implemented as adapter-level literal output;
-* VIQR* can share the VIQR adapter shape with a different horn key;
-* VIQR and VIQR* shifted punctuation can be handled by a `patterns_shift` bridge without jQuery.IME core changes;
-* VIQR and VIQR* delayed d-stroke can reuse the shared d-stroke command without jQuery.IME core changes;
-* tone reflow after ordinary letter extension can be implemented from rendered text without raw `context`, for covered cases such as `to1an -> toán` and `hoa2n -> hoàn`;
-* traditional and reformed tone-placement policies can be exposed as separate input-method ids without jQuery.IME core changes;
-* structural-validation hardening can pass through covered foreign-like Telex runs such as `droid`, `david`, `browser`, `nodejs`, and `washington` without dictionary data, hard-coded word exceptions, raw key history, or jQuery.IME core changes;
-* a finite rime recognizer can replace the broad vowel-block classifier while preserving covered Vietnamese composition states;
-* the recognizer can distinguish complete rimes from composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families;
-* the complete rime inventory is audited by pure tests against the current Hieu Thi–based table data;
-* representative manual typing can be smoke-tested through the functional adapters without a browser DOM;
-* Telex `z` is the same semantic tone-removal command as VNI `0`; it removes tone only and preserves vowel diacritics;
-* Telex `w` handling can rely on shared delayed-command validation plus horn fallback, without a separate `ua` adapter precheck;
-* semantic transform output can be rejected when the resulting rime is unrecognized, without changing jQuery.IME core;
-* incompatible checked-tone commands can pass through without jQuery.IME core changes;
-* Telex can prefer recognized literal structure during delayed-command disambiguation, so rimes such as `oao` and `oeo` do not need hard-coded adapter exceptions.
-
-Unresolved:
-
-* whether a future file split is worth the extra loader complexity;
-* how much further structural validation should go beyond the covered impossible Latin runs.
-
-## Architecture acceptance criteria
-
-The architecture is successful when:
-
-* VNI, Telex, VIQR, and VIQR* share one engine;
-* adding a new Vietnamese typing convention mainly requires a new adapter;
-* pure engine behavior is tested without DOM input simulation;
-* tone placement is rendered from semantic state;
-* intermediate states are explicit;
-* Unicode output is correct;
-* jQuery.IME core remains unchanged unless a documented blocker exists;
-* future contributors can understand the implementation from code, tests, and these docs.
+Manual example testing is useful for typing feel, but automated regression tests
+remain required for confirmed bugs.

@@ -38,7 +38,7 @@ Use `onset`, `rime`, `nucleus`, and `ending` in implementation code when modelin
 | `tone` | A semantic property of a Vietnamese syllable. |
 | `tone mark` | The visible Unicode mark used to render a non-none tone. |
 | `tone placement` | The policy that chooses which written vowel letter receives the visible tone mark. |
-| `traditional tone placement` | Default policy for first implementation, producing forms such as `hòa`, `xóa`, `hủy`. |
+| `traditional tone placement` | The default VIME tone-placement policy, producing forms such as `hòa`, `xóa`, `hủy`. |
 | `reformed tone placement` | Alternate policy, producing forms such as `hoà`, `xoá`, `huỷ`. |
 
 Tone values:
@@ -89,7 +89,7 @@ A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + A
 | --- | --- |
 | `composition` | The act of transforming recent typed text into Vietnamese output. |
 | `composition state` | The parsed semantic state of a candidate. |
-| `complete state` | A candidate that can stand as a complete Vietnamese orthographic syllable. |
+| `complete state` | A candidate recognized as a complete structure in the current VIME composition model. |
 | `intermediate state` | A candidate that is not complete final spelling yet, but can still develop into valid Vietnamese through more commands. |
 | `unrecognized` | A candidate the Vietnamese engine should leave unchanged. |
 | `semantic command` | A method-independent command such as `APPLY_TONE(ACUTE)`. |
@@ -99,6 +99,9 @@ A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + A
 | `escape behavior` | Behavior that lets users type literal command characters. |
 | `repeated-key escape` | Escape behavior where repeating a command produces literal input, such as VNI `a1 -> á`, `a11 -> a1`. |
 | `tone reflow` | Re-rendering an already toned candidate after ordinary typed letters change its parsed structure and therefore its tone target. |
+| `delayed command` | A command key typed after more rime material, such as Telex `thayas -> thấy` or VNI `dac91 -> đác`. |
+| `recognized literal structure` | A candidate that already parses as a complete structure in the current composition model, so an ambiguous Telex key may remain literal. |
+| `post-transform validation` | Re-analyzing and reclassifying the transformed semantic state before rendering it. If the result is unrecognized, the adapter passes the original input through. |
 
 ## Unicode terms
 

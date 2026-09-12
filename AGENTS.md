@@ -2,235 +2,108 @@
 
 ## Project context
 
-This repository contains VIME, the Vietnamese Input Method Engine effort to add Vietnamese input methods to jQuery.IME.
+This repository contains VIME, the Vietnamese Input Method Engine being
+developed inside jQuery.IME.
 
-The target input methods are:
+The supported Vietnamese input methods are:
 
-* VNI
-* Telex
-* VIQR
-* VIQR* as a VIQR variant using `*` for horn
+* VNI;
+* Telex;
+* VIQR;
+* VIQR* as a VIQR variant using `*` for horn.
 
 All Vietnamese input methods must share one Vietnamese composition engine.
-
-VNI is the preferred method for examples and early implementation work when only one method-specific path is needed.
-
-## Current status
-
-The current branch contains the Phase 5 shared-engine hardening path:
-
-* Vietnamese metadata entries exist for `vi-vni`, `vi-telex`, `vi-viqr`, `vi-viqr-star`, and their `-reformed` tone-placement variants.
-* The Vietnamese input methods share one Vietnamese rule source.
-* Functional `patterns` rules can call a shared engine boundary.
-* VNI has a rime-aware shared-engine path for tones, vowel diacritics, `d`/`đ`, common tone-placement structures, `qu`, `gi`, checked endings, repeated-key escape, and case-preserving output.
-* Telex, VIQR, and VIQR* have Phase 4 adapter mappings over the shared engine.
-* VIQR and VIQR* support backslash escape for covered command keys.
-* VIQR and VIQR* support shifted punctuation command keys through a `patterns_shift` bridge.
-* VIQR and VIQR* support delayed d-stroke input such as `dacd' -> đác`.
-* Telex `z` removes tone only, matching VNI `0`, and preserves vowel diacritics.
-* Telex supports repeated-key escape for covered tone, vowel-diacritic, and `d`/`đ` commands.
-* Telex supports delayed vowel-diacritic commands such as `thayas -> thấy`.
-* Telex supports delayed d-stroke input such as `dacds -> đác`.
-* Telex supports the covered A-family switch sequence `haamw -> hăm`.
-* Telex supports the covered O-family switch sequence `hoposw -> hớp`.
-* Telex keeps `w` literal after off-glide candidates such as `thayw`.
-* Telex supports the covered `uo`-family switch sequence `huopwso -> huốp`.
-* Telex supports the covered `ua`-family horn sequence `huaws -> hứa`.
-* Telex keeps final `o` literal in covered rimes such as `hoaos -> hoáo` and `hoeos -> hoéo`.
-* Telex leaves standalone `w`, `[`, and `]` as literal input; `w` still works as a horn command when it can transform an existing candidate.
-* Phase 5 hardening has started with tone reflow after ordinary letter extension, such as `to1an -> toán` and `hoa2n -> hoàn`.
-* Phase 5 also exposes reformed tone-placement variants, such as `vi-vni-reformed`, while keeping traditional placement as the default.
-* Phase 5 structural-validation hardening passes through covered foreign-like Telex runs whose candidate structure is impossible as one Vietnamese orthographic syllable, such as `droid`, `david`, `browser`, `nodejs`, and `washington`.
-* Phase 5 uses a finite rime recognizer for covered Vietnamese composition states, with separate handling for complete rimes and composition precursors across the covered IÊ/YÊ/UYÊ, UÔ/ƯƠ, UÂ, and e/ê precursor families.
-* Phase 5 has pure test audit coverage for the complete rimes in the current Hieu Thi–based composition inventory, plus representative manual typing smoke coverage through the adapters.
-* Phase 5 covers additional e/ê precursor gaps, such as `d9ieu62 -> điều` and `nghech61 -> nghếch`.
-* Semantic transform output is rejected when the resulting rime is unrecognized, so invalid transformations pass through rather than being rendered.
-* Telex delayed-command disambiguation prefers recognized literal structure, so covered rimes such as `oao` and `oeo` no longer need hard-coded adapter exceptions.
-* Telex `w` handling relies on shared delayed-command validation plus horn fallback, without a separate `ua` adapter precheck.
-* The current Phase 5 boundary is a hardened composition engine for covered behavior, not a spell checker, broad foreign word detector, minority language orthography model, or upstream submission package.
-
-Do not assume broader Vietnamese production behavior exists unless it is present in the current branch and covered by tests. Broader coverage, further recognizer expansion, and engine documentation are still Phase 5 work.
+VNI remains the preferred method for examples and early method-specific work
+when only one path is needed.
 
 ## Required reading
 
-Before changing Vietnamese-specific behavior, architecture, or tests, read:
+Before changing Vietnamese-specific behavior, architecture, tests, or
+documentation, read:
 
 * `docs/vi/README.md`
+* `docs/vi/status.md`
 * `docs/vi/requirements.md`
 * `docs/vi/architecture.md`
+* `docs/vi/algorithm.md`
 * `docs/vi/orthographic-model.md`
 * `docs/vi/testing.md`
 * `docs/vi/terminology.md`
 
-These documents define the intended project model.
+These documents define the intended project model. When implementation and
+documentation disagree, do not silently choose one. Identify the discrepancy,
+update the right document, and keep code, tests, and docs aligned.
 
-When implementation and documentation disagree, do not silently choose one. Identify the discrepancy, update the right document, and keep the code and tests aligned.
+## Source-of-truth map
 
-## Revised phase plan
+Use the docs by ownership:
 
-The active plan is:
+* `README.md` for the short project map.
+* `status.md` for phase history, current boundary, known limits, and deferred
+  work.
+* `requirements.md` for user-visible behavior.
+* `architecture.md` for software boundaries, packaging, and jQuery.IME
+  integration.
+* `algorithm.md` for the current engine flow.
+* `orthographic-model.md` for Vietnamese written structure.
+* `testing.md` for test layout and commands.
+* `terminology.md` for canonical vocabulary.
 
-* Phase 0 – baseline and project specification.
-* Phase 1 – jQuery.IME integration spike.
-* Phase 2 – shared engine vertical slice with VNI.
-* Phase 3 – complete shared Vietnamese behavior for the VNI path.
-* Phase 4 – Telex and VIQR adapters.
-* Phase 5 – engine hardening and documentation.
+Do not place major architectural decisions only in source comments.
 
-The next implementation work should normally be Phase 5: broader coverage, manual typing hardening, further structural-validation tuning, engine simplification where useful, and documentation polish. Playground work and upstream submission preparation are outside the current Phase 5 scope unless the project direction explicitly brings them back.
+## Core architectural constraints
 
-## Architectural constraints
+Use one shared Vietnamese engine. Do not implement VNI, Telex, VIQR, and VIQR*
+as independent transformation systems.
 
-### Use one shared Vietnamese engine
-
-Do not implement VNI, Telex, and VIQR as three independent Vietnamese transformation systems.
-
-Input-method-specific code should primarily translate input keys into shared semantic commands.
-
-Conceptually:
+Input-method-specific code should primarily translate input keys into shared
+semantic commands:
 
 ```text
 VNI 1
 Telex s
 VIQR '
 VIQR* '
-    ->
-APPLY_TONE(ACUTE)
+    -> apply tone acute
 ```
 
-Parsing, tone placement, vowel-diacritic handling, Unicode rendering, `qu`, `gi`, and other Vietnamese orthographic logic must be shared.
+The shared engine owns Vietnamese parsing, structural validation, tone
+placement, vowel-diacritic behavior, `qu`, `gi`, Unicode rendering, and
+post-transform validation.
 
-### Keep the engine host-independent
+Keep the engine host-independent. Core Vietnamese logic must not depend on DOM
+APIs, jQuery selectors, keyboard events, caret manipulation, or editable
+elements.
 
-Core Vietnamese logic should not depend directly on:
+Use rendered text near the caret as the main composition state. Do not rely on
+persistent raw-key history unless a specific behavior demonstrably requires it
+and has focused tests.
 
-* DOM APIs;
-* jQuery selectors;
-* keyboard events;
-* caret manipulation;
-* editable-element handling.
+Treat tone semantically. Do not implement tone relocation as a fundamental
+operation. Parse the current structure, preserve the semantic tone, update the
+structure, recalculate tone placement, then render.
 
-jQuery.IME remains responsible for host integration.
+Distinguish:
 
-The Vietnamese engine should be directly testable without simulating browser input wherever practical.
-
-### Prefer semantic transformations
-
-Represent Vietnamese operations semantically.
-
-Examples:
-
-* applying a tone;
-* removing a tone;
-* applying a vowel diacritic;
-* applying d-stroke.
-
-Do not model Vietnamese behavior primarily as direct character substitutions.
-
-### Avoid large ordered regex grammars
-
-Regular expressions are allowed for small, local tasks.
-
-Do not encode Vietnamese orthographic semantics as a large ordered list of overlapping regex rules whose ordering determines correctness.
-
-If parsing is ambiguous, resolve the ambiguity explicitly through the orthographic model.
-
-### Use rendered text as the main state
-
-Prefer reconstructing the current Vietnamese composition state from rendered text near the caret.
-
-Do not rely on persistent raw-keystroke history unless a specific behavior demonstrably requires it.
-
-jQuery.IME `context` should not become the primary Vietnamese composition state.
-
-### Treat tone semantically
-
-Tone must be modeled independently from the Unicode character that currently carries the visible tone mark.
-
-Do not implement tone relocation as a fundamental semantic operation.
-
-Use this model instead:
-
-```text
-parse current structure
--> preserve semantic tone
--> change structure
--> recalculate tone placement
--> render
-```
-
-### Distinguish state types
-
-The parser must distinguish:
-
-* complete Vietnamese orthographic syllables;
+* recognized complete composition structures;
 * valid intermediate composition states;
 * unrecognized input.
 
-Do not reject a composition merely because its current surface form is not valid final Vietnamese orthography.
+Keep structural and lexical validity separate. VIME is not a dictionary or
+lexical spell checker.
 
-### Keep structural and lexical validity separate
+## jQuery.IME integration constraints
 
-VIME is not a Vietnamese dictionary or lexical spell checker.
+Avoid modifying jQuery.IME core. A core change should only be considered when:
 
-Do not introduce a dictionary dependency merely to determine ordinary Vietnamese composition behavior.
-
-## Terminology
-
-Use the canonical terminology in `docs/vi/terminology.md`.
-
-Important terms:
-
-* use `tone`, not `accent`;
-* use `tone mark` for the visible mark;
-* use `vowel diacritic` for circumflex, breve, and horn;
-* use `nucleus`, `onset`, `rime`, and `ending` according to the project model;
-* use `traditional tone placement` and `reformed tone placement`, not `old style` and `new style`.
-
-Do not introduce competing terminology without updating `docs/vi/terminology.md`.
-
-## Tone placement
-
-The initial default policy is:
-
-```text
-TRADITIONAL
-```
-
-with examples such as:
-
-```text
-hòa
-xóa
-hủy
-```
-
-The shared engine supports reformed policy variants where open `oa`, `oe`, and `uy` rimes place tone on the final vowel:
-
-```text
-hoà
-khoẻ
-huỷ
-```
-
-Do not hard-code tone-placement policy inside VNI, Telex, VIQR, or VIQR* adapters.
-
-## jQuery.IME core
-
-Avoid modifying jQuery.IME core.
-
-A core change should only be considered when:
-
-1. a concrete Vietnamese requirement cannot be implemented correctly through existing extension mechanisms;
+1. a concrete Vietnamese requirement cannot be implemented correctly through
+   existing extension mechanisms;
 2. the limitation can be demonstrated with a minimal reproducible case;
 3. the blocker is documented;
-4. project-level design discussion is appropriate before substantial work proceeds.
+4. project-level design discussion is appropriate before substantial work
+   proceeds.
 
-If a core limitation is discovered, report it rather than immediately working around it with fragile Vietnamese-specific behavior.
-
-## Packaging
-
-The Phase 1 spike confirmed that the smallest jQuery.IME-compatible packaging is one shared Vietnamese rule source:
+The current jQuery.IME-compatible package is one shared Vietnamese rule source:
 
 ```text
 rules/vi/vi.js
@@ -251,67 +124,52 @@ vi-viqr-star-reformed
 
 all pointing to that source.
 
-Keep this packaging until tests or implementation size prove that a split is worth the additional loader complexity.
+Keep this packaging until tests or implementation size prove that a split is
+worth the additional loader complexity.
 
 ## Testing rules
 
-Read `docs/vi/testing.md` before changing test infrastructure.
-
-Keep VIME unit and adapter tests in:
+Keep VIME-specific unit and adapter tests in:
 
 ```text
 test/jquery.ime.vi.test.js
 ```
 
-Keep VIME fixture data in:
+Keep VIME-specific fixture data in:
 
 ```text
 test/jquery.ime.vi.test.fixtures.js
 ```
 
-Do not add Vietnamese-specific QUnit modules or fixture entries to the generic jQuery.IME test files unless a future integration review explicitly asks for that layout.
+Use pure engine tests for parser behavior, transformations, validation, tone
+placement, Unicode handling, rendering, and recognizer inventory audits.
 
-Use pure engine tests for:
+Use jQuery.IME integration fixtures for the host boundary and representative
+complete typing sequences. Do not run large grammar corpora through simulated
+DOM typing when direct engine tests are sufficient.
 
-* parser behavior;
-* tone transformations;
-* vowel-diacritic transformations;
-* tone placement;
-* Unicode handling;
-* rendering;
-* validation.
+A confirmed bug should receive a deterministic automated regression test. Prefer
+the smallest test that reproduces the actual failure.
 
-Use jQuery.IME integration fixtures for the host boundary and representative complete typing sequences.
+Before a substantial change is considered complete, run focused Vietnamese
+tests:
 
-Do not run large grammar corpora through simulated DOM typing when direct engine tests are sufficient.
+```bash
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+```
 
-### Regression tests
-
-A confirmed bug should receive a deterministic automated regression test.
-
-Prefer the smallest test that reproduces the actual failure.
-
-### Preserve repository tests
-
-Before a substantial change is considered complete, run focused Vietnamese tests.
-
-Before milestones or broad integration changes, run the full relevant repository suite:
+Before milestones or broad integration changes, run the full relevant
+repository suite:
 
 ```bash
 npx grunt test
 ```
 
-If full lint/default tasks fail because of unrelated pre-existing issues, keep touched-file lint clean and document the broader failure.
+If the full suite fails because of unrelated pre-existing issues, keep
+touched-file checks clean and document the broader failure.
 
-### Do not weaken tests
-
-Do not:
-
-* remove unrelated assertions;
-* skip failing repository tests without explanation;
-* relax Vietnamese requirements merely because the current implementation is difficult.
-
-If a test and the specification genuinely disagree, identify the specification issue explicitly and update the relevant doc.
+Do not weaken tests, skip failing repository tests, or relax Vietnamese
+requirements merely because the current implementation is difficult.
 
 ## Implementation workflow
 
@@ -326,29 +184,39 @@ For non-trivial work:
 7. inspect the diff for unrelated changes;
 8. run broader regression tests when appropriate.
 
-Do not rewrite unrelated jQuery.IME code while implementing Vietnamese support.
-
 When asked only to analyze or plan, do not modify files.
 
-When asked to implement a scoped task, stay within that scope unless a blocking dependency requires a small additional change.
+When asked to implement a scoped task, stay within that scope unless a blocking
+dependency requires a small additional change.
+
+## Terminology
+
+Use the canonical terms in `docs/vi/terminology.md`.
+
+Important terms:
+
+* use `tone`, not `accent`;
+* use `tone mark` for the visible mark;
+* use `vowel diacritic` for circumflex, breve, and horn;
+* use `nucleus`, `onset`, `rime`, and `ending` according to the project model;
+* use `traditional tone placement` and `reformed tone placement`, not `old
+  style` and `new style`.
+
+Do not introduce competing terminology without updating `docs/vi/terminology.md`.
 
 ## Documentation maintenance
 
-Update documentation when an implementation decision changes documented architecture or behavior.
+Update documentation when an implementation decision changes documented
+architecture or behavior.
 
-Use:
+Do not duplicate large feature inventories across docs. Put current project
+status in `status.md`, user-visible rules in `requirements.md`, algorithmic
+flow in `algorithm.md`, and software boundaries in `architecture.md`.
 
-* `requirements.md` for user-visible behavior;
-* `orthographic-model.md` for Vietnamese written structure;
-* `architecture.md` for software boundaries;
-* `testing.md` for testing strategy and commands;
-* `terminology.md` for names.
+## Integration mindset
 
-Do not place major architectural decisions only in source-code comments.
-
-## jQuery.IME integration mindset
-
-Keep the implementation understandable to future jQuery.IME maintainers and VIME contributors who may not know Vietnamese.
+Keep the implementation understandable to future jQuery.IME maintainers and
+VIME contributors who may not know Vietnamese.
 
 Prefer:
 
@@ -357,6 +225,4 @@ Prefer:
 * readable tests;
 * small commits;
 * documented behavior;
-* minimal core impact.
-
-The implementation should be understandable from code, tests, and documentation without requiring knowledge of historical Vietnamese input-method implementations.
+* minimal jQuery.IME core impact.

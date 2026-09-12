@@ -1,6 +1,9 @@
 # VIME requirements
 
-This document defines the user-visible behavior required for Vietnamese input methods in jQuery.IME. It says what the input methods must do; `architecture.md` says how the code is structured.
+This document defines the user-visible behavior required for Vietnamese input
+methods in jQuery.IME. It says what the input methods must do;
+`architecture.md` says how the code is structured, and `algorithm.md` explains
+the current engine flow.
 
 ## Requirement levels
 
@@ -11,13 +14,13 @@ This document defines the user-visible behavior required for Vietnamese input me
 
 ## Supported input methods
 
-The first stable implementation MUST support:
+The implementation MUST support:
 
 * VNI
 * Telex
 * VIQR
 
-The current implementation also supports:
+The implementation also supports:
 
 * VIQR* as a VIQR variant using `*` for horn
 * reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*
@@ -37,11 +40,14 @@ VIQR* (đặt dấu kiểu mới)
 
 All Vietnamese input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
 
-## Current implementation boundary
+## Implementation boundary
 
-The current Phase 5 implementation SHOULD be treated as a hardened composition engine for covered modern Vietnamese typing behavior. It supports practical evaluation of VNI, Telex, VIQR, VIQR*, and their reformed tone placement variants in the current jQuery.IME example and test infrastructure.
+VIME SHOULD be treated as a composition engine for covered modern Vietnamese
+typing behavior.
 
-The current implementation MUST NOT be described as a Vietnamese spell checker, a dictionary backed validator, a broad foreign word detector, a minority language orthography model, or an upstream ready package. Those scopes require explicit future design work.
+VIME MUST NOT be described as a Vietnamese spell checker, a dictionary-backed
+validator, a broad foreign-word detector, a minority-language orthography model,
+or an upstream-ready package. Those scopes require explicit future design work.
 
 ## Core composition behavior
 
@@ -59,17 +65,22 @@ The implementation MUST NOT require a dictionary to decide ordinary typing behav
 
 ## Semantic commands
 
-Input-method adapters MUST translate method-specific keys into these semantic commands where applicable:
+Input-method adapters MUST translate method-specific keys into these shared
+semantic commands where applicable:
 
 ```text
 APPLY_TONE(tone)
 REMOVE_TONE
 APPLY_VOWEL_DIACRITIC(vowelDiacritic)
 APPLY_D_STROKE
-ESCAPE_OR_LITERAL
 ```
 
 The shared engine, not the adapter, is responsible for applying those commands to the current candidate.
+
+Input-method adapters MAY also return adapter-level literal or escape output
+where the typing convention requires it, such as VIQR backslash escape. That
+literal output is not a shared semantic command and does not go through the
+engine transformer.
 
 ## VNI mapping
 
@@ -205,7 +216,7 @@ Telex `z` MUST remove only the semantic tone, matching VNI `0`. It MUST preserve
 
 The VIQR adapter MUST support ordinary VIQR-style commands for tones, vowel diacritics, and `đ`.
 
-The Phase 4 VIQR adapter supports this mapping:
+The VIQR adapter supports this mapping:
 
 | Key or sequence | Semantic command or adapter behavior |
 | --- | --- |
@@ -331,7 +342,7 @@ hớp6 -> hốp
 
 Broad replacement among unrelated vowel-diacritic forms remains UNRESOLVED. Do not implement arbitrary replacement behavior until the rule is specified with examples.
 
-The first VNI implementation supports the narrow `uô <-> ươ` family switch needed for equivalent composition order:
+The engine supports the narrow `uô <-> ươ` family switch needed for equivalent composition order:
 
 ```text
 huop61  -> huốp
@@ -386,7 +397,7 @@ huynh2 -> huỳnh
 
 The engine MUST support commands entered after some or all of the current candidate has been typed. Equivalent typing orders SHOULD converge when they express the same valid Vietnamese result.
 
-Examples to cover during implementation:
+Representative composition-order cases include:
 
 ```text
 tone before vowel diacritic
@@ -501,7 +512,9 @@ The implementation SHOULD represent checked syllables ending in:
 
 Standard checked syllables are structurally compatible only with acute and dot tones.
 
-For the first VNI implementation, incompatible tone commands on checked syllables MUST pass through unchanged. This avoids rendering nonstandard checked-tone forms while keeping the user's literal command available.
+Incompatible tone commands on checked syllables MUST pass through unchanged. This
+avoids rendering nonstandard checked-tone forms while keeping the user's literal
+command available.
 
 ## Unicode behavior
 
@@ -515,11 +528,17 @@ Normal composition MUST NOT produce malformed combining-mark sequences or duplic
 
 ## Non-Vietnamese text
 
-The first priority is correct Vietnamese composition. Conservative protection against all foreign words, code identifiers, or technical text is not required for the first engine slice.
+The first priority is correct Vietnamese composition. Conservative protection
+against all foreign words, code identifiers, or technical text is not required
+for the current engine boundary.
 
-The architecture SHOULD allow stricter structural validation later, but VIME MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental transformations.
+The architecture SHOULD allow stricter structural validation later, but VIME
+MUST NOT add a Vietnamese dictionary dependency merely to avoid accidental
+transformations.
 
-Phase 5 structural-validation hardening SHOULD pass through a continuous Latin candidate when its written structure is impossible as one Vietnamese orthographic syllable in the current model.
+Structural validation SHOULD pass through a continuous Latin candidate when its
+written structure is impossible as one Vietnamese orthographic syllable in the
+current model.
 
 Covered Telex examples:
 
