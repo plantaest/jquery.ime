@@ -1534,6 +1534,49 @@
 		return resultFromState( nextState, null, tonePlacement );
 	}
 
+	function promoteOpenUoContinuation( state, tonePlacement ) {
+		var i, firstToken, secondToken, nextState, result,
+			rimeStart = state.structure ? state.structure.rimeStart : 0;
+
+		if ( !state.structure ) {
+			prepareState( state, tonePlacement );
+			rimeStart = state.structure ? state.structure.rimeStart : 0;
+		}
+
+		if ( !state.structure || state.structure.rime === 'uơ' ) {
+			return null;
+		}
+
+		for ( i = state.tokens.length - 2; i >= rimeStart; i-- ) {
+			firstToken = state.tokens[ i ];
+			secondToken = state.tokens[ i + 1 ];
+
+			if (
+				firstToken.isVowel &&
+				secondToken.isVowel &&
+				firstToken.base.toLowerCase() === 'u' &&
+				secondToken.base.toLowerCase() === 'o' &&
+				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.HORN &&
+				!isIgnoredVowelPair( state, i )
+			) {
+				nextState = cloneState( state );
+				nextState.tokens[ i ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+				result = resultFromState( nextState, null, tonePlacement );
+
+				if (
+					result.state.status !== Vietnamese.StateType.UNRECOGNIZED &&
+					result.state.structure &&
+					result.state.structure.rime.indexOf( 'ươ' ) === 0
+				) {
+					return result;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	function removeVowelDiacritic( state, target, literal, tonePlacement ) {
 		var nextState = cloneState( state );
 
@@ -1987,7 +2030,7 @@
 		},
 
 		/**
-		 * Re-render a toned candidate after ordinary letters extend it.
+		 * Re-render a candidate after ordinary letters extend it.
 		 *
 		 * @param {string} candidate Candidate text near the caret.
 		 * @param {Object} [options] Engine options.
@@ -1995,9 +2038,23 @@
 		 * @return {Object} Result object with handled and output fields.
 		 */
 		reflowCandidate: function ( candidate, options ) {
-			var output,
+			var output, promotionResult,
 				tonePlacement = options && options.tonePlacement,
 				state = parseCandidate( candidate, tonePlacement );
+
+			promotionResult = promoteOpenUoContinuation( state, tonePlacement );
+			if (
+				promotionResult &&
+				promotionResult.state.status !== Vietnamese.StateType.UNRECOGNIZED
+			) {
+				output = renderCandidate( promotionResult.state, tonePlacement );
+				if ( output !== normalizeText( candidate, 'NFC' ) ) {
+					return {
+						handled: true,
+						output: output
+					};
+				}
+			}
 
 			if (
 				state.status === Vietnamese.StateType.UNRECOGNIZED ||

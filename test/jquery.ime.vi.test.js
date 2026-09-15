@@ -1115,6 +1115,29 @@
 			},
 			'Intermediate tháy is already rendered at its current tone target'
 		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'nguơi' ),
+			{
+				handled: true,
+				output: 'ngươi'
+			},
+			'uơ plus a covered continuation promotes to ươ without requiring a tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'nguời' ),
+			{
+				handled: true,
+				output: 'người'
+			},
+			'uơ plus a covered continuation promotes to ươ while preserving tone'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'huơ' ),
+			{
+				handled: false
+			},
+			'Open uơ remains distinct from ươ'
+		);
 	} );
 
 	QUnit.module( 'VIME – Tone placement', {
@@ -1321,9 +1344,14 @@
 			[ 'vi-vni', 'huop617', 'hướp' ],
 			[ 'vi-vni', 'huop716', 'huốp' ],
 			[ 'vi-vni', 'lo6o62ng', 'lôồng' ],
+			[ 'vi-vni', 'nguo7i2', 'người' ],
+			[ 'vi-vni', 'nguo72i', 'người' ],
 			[ 'vi-telex', 'thayas', 'thấy' ],
 			[ 'vi-telex', 'thuongwf', 'thường' ],
 			[ 'vi-telex', 'huopwso', 'huốp' ],
+			[ 'vi-telex', 'nguowi', 'ngươi' ],
+			[ 'vi-telex', 'nguowif', 'người' ],
+			[ 'vi-telex', 'nguowfi', 'người' ],
 			[ 'vi-telex', 'haamw', 'hăm' ],
 			[ 'vi-telex', 'hoposw', 'hớp' ],
 			[ 'vi-telex', 'huaws', 'hứa' ],
@@ -1337,6 +1365,8 @@
 			[ 'vi-telex', 'washington', 'washington' ],
 			[ 'vi-viqr', 'tie^\'ng', 'tiếng' ],
 			[ 'vi-viqr', 'ddu+o+`ng', 'đường' ],
+			[ 'vi-viqr', 'nguo+i`', 'người' ],
+			[ 'vi-viqr', 'nguo+`i', 'người' ],
 			[ 'vi-viqr', 'dacd\'', 'đác' ],
 			[ 'vi-viqr', 'tan\\?', 'tan?' ],
 			[ 'vi-viqr-star', 'ddu*o*`ng', 'đường' ],

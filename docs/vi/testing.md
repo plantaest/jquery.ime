@@ -197,14 +197,15 @@ hoan2 -> hoàn
 huynh2 -> huỳnh
 ```
 
-### Tone reflow
+### Candidate reflow
 
-Tone reflow should be tested through both pure engine tests and representative
-fixtures:
+Candidate reflow should be tested through both pure engine tests and
+representative fixtures:
 
 ```text
 to1an -> toán
 hoa2n -> hoàn
+nguowfi -> người
 ```
 
 Pure engine tests should assert that reflow does not report handled when

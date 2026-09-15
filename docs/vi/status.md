@@ -18,6 +18,8 @@ This means:
 * tone reflow, post-transform validation, repeated-key escape, and Telex
   delayed-command disambiguation are documented and tested for the current
   scope;
+* open `uơ` remains distinct but promotes to covered ƯƠ-family rimes when
+  later continuation makes that structure available;
 * the project has enough documentation for a contributor to understand the
   current algorithm without reverse-engineering `rules/vi/vi.js` from scratch.
 
@@ -102,6 +104,7 @@ Phase 5 hardened the shared engine and documented the current algorithm:
 * finite rime recognizer with complete, composable, and prefix statuses;
 * post-transform structural validation;
 * tone reflow after ordinary letter extension;
+* `uơ` continuation promotion into covered ƯƠ-family rimes;
 * traditional and reformed tone-placement variants;
 * foreign-like Telex pass-through for structurally impossible candidates;
 * recognized-literal disambiguation for Telex delayed commands;

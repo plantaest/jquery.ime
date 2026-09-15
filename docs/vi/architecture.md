@@ -221,7 +221,7 @@ engine.transformCandidate( candidate, command, {
 } )
 ```
 
-Tone reflow after ordinary letter extension:
+Candidate reflow after ordinary letter extension:
 
 ```javascript
 engine.reflowCandidate( candidate, {

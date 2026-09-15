@@ -356,10 +356,14 @@ semantic state
 Case is preserved from the original token bases. `D` with d-stroke renders as
 `Đ`; `d` with d-stroke renders as `đ`.
 
-## Tone reflow
+## Candidate reflow
 
 When the adapter decodes no command, it may still ask the engine to re-render
-the candidate. Reflow only handles candidates that already have a semantic tone.
+the candidate. Reflow handles two narrow cases:
+
+* tone reflow for candidates that already have a semantic tone;
+* structural promotion from open `uơ` into covered ƯƠ-family rimes.
+
 If rendering would not change the text, the engine reports `handled: false`.
 
 This covers ordinary extension after an early tone command:
@@ -370,11 +374,17 @@ to1an   -> toán
 
 hoa2    -> hòa
 hoa2n   -> hoàn
+
+nguo7   -> nguơ
+nguo7i  -> ngươi
+
+nguo72  -> nguờ
+nguo72i -> người
 ```
 
 The same mechanism is structural rather than lexical. It does not decide
 whether a word exists; it only re-renders a recognized candidate whose tone
-target changes after more letters are typed.
+target or narrow `uơ` structure changes after more letters are typed.
 
 ## Telex disambiguation
 

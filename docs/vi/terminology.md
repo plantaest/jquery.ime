@@ -99,6 +99,7 @@ A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + A
 | `escape behavior` | Behavior that lets users type literal command characters. |
 | `repeated-key escape` | Escape behavior where repeating a command produces literal input, such as VNI `a1 -> á`, `a11 -> a1`. |
 | `tone reflow` | Re-rendering an already toned candidate after ordinary typed letters change its parsed structure and therefore its tone target. |
+| `structural promotion` | Re-rendering a narrow intermediate structure into a covered composition family after ordinary typed letters extend it, such as `nguơi -> ngươi`. |
 | `delayed command` | A command key typed after more rime material, such as Telex `thayas -> thấy` or VNI `dac91 -> đác`. |
 | `recognized literal structure` | A candidate that already parses as a complete structure in the current composition model, so an ambiguous Telex key may remain literal. |
 | `post-transform validation` | Re-analyzing and reclassifying the transformed semantic state before rendering it. If the result is unrecognized, the adapter passes the original input through. |

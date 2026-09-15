@@ -153,6 +153,18 @@ huop6 -> huôp
 huop7 -> hươp
 ```
 
+If an open `uơ` result later gains a covered ƯƠ-family continuation, the engine
+promotes the first vowel as well:
+
+```text
+nguơi -> ngươi
+nguời -> người
+```
+
+This keeps open `uơ` available while avoiding final-looking `uơi`, `uơu`,
+`uơm`, `uơn`, `uơng`, `uơc`, `uơt`, and `uơp` structures when the corresponding
+`ươ...` rime is covered.
+
 The unmarked `ua` precursor can become `ưa` when horn is explicitly applied to the `u` before `a`:
 
 ```text

@@ -130,6 +130,9 @@ thuongw  -> thương
 thuongwf -> thường
 huopwso  -> huốp
 huaws    -> hứa
+nguowi   -> ngươi
+nguowif  -> người
+nguowfi  -> người
 tieengs  -> tiếng
 Vieetj   -> Việt
 dduwowngf -> đường
@@ -360,6 +363,25 @@ huop716 -> huốp
 hua7    -> hưa
 ```
 
+Open `uơ` MUST remain distinct from `ươ` when no continuation follows:
+
+```text
+huo7 -> huơ
+huow -> huơ
+```
+
+When open `uơ` gains a covered ƯƠ-family continuation, the engine SHOULD promote it to `ươ`:
+
+```text
+nguowi   -> ngươi
+nguowif  -> người
+nguowfi  -> người
+nguo7i2  -> người
+nguo72i  -> người
+nguo+i`  -> người
+nguo+`i  -> người
+```
+
 This does not imply broad arbitrary replacement among all vowel-diacritic forms.
 
 ## Tone placement
@@ -424,6 +446,8 @@ gieng61 -> giếng
 dac91  -> đác
 huop617 -> hướp
 huop716 -> huốp
+nguo7i2 -> người
+nguo72i -> người
 to1an  -> toán
 hoa2n  -> hoàn
 ```
