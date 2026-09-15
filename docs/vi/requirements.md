@@ -420,6 +420,21 @@ nguo+i`  -> người
 nguo+`i  -> người
 ```
 
+When an already horned `ư` gains `o` as the start of a covered ƯƠ-family
+continuation, the engine SHOULD promote `ưo` to `ươ`:
+
+```text
+tu7oi  -> tươi
+tu7oi1 -> tưới
+twoi   -> tươi
+tuwoi  -> tươi
+tu+oi  -> tươi
+tu*oi  -> tươi
+```
+
+Bare `ưo` SHOULD wait for additional rime material before promotion so explicit
+orders such as VIQR `ddu+o+` can still compose `ươ`.
+
 This does not imply broad arbitrary replacement among all vowel-diacritic forms.
 
 ## Tone placement

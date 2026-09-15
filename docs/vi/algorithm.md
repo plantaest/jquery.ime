@@ -367,7 +367,8 @@ When the adapter decodes no command, it may still ask the engine to re-render
 the candidate. Reflow handles two narrow cases:
 
 * tone reflow for candidates that already have a semantic tone;
-* structural promotion from open `uơ` into covered ƯƠ-family rimes.
+* structural promotion from narrow `uơ`/`ưo` precursors into covered
+  ƯƠ-family rimes.
 
 If rendering would not change the text, the engine reports `handled: false`.
 
@@ -385,11 +386,14 @@ nguo7i  -> ngươi
 
 nguo72  -> nguờ
 nguo72i -> người
+
+tu7o    -> tưo
+tu7oi   -> tươi
 ```
 
 The same mechanism is structural rather than lexical. It does not decide
 whether a word exists; it only re-renders a recognized candidate whose tone
-target or narrow `uơ` structure changes after more letters are typed.
+target or narrow ƯƠ-family precursor changes after more letters are typed.
 
 ## Telex disambiguation
 

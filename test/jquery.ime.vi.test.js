@@ -1144,6 +1144,29 @@
 			'uơ plus a covered continuation promotes to ươ while preserving tone'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'tưo' ),
+			{
+				handled: false
+			},
+			'Bare ưo waits for more rime material before promotion'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'tưoi' ),
+			{
+				handled: true,
+				output: 'tươi'
+			},
+			'ưo plus a covered continuation promotes to ươ'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.reflowCandidate( 'tứoi' ),
+			{
+				handled: true,
+				output: 'tưới'
+			},
+			'ưo promotion preserves tone and reflows placement'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.reflowCandidate( 'huơ' ),
 			{
 				handled: false
@@ -1358,11 +1381,15 @@
 			[ 'vi-vni', 'lo6o62ng', 'lôồng' ],
 			[ 'vi-vni', 'nguo7i2', 'người' ],
 			[ 'vi-vni', 'nguo72i', 'người' ],
+			[ 'vi-vni', 'tu7oi', 'tươi' ],
+			[ 'vi-vni', 'tu7oi1', 'tưới' ],
 			[ 'vi-telex', 'w', 'ư' ],
 			[ 'vi-telex', 'ww', 'w' ],
 			[ 'vi-telex', 'tw', 'tư' ],
 			[ 'vi-telex', 'tww', 'tw' ],
 			[ 'vi-telex', 'uww', 'uw' ],
+			[ 'vi-telex', 'twoi', 'tươi' ],
+			[ 'vi-telex', 'twois', 'tưới' ],
 			[ 'vi-telex', 'thayas', 'thấy' ],
 			[ 'vi-telex', 'thuongwf', 'thường' ],
 			[ 'vi-telex', 'huopwso', 'huốp' ],
@@ -1385,14 +1412,18 @@
 			[ 'vi-telex-simple', 'thayw', 'thayw' ],
 			[ 'vi-telex-simple', 'thuongwf', 'thường' ],
 			[ 'vi-telex-simple', 'nguowif', 'người' ],
+			[ 'vi-telex-simple', 'tuwoi', 'tươi' ],
 			[ 'vi-telex-simple', 'washington', 'washington' ],
 			[ 'vi-viqr', 'tie^\'ng', 'tiếng' ],
 			[ 'vi-viqr', 'ddu+o+`ng', 'đường' ],
 			[ 'vi-viqr', 'nguo+i`', 'người' ],
 			[ 'vi-viqr', 'nguo+`i', 'người' ],
+			[ 'vi-viqr', 'tu+oi', 'tươi' ],
+			[ 'vi-viqr', 'tu+oi\'', 'tưới' ],
 			[ 'vi-viqr', 'dacd\'', 'đác' ],
 			[ 'vi-viqr', 'tan\\?', 'tan?' ],
 			[ 'vi-viqr-star', 'ddu*o*`ng', 'đường' ],
+			[ 'vi-viqr-star', 'tu*oi', 'tươi' ],
 			[ 'vi-viqr-star', 'o\\*', 'o*' ],
 			[ 'vi-vni-reformed', 'hoa2n', 'hoàn' ],
 			[ 'vi-telex-reformed', 'hoaf', 'hoà' ],

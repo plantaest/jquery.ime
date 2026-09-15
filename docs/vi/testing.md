@@ -209,6 +209,7 @@ representative fixtures:
 to1an -> toán
 hoa2n -> hoàn
 nguowfi -> người
+tu7oi -> tươi
 ```
 
 Pure engine tests should assert that reflow does not report handled when

@@ -1604,7 +1604,7 @@
 		return resultFromState( nextState, null, tonePlacement );
 	}
 
-	function promoteOpenUoContinuation( state, tonePlacement ) {
+	function promoteUoFamilyContinuation( state, tonePlacement ) {
 		var i, firstToken, secondToken, nextState, result,
 			rimeStart = state.structure ? state.structure.rimeStart : 0;
 
@@ -1613,7 +1613,11 @@
 			rimeStart = state.structure ? state.structure.rimeStart : 0;
 		}
 
-		if ( !state.structure || state.structure.rime === 'uơ' ) {
+		if (
+			!state.structure ||
+			state.structure.rime === 'uơ' ||
+			state.structure.rime === 'ưo'
+		) {
 			return null;
 		}
 
@@ -1626,12 +1630,24 @@
 				secondToken.isVowel &&
 				firstToken.base.toLowerCase() === 'u' &&
 				secondToken.base.toLowerCase() === 'o' &&
-				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.HORN &&
 				!isIgnoredVowelPair( state, i )
 			) {
-				nextState = cloneState( state );
-				nextState.tokens[ i ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+				if (
+					firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
+					secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.HORN
+				) {
+					nextState = cloneState( state );
+					nextState.tokens[ i ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+				} else if (
+					firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.HORN &&
+					secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE
+				) {
+					nextState = cloneState( state );
+					nextState.tokens[ i + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+				} else {
+					continue;
+				}
+
 				result = resultFromState( nextState, null, tonePlacement );
 
 				if (
@@ -2129,7 +2145,7 @@
 				tonePlacement = options && options.tonePlacement,
 				state = parseCandidate( candidate, tonePlacement );
 
-			promotionResult = promoteOpenUoContinuation( state, tonePlacement );
+			promotionResult = promoteUoFamilyContinuation( state, tonePlacement );
 			if (
 				promotionResult &&
 				promotionResult.state.status !== Vietnamese.StateType.UNRECOGNIZED

@@ -216,6 +216,12 @@ Default Telex also supports standalone quick `w -> ư`, while Simple Telex keeps
 standalone `w` literal. Both profiles still use the same orthographic model
 once a key becomes a semantic vowel-diacritic command.
 
+The same ƯƠ-family promotion can also start from an already horned `ư` followed
+by `o` plus more rime material, such as `tu7oi -> tươi` or `twoi -> tươi`.
+Bare `ưo` waits for more input so explicit command orders such as VIQR
+`ddu+o+` can still work. The recognizer still decides whether the promoted rime
+is covered.
+
 Covered extended rimes such as `oao` and `oeo` should keep their final `o` literal during Telex delayed-command detection:
 
 ```text
