@@ -14,12 +14,12 @@
 
 	function getVietnameseDisplayNames() {
 		return {
-			'vi-vni': 'VNI',
 			'vi-telex': 'Telex',
+			'vi-vni': 'VNI',
 			'vi-viqr': 'VIQR',
 			'vi-viqr-star': 'VIQR*',
-			'vi-vni-reformed': 'VNI (đặt dấu kiểu mới)',
 			'vi-telex-reformed': 'Telex (đặt dấu kiểu mới)',
+			'vi-vni-reformed': 'VNI (đặt dấu kiểu mới)',
 			'vi-viqr-reformed': 'VIQR (đặt dấu kiểu mới)',
 			'vi-viqr-star-reformed': 'VIQR* (đặt dấu kiểu mới)'
 		};

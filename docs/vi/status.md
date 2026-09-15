@@ -29,12 +29,12 @@ complete model of every Vietnamese-related orthography.
 The current jQuery.IME source registers:
 
 ```text
-vi-vni
 vi-telex
+vi-vni
 vi-viqr
 vi-viqr-star
-vi-vni-reformed
 vi-telex-reformed
+vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```

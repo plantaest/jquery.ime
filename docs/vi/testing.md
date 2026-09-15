@@ -128,12 +128,12 @@ Tests should assert that Vietnamese methods are registered with the expected
 display labels and metadata:
 
 ```text
-VNI
 Telex
+VNI
 VIQR
 VIQR*
-VNI (đặt dấu kiểu mới)
 Telex (đặt dấu kiểu mới)
+VNI (đặt dấu kiểu mới)
 VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
 ```

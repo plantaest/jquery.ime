@@ -7,14 +7,15 @@ developed inside jQuery.IME.
 
 The supported Vietnamese input methods are:
 
-* VNI;
 * Telex;
+* VNI;
 * VIQR;
 * VIQR* as a VIQR variant using `*` for horn.
 
 All Vietnamese input methods must share one Vietnamese composition engine.
-VNI remains the preferred method for examples and early method-specific work
-when only one path is needed.
+User-facing method order is Telex, VNI, VIQR, then VIQR*. VNI may remain the
+preferred profile for detailed development examples when only one input-method
+path is needed.
 
 ## Required reading
 
@@ -112,12 +113,12 @@ rules/vi/vi.js
 with metadata entries for:
 
 ```text
-vi-vni
 vi-telex
+vi-vni
 vi-viqr
 vi-viqr-star
-vi-vni-reformed
 vi-telex-reformed
+vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```

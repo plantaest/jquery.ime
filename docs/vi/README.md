@@ -6,8 +6,8 @@ rather than separate VNI, Telex, and VIQR implementations.
 
 The current jQuery.IME-hosted implementation supports:
 
-* VNI;
 * Telex;
+* VNI;
 * VIQR;
 * VIQR*;
 * traditional tone placement as the default;
@@ -32,12 +32,12 @@ rules/vi/vi.js
 All Vietnamese input-method metadata entries point to that file:
 
 ```text
-vi-vni
 vi-telex
+vi-vni
 vi-viqr
 vi-viqr-star
-vi-vni-reformed
 vi-telex-reformed
+vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```

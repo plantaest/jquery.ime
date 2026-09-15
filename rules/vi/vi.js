@@ -2043,16 +2043,16 @@
 	// Input method registration.
 
 	registerInputMethod(
-		'vi-vni',
-		'VNI',
-		'Vietnamese VNI input method',
-		decodeVNICommand
-	);
-	registerInputMethod(
 		'vi-telex',
 		'Telex',
 		'Vietnamese Telex input method',
 		decodeTelexCommand
+	);
+	registerInputMethod(
+		'vi-vni',
+		'VNI',
+		'Vietnamese VNI input method',
+		decodeVNICommand
 	);
 	registerInputMethod(
 		'vi-viqr',
@@ -2069,18 +2069,18 @@
 		[ '?', '~', '^', '(', '*' ]
 	);
 	registerInputMethod(
-		'vi-vni-reformed',
-		'VNI (đặt dấu kiểu mới)',
-		'Vietnamese VNI input method with reformed tone placement',
-		decodeVNICommand,
-		null,
-		Vietnamese.TonePlacement.REFORMED
-	);
-	registerInputMethod(
 		'vi-telex-reformed',
 		'Telex (đặt dấu kiểu mới)',
 		'Vietnamese Telex input method with reformed tone placement',
 		decodeTelexCommand,
+		null,
+		Vietnamese.TonePlacement.REFORMED
+	);
+	registerInputMethod(
+		'vi-vni-reformed',
+		'VNI (đặt dấu kiểu mới)',
+		'Vietnamese VNI input method with reformed tone placement',
+		decodeVNICommand,
 		null,
 		Vietnamese.TonePlacement.REFORMED
 	);

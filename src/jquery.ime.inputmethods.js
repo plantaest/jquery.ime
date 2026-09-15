@@ -1102,12 +1102,12 @@
 			name: 'Vèneto',
 			source: 'rules/vec/vec-GVU.js'
 		},
-		'vi-vni': {
-			name: 'VNI',
-			source: 'rules/vi/vi.js'
-		},
 		'vi-telex': {
 			name: 'Telex',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-vni': {
+			name: 'VNI',
 			source: 'rules/vi/vi.js'
 		},
 		'vi-viqr': {
@@ -1118,12 +1118,12 @@
 			name: 'VIQR*',
 			source: 'rules/vi/vi.js'
 		},
-		'vi-vni-reformed': {
-			name: 'VNI (đặt dấu kiểu mới)',
-			source: 'rules/vi/vi.js'
-		},
 		'vi-telex-reformed': {
 			name: 'Telex (đặt dấu kiểu mới)',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-vni-reformed': {
+			name: 'VNI (đặt dấu kiểu mới)',
 			source: 'rules/vi/vi.js'
 		},
 		'vi-viqr-reformed': {
@@ -1985,12 +1985,12 @@
 		vi: {
 			autonym: 'Tiếng Việt',
 			inputmethods: [
-				'vi-vni',
 				'vi-telex',
+				'vi-vni',
 				'vi-viqr',
 				'vi-viqr-star',
-				'vi-vni-reformed',
 				'vi-telex-reformed',
+				'vi-vni-reformed',
 				'vi-viqr-reformed',
 				'vi-viqr-star-reformed'
 			]

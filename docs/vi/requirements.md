@@ -16,8 +16,8 @@ the current engine flow.
 
 The implementation MUST support:
 
-* VNI
 * Telex
+* VNI
 * VIQR
 
 The implementation also supports:
@@ -25,15 +25,15 @@ The implementation also supports:
 * VIQR* as a VIQR variant using `*` for horn
 * reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*
 
-The Vietnamese selector SHOULD show concise method names:
+The Vietnamese selector SHOULD show concise method names in this order:
 
 ```text
-VNI
 Telex
+VNI
 VIQR
 VIQR*
-VNI (đặt dấu kiểu mới)
 Telex (đặt dấu kiểu mới)
+VNI (đặt dấu kiểu mới)
 VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
 ```
@@ -81,50 +81,6 @@ Input-method adapters MAY also return adapter-level literal or escape output
 where the typing convention requires it, such as VIQR backslash escape. That
 literal output is not a shared semantic command and does not go through the
 engine transformer.
-
-## VNI mapping
-
-The VNI adapter MUST support the following mappings:
-
-| Key | Semantic command |
-| --- | --- |
-| `1` | `APPLY_TONE(acute)` |
-| `2` | `APPLY_TONE(grave)` |
-| `3` | `APPLY_TONE(hook)` |
-| `4` | `APPLY_TONE(tilde)` |
-| `5` | `APPLY_TONE(dot)` |
-| `6` | `APPLY_VOWEL_DIACRITIC(circumflex)` |
-| `7` | `APPLY_VOWEL_DIACRITIC(horn)` |
-| `8` | `APPLY_VOWEL_DIACRITIC(breve)` |
-| `9` | `APPLY_D_STROKE` |
-| `0` | `REMOVE_TONE` |
-
-Examples:
-
-```text
-a1 -> á
-a2 -> à
-a3 -> ả
-a4 -> ã
-a5 -> ạ
-
-a6 -> â
-e6 -> ê
-o6 -> ô
-
-o7 -> ơ
-u7 -> ư
-huo7 -> huơ
-hua7 -> hưa
-
-a8 -> ă
-
-d9 -> đ
-D9 -> Đ
-dac9 -> đac
-d9ieu62 -> điều
-nghech61 -> nghếch
-```
 
 ## Telex mapping
 
@@ -219,6 +175,50 @@ The engine SHOULD support covered vowel family switches while preserving tone. F
 Telex delayed command detection SHOULD prefer literal input when the full candidate including the latest key is already a recognized Vietnamese composition structure. For example, `hoaos -> hoáo` and `hoeos -> hoéo` keep the final `o` as part of the rime before the tone key applies, without requiring `oao` and `oeo` to be hard coded in the Telex adapter.
 
 Telex `z` MUST remove only the semantic tone, matching VNI `0`. It MUST preserve vowel diacritics and complex nuclei.
+
+## VNI mapping
+
+The VNI adapter MUST support the following mappings:
+
+| Key | Semantic command |
+| --- | --- |
+| `1` | `APPLY_TONE(acute)` |
+| `2` | `APPLY_TONE(grave)` |
+| `3` | `APPLY_TONE(hook)` |
+| `4` | `APPLY_TONE(tilde)` |
+| `5` | `APPLY_TONE(dot)` |
+| `6` | `APPLY_VOWEL_DIACRITIC(circumflex)` |
+| `7` | `APPLY_VOWEL_DIACRITIC(horn)` |
+| `8` | `APPLY_VOWEL_DIACRITIC(breve)` |
+| `9` | `APPLY_D_STROKE` |
+| `0` | `REMOVE_TONE` |
+
+Examples:
+
+```text
+a1 -> á
+a2 -> à
+a3 -> ả
+a4 -> ã
+a5 -> ạ
+
+a6 -> â
+e6 -> ê
+o6 -> ô
+
+o7 -> ơ
+u7 -> ư
+huo7 -> huơ
+hua7 -> hưa
+
+a8 -> ă
+
+d9 -> đ
+D9 -> Đ
+dac9 -> đac
+d9ieu62 -> điều
+nghech61 -> nghếch
+```
 
 ## VIQR mapping
 
@@ -375,8 +375,8 @@ hủy
 The shared engine MUST keep tone-placement policy independent from input-method key mapping. Reformed placement is exposed through separate `-reformed` input-method variants:
 
 ```text
-vi-vni-reformed
 vi-telex-reformed
+vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```
@@ -592,7 +592,7 @@ Every stable Vietnamese behavior MUST have automated tests.
 
 Core engine behavior SHOULD be tested without DOM keyboard simulation.
 
-jQuery.IME integration fixtures MUST cover representative complete typing sequences for VNI, Telex, VIQR, and VIQR*.
+jQuery.IME integration fixtures MUST cover representative complete typing sequences for all supported Vietnamese input methods.
 
 Tests MUST cover at least:
 

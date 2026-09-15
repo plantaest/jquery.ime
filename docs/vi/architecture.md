@@ -85,12 +85,12 @@ rules/vi/vi.js
 All Vietnamese metadata entries point to this source:
 
 ```text
-vi-vni                -> rules/vi/vi.js
 vi-telex              -> rules/vi/vi.js
+vi-vni                -> rules/vi/vi.js
 vi-viqr               -> rules/vi/vi.js
 vi-viqr-star          -> rules/vi/vi.js
-vi-vni-reformed       -> rules/vi/vi.js
 vi-telex-reformed     -> rules/vi/vi.js
+vi-vni-reformed       -> rules/vi/vi.js
 vi-viqr-reformed      -> rules/vi/vi.js
 vi-viqr-star-reformed -> rules/vi/vi.js
 ```
@@ -131,8 +131,8 @@ input key or key sequence
 Examples:
 
 ```text
-VNI 1    -> apply tone acute
 Telex s  -> apply tone acute
+VNI 1    -> apply tone acute
 VIQR '   -> apply tone acute
 VIQR* '  -> apply tone acute
 ```
@@ -281,8 +281,8 @@ maxKeyLength:
   all Vietnamese methods 16
 
 tonePlacement:
-  vi-vni, vi-telex, vi-viqr, vi-viqr-star traditional
-  vi-vni-reformed, vi-telex-reformed, vi-viqr-reformed, vi-viqr-star-reformed reformed
+  vi-telex, vi-vni, vi-viqr, vi-viqr-star traditional
+  vi-telex-reformed, vi-vni-reformed, vi-viqr-reformed, vi-viqr-star-reformed reformed
 ```
 
 `contextLength = 0` keeps raw key history out of the main composition model.
