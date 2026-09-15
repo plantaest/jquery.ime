@@ -241,6 +241,16 @@ This preserves explicit multi-vowel spellings such as:
 lo6o62ng -> lôồng
 ```
 
+For Telex delayed vowel-diacritic letters, escape from an already rendered
+vowel diacritic is checked before recognized literal structure. This lets
+`ooo -> oo` and `booong -> boong` work even though `ôo` and related extended
+rimes are recognized structures in the composition inventory.
+
+After that escape has produced a literal repeated-vowel run, later Telex
+letters in the same run stay literal. This keeps long `o` sequences usable for
+foreign text and rare literal spellings instead of turning them back into
+extended circumflex composition.
+
 Checked syllables accept only acute (`sắc`) and dot (`nặng`) tone commands. Incompatible checked
 tone commands pass through rather than rendering nonstandard checked-tone forms.
 
@@ -373,12 +383,16 @@ commands. VIME resolves the covered cases in this order:
 
 1. Decode direct command keys before delayed vowel-diacritic ambiguity handling.
 2. For delayed vowel-diacritic letters such as `a`, `e`, `o`, and `w`, first
-   check whether the literal candidate including the new key is already
-   structurally valid.
-3. If literal structure is valid, keep the new key literal.
-4. Otherwise, test whether the previous candidate has or can receive the
+   keep the key literal if the previous candidate already contains a repeated
+   literal run for that key.
+3. Otherwise, check whether the previous rendered candidate already has the
+   requested vowel diacritic and should escape to literal input.
+4. Otherwise, check whether the literal candidate including the new key is
+   already structurally valid.
+5. If literal structure is valid, keep the new key literal.
+6. Otherwise, test whether the previous candidate can receive the
    requested vowel diacritic.
-5. If a semantic transform would produce an unrecognized semantic state, pass
+7. If a semantic transform would produce an unrecognized semantic state, pass
    through.
 
 This gives behavior such as:
@@ -388,6 +402,9 @@ thayas  -> thấy
 thayw   -> thayw
 hoaos   -> hoáo
 hoeos   -> hoéo
+ooo     -> oo
+oooo    -> ooo
+booong  -> boong
 huaws   -> hứa
 dacds   -> đác
 droid   -> droid

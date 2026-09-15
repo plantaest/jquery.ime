@@ -188,6 +188,18 @@ Extended `oo` spellings are not inferred automatically from unmarked `oo`, but e
 lo6o62ng -> lôồng
 ```
 
+Telex repeated-key escape allows literal `oo` input by typing `o` a third time.
+After that escape, later `o` letters stay literal in the same run:
+
+```text
+ooo -> oo
+oooo -> ooo
+booong -> boong
+```
+
+This is a Telex disambiguation rule. It does not remove explicit per-vowel
+command support for extended spellings in non-Telex input methods.
+
 Covered extended rimes such as `oao` and `oeo` should keep their final `o` literal during Telex delayed-command detection:
 
 ```text

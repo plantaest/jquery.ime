@@ -1779,6 +1779,22 @@
 			'Repeating a Telex circumflex key escapes to literal input'
 		);
 		assert.deepEqual(
+			telex( 'ôo', '' ),
+			{
+				noop: false,
+				output: 'oo'
+			},
+			'Repeating Telex o escapes a rendered circumflex before literal oo rimes'
+		);
+		assert.deepEqual(
+			telex( 'looo', '' ),
+			{
+				noop: true,
+				output: 'looo'
+			},
+			'Telex keeps additional o literal after a literal oo run'
+		);
+		assert.deepEqual(
 			telex( 'ưw', '' ),
 			{
 				noop: false,

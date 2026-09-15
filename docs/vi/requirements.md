@@ -186,6 +186,9 @@ Literal and constraint examples:
 thayw    -> thayw
 hoaos    -> hoáo
 hoeos    -> hoéo
+booo     -> boo
+boooo    -> booo
+booong   -> boong
 mats     -> mát
 matj     -> mạt
 matf     -> matf
@@ -199,6 +202,11 @@ ww       -> ww
 ```
 
 Telex does not infer IÊ-family vowel diacritics from unmarked `ie`, `ye`, or `uye`. Type the vowel diacritic explicitly, such as `Vieetj -> Việt`.
+
+Telex also does not infer explicit extended double-`oo` spellings from long
+literal `o` runs. After `oo` has been escaped to literal text, later `o`
+letters stay literal, so `booong -> boong` rather than `bôong`. Explicit
+per-vowel command paths in other input methods remain separate engine behavior.
 
 Telex vowel diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`.
 
@@ -476,6 +484,9 @@ as  -> á
 ass -> as
 aa  -> â
 aaa -> aa
+oo  -> ô
+ooo -> oo
+oooo -> ooo
 uw  -> ư
 uww -> uw
 thuongw  -> thương
