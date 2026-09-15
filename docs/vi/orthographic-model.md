@@ -212,6 +212,10 @@ booong -> boong
 This is a Telex disambiguation rule. It does not remove explicit per-vowel
 command support for extended spellings in non-Telex input methods.
 
+Default Telex also supports standalone quick `w -> ư`, while Simple Telex keeps
+standalone `w` literal. Both profiles still use the same orthographic model
+once a key becomes a semantic vowel-diacritic command.
+
 Covered extended rimes such as `oao` and `oeo` should keep their final `o` literal during Telex delayed-command detection:
 
 ```text

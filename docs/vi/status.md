@@ -12,8 +12,8 @@ jQuery.IME-hosted VIME stage.
 
 This means:
 
-* the current shared engine has a stable tested baseline for VNI, Telex, VIQR,
-  VIQR*, and their reformed tone-placement variants;
+* the current shared engine has a stable tested baseline for Telex, Simple
+  Telex, VNI, VIQR, VIQR*, and their reformed tone-placement variants;
 * the finite rime recognizer is used for covered structural validation;
 * tone reflow, post-transform validation, repeated-key escape, and Telex
   delayed-command disambiguation are documented and tested for the current
@@ -32,16 +32,18 @@ The current jQuery.IME source registers:
 
 ```text
 vi-telex
+vi-telex-simple
 vi-vni
 vi-viqr
 vi-viqr-star
 vi-telex-reformed
+vi-telex-simple-reformed
 vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```
 
-All eight input-method ids load the same source file:
+All ten input-method ids load the same source file:
 
 ```text
 rules/vi/vi.js
@@ -92,6 +94,8 @@ Phase 3 expanded the shared engine for the VNI path:
 Phase 4 added the remaining adapters over the shared engine:
 
 * Telex command decoding and repeated-key escape;
+* Simple Telex as the conservative Telex profile without standalone `w` quick
+  input;
 * VIQR command decoding and backslash escape;
 * VIQR* horn mapping;
 * shifted VIQR punctuation bridge;
@@ -139,9 +143,10 @@ Rare, dialectal, minority-language, historical, and specialized spellings may
 need new structural examples and tests before the recognizer should accept them.
 
 Some Telex ambiguity remains inherent in a rendered-text-first jQuery.IME
-adapter. VIME currently prefers documented structural behavior and
-repeated-key escape rather than a persistent raw-key history or a user-visible
-spell-check option.
+adapter. Full Telex uses a narrow raw-key context only for standalone `w`
+quick-key escape. Other Vietnamese behavior still prefers documented structural
+behavior and repeated-key escape rather than persistent raw-key history or a
+user-visible spell-check option.
 
 The current implementation is intentionally packaged as one jQuery.IME rule
 file. A later standalone VIME package could split source files once loader and
@@ -165,7 +170,7 @@ These are not required to close the current jQuery.IME-hosted Phase 5.
 Focused Vietnamese tests:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
 Full repository suite:

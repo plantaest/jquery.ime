@@ -1106,6 +1106,10 @@
 			name: 'Telex',
 			source: 'rules/vi/vi.js'
 		},
+		'vi-telex-simple': {
+			name: 'Simple Telex',
+			source: 'rules/vi/vi.js'
+		},
 		'vi-vni': {
 			name: 'VNI',
 			source: 'rules/vi/vi.js'
@@ -1120,6 +1124,10 @@
 		},
 		'vi-telex-reformed': {
 			name: 'Telex (đặt dấu kiểu mới)',
+			source: 'rules/vi/vi.js'
+		},
+		'vi-telex-simple-reformed': {
+			name: 'Simple Telex (đặt dấu kiểu mới)',
 			source: 'rules/vi/vi.js'
 		},
 		'vi-vni-reformed': {
@@ -1986,10 +1994,12 @@
 			autonym: 'Tiếng Việt',
 			inputmethods: [
 				'vi-telex',
+				'vi-telex-simple',
 				'vi-vni',
 				'vi-viqr',
 				'vi-viqr-star',
 				'vi-telex-reformed',
+				'vi-telex-simple-reformed',
 				'vi-vni-reformed',
 				'vi-viqr-reformed',
 				'vi-viqr-star-reformed'

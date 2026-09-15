@@ -7,6 +7,7 @@ rather than separate VNI, Telex, and VIQR implementations.
 The current jQuery.IME-hosted implementation supports:
 
 * Telex;
+* Simple Telex;
 * VNI;
 * VIQR;
 * VIQR*;
@@ -33,10 +34,12 @@ All Vietnamese input-method metadata entries point to that file:
 
 ```text
 vi-telex
+vi-telex-simple
 vi-vni
 vi-viqr
 vi-viqr-star
 vi-telex-reformed
+vi-telex-simple-reformed
 vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
@@ -92,7 +95,7 @@ part of the closed initial scope.
 Focused Vietnamese tests:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
 Full repository suite:

@@ -67,6 +67,11 @@ testFixtures.push( {
 	tests: [
 		{ input: 'tieengs', output: 'tiếng', description: 'Vietnamese Telex tieengs -> tiếng' },
 		{ input: 'Vieetj', output: 'Việt', description: 'Vietnamese Telex Vieetj -> Việt' },
+		{ input: 'w', output: 'ư', description: 'Vietnamese Telex standalone w -> ư' },
+		{ input: 'ww', output: 'w', description: 'Vietnamese Telex repeated standalone w escape' },
+		{ input: 'tw', output: 'tư', description: 'Vietnamese Telex quick w after an onset prefix' },
+		{ input: 'tww', output: 'tw', description: 'Vietnamese Telex repeated quick w after an onset prefix' },
+		{ input: 'uww', output: 'uw', description: 'Vietnamese Telex repeated horn key escape after raw uw' },
 		{ input: 'thayas', output: 'thấy', description: 'Vietnamese Telex delayed circumflex before off-glide' },
 		{ input: 'thayw', output: 'thayw', description: 'Vietnamese Telex w stays literal after off-glide' },
 		{ input: 'thangws', output: 'thắng', description: 'Vietnamese Telex delayed breve after coda' },
@@ -97,12 +102,25 @@ testFixtures.push( {
 		{ input: 'booo', output: 'boo', description: 'Vietnamese Telex repeated o escapes to literal oo' },
 		{ input: 'boooo', output: 'booo', description: 'Vietnamese Telex keeps o literal after escaping oo' },
 		{ input: 'booong', output: 'boong', description: 'Vietnamese Telex literal oo can extend to oong' },
-		{ input: 'uww', output: 'uw', description: 'Vietnamese Telex repeated horn key escape' },
-		{ input: 'ww', output: 'ww', description: 'Vietnamese Telex standalone w remains literal' },
 		{ input: 'ddd', output: 'dd', description: 'Vietnamese Telex repeated d-stroke key escape' },
-		{ input: 'w', output: 'w', description: 'Vietnamese Telex standalone w remains literal' },
 		{ input: '[', output: '[', description: 'Vietnamese Telex [ remains literal' },
 		{ input: ']', output: ']', description: 'Vietnamese Telex ] remains literal' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese Simple Telex adapter test',
+	inputmethod: 'vi-telex-simple',
+	tests: [
+		{ input: 'w', output: 'w', description: 'Vietnamese Simple Telex standalone w remains literal' },
+		{ input: 'ww', output: 'ww', description: 'Vietnamese Simple Telex standalone ww remains literal' },
+		{ input: 'tw', output: 'tw', description: 'Vietnamese Simple Telex keeps w after an onset prefix literal' },
+		{ input: 'thayw', output: 'thayw', description: 'Vietnamese Simple Telex w stays literal after off-glide' },
+		{ input: 'thuongwf', output: 'thường', description: 'Vietnamese Simple Telex delayed w horn plus tone' },
+		{ input: 'nguowif', output: 'người', description: 'Vietnamese Simple Telex promotes uơ plus i before tone' },
+		{ input: 'booong', output: 'boong', description: 'Vietnamese Simple Telex literal oo can extend to oong' },
+		{ input: '[', output: '[', description: 'Vietnamese Simple Telex [ remains literal' },
+		{ input: ']', output: ']', description: 'Vietnamese Simple Telex ] remains literal' }
 	]
 } );
 
@@ -114,11 +132,26 @@ testFixtures.push( {
 		{ input: 'david', output: 'david', description: 'Vietnamese Telex keeps structurally impossible david literal' },
 		{ input: 'browser', output: 'browser', description: 'Vietnamese Telex keeps structurally impossible browser literal' },
 		{ input: 'nodejs', output: 'nodejs', description: 'Vietnamese Telex keeps structurally impossible nodejs literal' },
-		{ input: 'washington', output: 'washington', description: 'Vietnamese Telex keeps structurally impossible washington literal' },
 		{ input: 'dacds', output: 'đác', description: 'Vietnamese Telex still composes delayed d-stroke near-neighbor' },
 		{ input: 'thayas', output: 'thấy', description: 'Vietnamese Telex still composes delayed circumflex near-neighbor' },
 		{ input: 'quocos', output: 'quốc', description: 'Vietnamese Telex still composes qu near-neighbor' },
 		{ input: 'gienges', output: 'giếng', description: 'Vietnamese Telex still composes gi near-neighbor' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese Simple Telex structural validation test',
+	inputmethod: 'vi-telex-simple',
+	tests: [
+		{ input: 'droid', output: 'droid', description: 'Vietnamese Simple Telex keeps structurally impossible droid literal' },
+		{ input: 'david', output: 'david', description: 'Vietnamese Simple Telex keeps structurally impossible david literal' },
+		{ input: 'browser', output: 'browser', description: 'Vietnamese Simple Telex keeps structurally impossible browser literal' },
+		{ input: 'nodejs', output: 'nodejs', description: 'Vietnamese Simple Telex keeps structurally impossible nodejs literal' },
+		{ input: 'washington', output: 'washington', description: 'Vietnamese Simple Telex keeps structurally impossible washington literal' },
+		{ input: 'dacds', output: 'đác', description: 'Vietnamese Simple Telex still composes delayed d-stroke near-neighbor' },
+		{ input: 'thayas', output: 'thấy', description: 'Vietnamese Simple Telex still composes delayed circumflex near-neighbor' },
+		{ input: 'quocos', output: 'quốc', description: 'Vietnamese Simple Telex still composes qu near-neighbor' },
+		{ input: 'gienges', output: 'giếng', description: 'Vietnamese Simple Telex still composes gi near-neighbor' }
 	]
 } );
 
@@ -139,12 +172,23 @@ testFixtures.push( {
 	description: 'Vietnamese Telex reformed tone-placement test',
 	inputmethod: 'vi-telex-reformed',
 	tests: [
+		{ input: 'w', output: 'ư', description: 'Vietnamese Telex reformed standalone w -> ư' },
 		{ input: 'hoaf', output: 'hoà', description: 'Vietnamese Telex reformed open oa placement' },
 		{ input: 'khoer', output: 'khoẻ', description: 'Vietnamese Telex reformed open oe placement' },
 		{ input: 'huyr', output: 'huỷ', description: 'Vietnamese Telex reformed open uy placement' },
 		{ input: 'huynhf', output: 'huỳnh', description: 'Vietnamese Telex reformed uy plus ending placement' },
 		{ input: 'quoocs', output: 'quốc', description: 'Vietnamese Telex reformed keeps qu behavior shared' },
 		{ input: 'tieengs', output: 'tiếng', description: 'Vietnamese Telex reformed keeps iê behavior shared' }
+	]
+} );
+
+testFixtures.push( {
+	description: 'Vietnamese Simple Telex reformed tone-placement test',
+	inputmethod: 'vi-telex-simple-reformed',
+	tests: [
+		{ input: 'w', output: 'w', description: 'Vietnamese Simple Telex reformed standalone w remains literal' },
+		{ input: 'hoaf', output: 'hoà', description: 'Vietnamese Simple Telex reformed open oa placement' },
+		{ input: 'thuongwf', output: 'thường', description: 'Vietnamese Simple Telex reformed delayed w horn plus tone' }
 	]
 } );
 

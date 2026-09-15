@@ -85,14 +85,16 @@ rules/vi/vi.js
 All Vietnamese metadata entries point to this source:
 
 ```text
-vi-telex              -> rules/vi/vi.js
-vi-vni                -> rules/vi/vi.js
-vi-viqr               -> rules/vi/vi.js
-vi-viqr-star          -> rules/vi/vi.js
-vi-telex-reformed     -> rules/vi/vi.js
-vi-vni-reformed       -> rules/vi/vi.js
-vi-viqr-reformed      -> rules/vi/vi.js
-vi-viqr-star-reformed -> rules/vi/vi.js
+vi-telex                   -> rules/vi/vi.js
+vi-telex-simple            -> rules/vi/vi.js
+vi-vni                     -> rules/vi/vi.js
+vi-viqr                    -> rules/vi/vi.js
+vi-viqr-star               -> rules/vi/vi.js
+vi-telex-reformed          -> rules/vi/vi.js
+vi-telex-simple-reformed   -> rules/vi/vi.js
+vi-vni-reformed            -> rules/vi/vi.js
+vi-viqr-reformed           -> rules/vi/vi.js
+vi-viqr-star-reformed      -> rules/vi/vi.js
 ```
 
 Reason: jQuery.IME has a simple rule-file loader. Its dependency support is
@@ -205,7 +207,7 @@ An adapter-level literal replacement:
 ```
 
 Or `null`, meaning the newest key is not a semantic command. In that case the
-adapter may ask the engine to reflow tone placement for the rendered candidate.
+adapter may ask the engine to reflow the rendered candidate.
 
 ## Engine contract
 
@@ -275,17 +277,24 @@ Current configuration:
 
 ```text
 contextLength:
-  all Vietnamese methods 0
+  vi-telex and vi-telex-reformed 2
+  all other Vietnamese methods 0
 
 maxKeyLength:
   all Vietnamese methods 16
 
 tonePlacement:
-  vi-telex, vi-vni, vi-viqr, vi-viqr-star traditional
-  vi-telex-reformed, vi-vni-reformed, vi-viqr-reformed, vi-viqr-star-reformed reformed
+  vi-telex, vi-telex-simple, vi-vni, vi-viqr, vi-viqr-star traditional
+  vi-telex-reformed, vi-telex-simple-reformed, vi-vni-reformed, vi-viqr-reformed, vi-viqr-star-reformed reformed
 ```
 
-`contextLength = 0` keeps raw key history out of the main composition model.
+`contextLength = 0` keeps raw key history out of the main composition model for
+VNI, VIQR, VIQR*, and Simple Telex.
+
+Default Telex keeps `contextLength = 2` for the narrow standalone quick-`w`
+escape distinction. This lets the adapter distinguish `ww -> w` from
+`uww -> uw` after both first steps have rendered as `ư`. The engine still uses
+rendered text near the caret as its main composition state.
 
 `maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese
 candidates plus a command key while keeping replacement scope bounded. Because
@@ -338,7 +347,7 @@ namespace modest and document any new seam in `testing.md`.
 Current test-facing seams include:
 
 * constants and enums;
-* command decoders;
+* command decoders, including Simple Telex;
 * `createAdapter`;
 * `extractCandidate`;
 * `parseCandidate`;

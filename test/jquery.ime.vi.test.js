@@ -15,10 +15,12 @@
 	function getVietnameseDisplayNames() {
 		return {
 			'vi-telex': 'Telex',
+			'vi-telex-simple': 'Simple Telex',
 			'vi-vni': 'VNI',
 			'vi-viqr': 'VIQR',
 			'vi-viqr-star': 'VIQR*',
 			'vi-telex-reformed': 'Telex (đặt dấu kiểu mới)',
+			'vi-telex-simple-reformed': 'Simple Telex (đặt dấu kiểu mới)',
 			'vi-vni-reformed': 'VNI (đặt dấu kiểu mới)',
 			'vi-viqr-reformed': 'VIQR (đặt dấu kiểu mới)',
 			'vi-viqr-star-reformed': 'VIQR* (đặt dấu kiểu mới)'
@@ -131,6 +133,7 @@
 
 	function typeWithInputMethod( inputMethodId, input ) {
 		var i, key, inputMethod, inputWindow, result,
+			context = '',
 			text = '';
 
 		inputMethod = $.ime.inputmethods[ inputMethodId ];
@@ -138,7 +141,12 @@
 			key = input.charAt( i );
 			text += key;
 			inputWindow = text.slice( -( inputMethod.maxKeyLength || input.length ) );
-			result = inputMethod.patterns( inputWindow, '' );
+			result = inputMethod.patterns( inputWindow, context );
+
+			context += key;
+			if ( context.length > inputMethod.contextLength ) {
+				context = context.slice( context.length - inputMethod.contextLength );
+			}
 
 			if ( result && !result.noop ) {
 				text = text.slice( 0, text.length - inputWindow.length ) + result.output;
@@ -303,7 +311,9 @@
 			'vi-vni',
 			'vi-vni-reformed',
 			'vi-telex',
+			'vi-telex-simple',
 			'vi-telex-reformed',
+			'vi-telex-simple-reformed',
 			'vi-viqr',
 			'vi-viqr-reformed',
 			'vi-viqr-star',
@@ -315,8 +325,10 @@
 
 			assert.strictEqual(
 				$.ime.inputmethods[ inputMethodId ].contextLength,
-				0,
-				inputMethodId + ' does not depend on raw input context'
+				inputMethodId === 'vi-telex' || inputMethodId === 'vi-telex-reformed' ?
+					$.ime.vi.TELEX_QUICK_CONTEXT_LENGTH :
+					$.ime.vi.DEFAULT_CONTEXT_LENGTH,
+				inputMethodId + ' stores the expected raw input context length'
 			);
 			assert.strictEqual(
 				$.ime.inputmethods[ inputMethodId ].maxKeyLength,
@@ -1346,6 +1358,11 @@
 			[ 'vi-vni', 'lo6o62ng', 'lôồng' ],
 			[ 'vi-vni', 'nguo7i2', 'người' ],
 			[ 'vi-vni', 'nguo72i', 'người' ],
+			[ 'vi-telex', 'w', 'ư' ],
+			[ 'vi-telex', 'ww', 'w' ],
+			[ 'vi-telex', 'tw', 'tư' ],
+			[ 'vi-telex', 'tww', 'tw' ],
+			[ 'vi-telex', 'uww', 'uw' ],
 			[ 'vi-telex', 'thayas', 'thấy' ],
 			[ 'vi-telex', 'thuongwf', 'thường' ],
 			[ 'vi-telex', 'huopwso', 'huốp' ],
@@ -1362,7 +1379,13 @@
 			[ 'vi-telex', 'david', 'david' ],
 			[ 'vi-telex', 'browser', 'browser' ],
 			[ 'vi-telex', 'nodejs', 'nodejs' ],
-			[ 'vi-telex', 'washington', 'washington' ],
+			[ 'vi-telex-simple', 'w', 'w' ],
+			[ 'vi-telex-simple', 'ww', 'ww' ],
+			[ 'vi-telex-simple', 'tw', 'tw' ],
+			[ 'vi-telex-simple', 'thayw', 'thayw' ],
+			[ 'vi-telex-simple', 'thuongwf', 'thường' ],
+			[ 'vi-telex-simple', 'nguowif', 'người' ],
+			[ 'vi-telex-simple', 'washington', 'washington' ],
 			[ 'vi-viqr', 'tie^\'ng', 'tiếng' ],
 			[ 'vi-viqr', 'ddu+o+`ng', 'đường' ],
 			[ 'vi-viqr', 'nguo+i`', 'người' ],
@@ -1372,7 +1395,8 @@
 			[ 'vi-viqr-star', 'ddu*o*`ng', 'đường' ],
 			[ 'vi-viqr-star', 'o\\*', 'o*' ],
 			[ 'vi-vni-reformed', 'hoa2n', 'hoàn' ],
-			[ 'vi-telex-reformed', 'hoaf', 'hoà' ]
+			[ 'vi-telex-reformed', 'hoaf', 'hoà' ],
+			[ 'vi-telex-simple-reformed', 'hoaf', 'hoà' ]
 		].forEach( ( testCase ) => {
 			assert.strictEqual(
 				typeWithInputMethod( testCase[ 0 ], testCase[ 1 ] ),
@@ -1773,7 +1797,7 @@
 		);
 	} );
 
-	QUnit.test( 'Telex adapter supports removal, repeated-key escape, and literal safeguards', ( assert ) => {
+	QUnit.test( 'Telex adapter supports quick w, removal, repeated-key escape, and literal safeguards', ( assert ) => {
 		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
 
 		assert.deepEqual(
@@ -1825,12 +1849,20 @@
 			'Telex keeps additional o literal after a literal oo run'
 		);
 		assert.deepEqual(
-			telex( 'ưw', '' ),
+			telex( 'ưw', 'uw' ),
 			{
 				noop: false,
 				output: 'uw'
 			},
-			'Repeating a Telex horn key escapes to literal input'
+			'Repeating a Telex horn key after raw uw escapes to literal input'
+		);
+		assert.deepEqual(
+			telex( 'ưw', 'w' ),
+			{
+				noop: false,
+				output: 'w'
+			},
+			'Repeating a standalone Telex quick w escapes to literal w'
 		);
 		assert.deepEqual(
 			telex( 'thươngw', '' ),
@@ -1891,10 +1923,18 @@
 		assert.deepEqual(
 			telex( 'w', '' ),
 			{
-				noop: true,
-				output: 'w'
+				noop: false,
+				output: 'ư'
 			},
-			'Standalone Telex w remains literal'
+			'Standalone Telex w is a quick ư key'
+		);
+		assert.deepEqual(
+			telex( 'tw', 't' ),
+			{
+				noop: false,
+				output: 'tư'
+			},
+			'Telex quick w can start a vowel after a recognized onset prefix'
 		);
 		assert.deepEqual(
 			telex( '[', '' ),
@@ -1918,7 +1958,7 @@
 				noop: true,
 				output: 'ww'
 			},
-			'Telex ww remains literal when standalone w is not a quick key'
+			'Telex does not treat a pasted literal ww window as a quick-w repeat'
 		);
 	} );
 
@@ -1983,7 +2023,7 @@
 	QUnit.test( 'Telex adapter passes through structurally impossible Latin runs', ( assert ) => {
 		var telex = $.ime.inputmethods[ 'vi-telex' ].patterns;
 
-		[ 'droid', 'david', 'browser', 'nodej', 'nodejs', 'was', 'washington' ].forEach( ( input ) => {
+		[ 'droid', 'david', 'browser', 'nodej', 'nodejs' ].forEach( ( input ) => {
 			assert.deepEqual(
 				telex( input, '' ),
 				{
@@ -2063,6 +2103,78 @@
 			},
 			'Telex reformed keeps uy plus ending shared with traditional placement'
 		);
+	} );
+
+	QUnit.module( 'VIME – Simple Telex adapter', {
+		before: loadVietnameseSource
+	} );
+
+	QUnit.test( 'Simple Telex keeps standalone quick keys literal', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex-simple' ].patterns;
+
+		assert.deepEqual(
+			telex( 'thuongw', '' ),
+			{
+				noop: false,
+				output: 'thương'
+			},
+			'Simple Telex still applies w to an eligible candidate'
+		);
+		assert.deepEqual(
+			telex( 'thayw', '' ),
+			{
+				noop: true,
+				output: 'thayw'
+			},
+			'Simple Telex keeps w literal when the candidate cannot receive it'
+		);
+		assert.deepEqual(
+			telex( 'w', '' ),
+			{
+				noop: true,
+				output: 'w'
+			},
+			'Simple Telex keeps standalone w literal'
+		);
+		assert.deepEqual(
+			telex( 'ww', '' ),
+			{
+				noop: true,
+				output: 'ww'
+			},
+			'Simple Telex keeps standalone ww literal'
+		);
+		assert.deepEqual(
+			telex( '[', '' ),
+			{
+				noop: true,
+				output: '['
+			},
+			'Simple Telex keeps [ literal'
+		);
+		assert.deepEqual(
+			telex( ']', '' ),
+			{
+				noop: true,
+				output: ']'
+			},
+			'Simple Telex keeps ] literal'
+		);
+	} );
+
+	QUnit.test( 'Simple Telex keeps w-heavy Latin runs literal', ( assert ) => {
+		var telex = $.ime.inputmethods[ 'vi-telex-simple' ].patterns;
+
+		[ 'was', 'washington' ].forEach( ( input ) => {
+			assert.deepEqual(
+				telex( input, '' ),
+				{
+					noop: true,
+					output: input
+				},
+				input + ' remains literal in Simple Telex'
+			);
+		} );
 	} );
 
 	QUnit.module( 'VIME – VIQR adapter', {

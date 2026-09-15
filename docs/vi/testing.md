@@ -93,6 +93,7 @@ VIME – Transform
 VIME – Tone placement
 VIME – Adapter
 VIME – Telex adapter
+VIME – Simple Telex adapter
 VIME – VIQR adapter
 VIME – VIQR* adapter
 ```
@@ -105,7 +106,7 @@ for registration and loader behavior.
 Run focused Vietnamese tests with:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
 Run the full relevant repository suite before closing milestones or broad
@@ -129,10 +130,12 @@ display labels and metadata:
 
 ```text
 Telex
+Simple Telex
 VNI
 VIQR
 VIQR*
 Telex (đặt dấu kiểu mới)
+Simple Telex (đặt dấu kiểu mới)
 VNI (đặt dấu kiểu mới)
 VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
@@ -213,20 +216,22 @@ rendering would not change the candidate.
 
 ### Telex ambiguity
 
-Telex tests should keep paired cases for foreign-like pass-through and nearby
-Vietnamese composition:
+Telex tests should keep paired cases for foreign-like pass-through that does
+not depend on standalone quick `w`, and nearby Vietnamese composition:
 
 ```text
 droid -> droid
 david -> david
 browser -> browser
 nodejs -> nodejs
-washington -> washington
 dacds -> đác
 thayas -> thấy
 quocos -> quốc
 gienges -> giếng
 ```
+
+Simple Telex should additionally cover `washington -> washington`. Default
+Telex may transform initial `w` by design.
 
 Tests should also cover recognized literal structures:
 
@@ -235,6 +240,16 @@ hoaos -> hoáo
 hoeos -> hoéo
 thayw -> thayw
 huaws -> hứa
+```
+
+Default Telex and Simple Telex should be paired where standalone quick `w`
+changes behavior:
+
+```text
+Telex:        w  -> ư
+Telex:        ww -> w
+Simple Telex: w  -> w
+Simple Telex: ww -> ww
 ```
 
 ### VIQR and VIQR*

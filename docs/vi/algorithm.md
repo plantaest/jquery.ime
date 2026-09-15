@@ -33,7 +33,7 @@ jQuery.IME input window
                 -> extract candidate
                 -> engine.reflowCandidate()
                 -> parse and analyze source state
-                -> render NFC output if tone target changed
+                -> render NFC output if candidate reflow changes the text
 ```
 
 The adapters are intentionally thin. They translate method-specific keys into
@@ -64,9 +64,14 @@ patterns( input, context )
 `input` is the text window before the caret plus the latest key. Its length is
 bounded by `maxKeyLength`. VIME sets this to `16` for the Vietnamese methods.
 
-`context` is raw key context. VIME currently keeps `contextLength = 0`, because
-ordinary Vietnamese composition is reconstructed from rendered text near the
-caret rather than from persistent raw key history.
+`context` is raw key context. VIME keeps `contextLength = 0` for VNI, VIQR,
+VIQR*, and Simple Telex, because ordinary Vietnamese composition is
+reconstructed from rendered text near the caret rather than from persistent raw
+key history.
+
+Default Telex uses `contextLength = 2` only for standalone quick-`w` escape.
+After the first key, both raw `w` and raw `uw` can render as `ư`; the small raw
+context lets the adapter distinguish `ww -> w` from `uww -> uw`.
 
 The adapter returns either a replacement object:
 
@@ -389,7 +394,14 @@ target or narrow `uơ` structure changes after more letters are typed.
 ## Telex disambiguation
 
 Telex has more ambiguity than VNI and VIQR because ordinary letters can also be
-commands. VIME resolves the covered cases in this order:
+commands. VIME exposes two Telex profiles:
+
+* `Telex` supports standalone quick `w -> ư`;
+* `Simple Telex` keeps standalone `w` literal.
+
+Both profiles leave `[` and `]` literal.
+
+VIME resolves the shared delayed-command cases in this order:
 
 1. Decode direct command keys before delayed vowel-diacritic ambiguity handling.
 2. For delayed vowel-diacritic letters such as `a`, `e`, `o`, and `w`, first
@@ -402,7 +414,10 @@ commands. VIME resolves the covered cases in this order:
 5. If literal structure is valid, keep the new key literal.
 6. Otherwise, test whether the previous candidate can receive the
    requested vowel diacritic.
-7. If a semantic transform would produce an unrecognized semantic state, pass
+7. In default Telex only, if the key is `w`, no semantic transform is possible,
+   and the preceding candidate is empty or still an onset-only prefix, insert
+   `ư` as quick input.
+8. If a semantic transform would produce an unrecognized semantic state, pass
    through.
 
 This gives behavior such as:
@@ -420,8 +435,26 @@ dacds   -> đác
 droid   -> droid
 ```
 
+Default Telex also gives:
+
+```text
+w   -> ư
+ww  -> w
+tw  -> tư
+tww -> tw
+```
+
+Simple Telex gives:
+
+```text
+w  -> w
+ww -> ww
+tw -> tw
+```
+
 The recognizer is doing structural work here. It is not hard-coding words such
-as `droid`, and it is not maintaining persistent raw key history.
+as `droid`. Apart from the two-character context used for default Telex
+quick-`w` escape, it is not maintaining persistent raw key history.
 
 ## Worked examples
 

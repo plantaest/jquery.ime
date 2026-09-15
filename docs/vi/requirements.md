@@ -17,6 +17,7 @@ the current engine flow.
 The implementation MUST support:
 
 * Telex
+* Simple Telex
 * VNI
 * VIQR
 
@@ -29,10 +30,12 @@ The Vietnamese selector SHOULD show concise method names in this order:
 
 ```text
 Telex
+Simple Telex
 VNI
 VIQR
 VIQR*
 Telex (đặt dấu kiểu mới)
+Simple Telex (đặt dấu kiểu mới)
 VNI (đặt dấu kiểu mới)
 VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
@@ -82,11 +85,17 @@ where the typing convention requires it, such as VIQR backslash escape. That
 literal output is not a shared semantic command and does not go through the
 engine transformer.
 
-## Telex mapping
+## Telex and Simple Telex mapping
 
-The Telex adapter MUST support the common Vietnamese Telex operations for tones, vowel diacritics, and `đ`.
+The Telex adapters MUST support the common Vietnamese Telex operations for tones, vowel diacritics, and `đ`.
 
-The current Telex profile maps input to visible behavior as follows:
+The default `Telex` profile follows the common user expectation that standalone
+`w` can type `ư`. The `Simple Telex` profile preserves the more conservative
+behavior where standalone `w` remains literal and `w` only transforms an
+eligible existing candidate. Neither profile uses `[` or `]` as quick keys,
+because those characters conflict with the main wikitext editing environment.
+
+Both Telex profiles map input to visible behavior as follows:
 
 | Input | Semantic command or adapter behavior |
 | --- | --- |
@@ -99,9 +108,13 @@ The current Telex profile maps input to visible behavior as follows:
 | `aa` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `a` |
 | `ee` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `e` |
 | `oo` | `APPLY_VOWEL_DIACRITIC(circumflex)` on `o` |
-| `w` | `APPLY_VOWEL_DIACRITIC(breve)` or `APPLY_VOWEL_DIACRITIC(horn)` when structurally compatible; literal otherwise |
+| `w` | `APPLY_VOWEL_DIACRITIC(breve)` or `APPLY_VOWEL_DIACRITIC(horn)` when structurally compatible |
 | `dd` | `APPLY_D_STROKE` |
 | `d` after a candidate with an initial `d` target | `APPLY_D_STROKE` |
+
+The default `Telex` profile also maps standalone `w` to visible `ư` when the
+current candidate cannot otherwise receive `w` and is either empty or still an
+onset-only prefix.
 
 Basic examples:
 
@@ -115,7 +128,18 @@ thuw     -> thư
 dd       -> đ
 ```
 
-Flexible composition examples:
+Default Telex quick-`w` examples:
+
+```text
+w   -> ư
+ww  -> w
+tw  -> tư
+tww -> tw
+[   -> [
+]   -> ]
+```
+
+Shared flexible composition examples:
 
 ```text
 thaya    -> thây
@@ -154,8 +178,6 @@ matf     -> matf
 matx     -> matx
 toansz   -> toan
 ấz       -> â
-w        -> w
-ww       -> ww
 [        -> [
 ]        -> ]
 ```
@@ -169,9 +191,25 @@ per-vowel command paths in other input methods remain separate engine behavior.
 
 Telex vowel diacritic commands SHOULD also work after later rime material has already been typed when the current rendered candidate identifies a compatible target. For example, `thayas -> thấy` is the delayed form of applying circumflex to `thay`; it is not tone placement over the literal candidate `thaya`.
 
-Telex `w` is intentionally candidate sensitive. It SHOULD apply breve to structurally compatible `a` targets, such as `aw -> ă`, `thangw -> thăng`, and `haamw -> hăm`. If breve is not compatible, it SHOULD fall back to horn for structurally compatible `o`, `u`, or covered `ua` targets, such as `cow -> cơ`, `thuw -> thư`, and `huaw -> hưa`. If neither result is recognized, it MUST remain literal, such as `thayw -> thayw`.
+Telex `w` is intentionally candidate sensitive. It SHOULD apply breve to structurally compatible `a` targets, such as `aw -> ă`, `thangw -> thăng`, and `haamw -> hăm`. If breve is not compatible, it SHOULD fall back to horn for structurally compatible `o`, `u`, or covered `ua` targets, such as `cow -> cơ`, `thuw -> thư`, and `huaw -> hưa`.
 
-The current Telex profile does not use standalone `w`, `[`, or `]` as quick keys. They remain literal unless `w` can transform the current candidate through the shared engine.
+If no candidate transform is possible, default Telex SHOULD use `w` as quick
+`ư` only for an empty candidate or a recognized onset-only prefix. It MUST NOT
+turn final off-glide cases such as `thayw` into `thayư`.
+
+Simple Telex MUST keep standalone `w` literal. It SHOULD otherwise share the
+same delayed-command and candidate-sensitive `w` behavior as default Telex:
+
+```text
+w        -> w
+ww       -> ww
+tw       -> tw
+thayw    -> thayw
+thuongwf -> thường
+nguowif  -> người
+```
+
+Neither Telex profile uses standalone `[` or `]` as quick keys.
 
 The engine SHOULD support covered vowel family switches while preserving tone. For example, a typed `o` after a horned `uo` family candidate can switch `ươ` back to `uô`, as in `huopwso -> huốp`.
 
@@ -398,6 +436,7 @@ The shared engine MUST keep tone-placement policy independent from input-method 
 
 ```text
 vi-telex-reformed
+vi-telex-simple-reformed
 vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
@@ -501,7 +540,8 @@ lo6o62ng -> lôồng
 
 VNI `9` SHOULD also be able to apply to an initial `d` after later rime material has been typed, so equivalent orders such as `d9ac1` and `dac91` converge to `đác`.
 
-Telex uses repeated-key escape for covered command keys:
+Default Telex uses repeated-key escape for covered command keys, including
+standalone quick `w`:
 
 ```text
 as  -> á
@@ -511,6 +551,10 @@ aaa -> aa
 oo  -> ô
 ooo -> oo
 oooo -> ooo
+w   -> ư
+ww  -> w
+tw  -> tư
+tww -> tw
 uw  -> ư
 uww -> uw
 thuongw  -> thương
@@ -518,6 +562,10 @@ thuongww -> thuongw
 dd  -> đ
 ddd -> dd
 ```
+
+Simple Telex keeps standalone `w` literal, so `w -> w`, `ww -> ww`, and
+`tw -> tw`, while preserving repeated-key escape for ordinary Telex command
+sequences such as `aa`, `oo`, `uw`, and `dd`.
 
 VIQR and VIQR* use backslash escape for covered command keys:
 
@@ -575,15 +623,19 @@ Structural validation SHOULD pass through a continuous Latin candidate when its
 written structure is impossible as one Vietnamese orthographic syllable in the
 current model.
 
-Covered Telex examples:
+Covered Telex examples that do not depend on standalone quick `w`:
 
 ```text
 droid      -> droid
 david      -> david
 browser    -> browser
 nodejs     -> nodejs
-washington -> washington
 ```
+
+Simple Telex also keeps `washington -> washington`, because standalone `w`
+remains literal in that profile. Default Telex may transform initial `w` by
+design; users who frequently type literal `w`-heavy Latin text can choose Simple
+Telex.
 
 These examples are regression coverage, not a runtime dictionary. They are protected because their candidate structure violates the orthographic model, such as a rime beginning with an unsupported consonant, a consonant inserted between vowel letters, or a suffix that is not a Vietnamese ending.
 

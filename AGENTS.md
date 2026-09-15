@@ -8,14 +8,15 @@ developed inside jQuery.IME.
 The supported Vietnamese input methods are:
 
 * Telex;
+* Simple Telex;
 * VNI;
 * VIQR;
 * VIQR* as a VIQR variant using `*` for horn.
 
 All Vietnamese input methods must share one Vietnamese composition engine.
-User-facing method order is Telex, VNI, VIQR, then VIQR*. VNI may remain the
-preferred profile for detailed development examples when only one input-method
-path is needed.
+User-facing method order is Telex, Simple Telex, VNI, VIQR, then VIQR*. VNI may
+remain the preferred profile for detailed development examples when only one
+input-method path is needed.
 
 ## Required reading
 
@@ -114,10 +115,12 @@ with metadata entries for:
 
 ```text
 vi-telex
+vi-telex-simple
 vi-vni
 vi-viqr
 vi-viqr-star
 vi-telex-reformed
+vi-telex-simple-reformed
 vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
@@ -156,7 +159,7 @@ Before a substantial change is considered complete, run focused Vietnamese
 tests:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
 Before milestones or broad integration changes, run the full relevant
