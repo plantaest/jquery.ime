@@ -1380,16 +1380,10 @@
 			return false;
 		}
 
-		if (
-			state.structure &&
+		return !(state.structure &&
 			state.structure.checked &&
 			tone !== Vietnamese.Tone.ACUTE &&
-			tone !== Vietnamese.Tone.DOT
-		) {
-			return false;
-		}
-
-		return true;
+			tone !== Vietnamese.Tone.DOT);
 	}
 
 	function applyTone( state, command, tonePlacement ) {
@@ -1471,153 +1465,129 @@
 		);
 	}
 
-	function findHornUoPair( state ) {
+	function findVowelPair( state, pair ) {
 		var i, firstToken, secondToken;
 
+		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
+			firstToken = state.tokens[ i ];
+			secondToken = state.tokens[ i + 1 ];
+
+			if (
+				firstToken.isVowel &&
+				secondToken.isVowel &&
+				firstToken.base.toLowerCase() === pair.firstBase &&
+				secondToken.base.toLowerCase() === pair.secondBase &&
+				firstToken.vowelDiacritic === pair.firstVowelDiacritic &&
+				secondToken.vowelDiacritic === pair.secondVowelDiacritic &&
+				!isIgnoredVowelPair( state, i )
+			) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	function applyVowelPairDiacritics( state, pairStart, pair, tonePlacement ) {
+		var nextState = cloneState( state );
+
+		if ( pair.firstVowelDiacritic !== undefined ) {
+			nextState.tokens[ pairStart ].vowelDiacritic = pair.firstVowelDiacritic;
+		}
+		if ( pair.secondVowelDiacritic !== undefined ) {
+			nextState.tokens[ pairStart + 1 ].vowelDiacritic = pair.secondVowelDiacritic;
+		}
+
+		return resultFromState( nextState, null, tonePlacement );
+	}
+
+	function findHornUoPair( state ) {
 		if ( state.structure && state.structure.rime === 'uo' ) {
 			return -1;
 		}
 
-		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
-			firstToken = state.tokens[ i ];
-			secondToken = state.tokens[ i + 1 ];
-
-			if (
-				firstToken.isVowel &&
-				secondToken.isVowel &&
-				firstToken.base.toLowerCase() === 'u' &&
-				secondToken.base.toLowerCase() === 'o' &&
-				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				!isIgnoredVowelPair( state, i )
-			) {
-				return i;
-			}
-		}
-
-		return -1;
+		return findVowelPair( state, {
+			firstBase: 'u',
+			secondBase: 'o',
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.NONE,
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.NONE
+		} );
 	}
 
 	function findUoFamilyPair( state, firstVowelDiacritic, secondVowelDiacritic ) {
-		var i, firstToken, secondToken;
-
-		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
-			firstToken = state.tokens[ i ];
-			secondToken = state.tokens[ i + 1 ];
-
-			if (
-				firstToken.isVowel &&
-				secondToken.isVowel &&
-				firstToken.base.toLowerCase() === 'u' &&
-				secondToken.base.toLowerCase() === 'o' &&
-				firstToken.vowelDiacritic === firstVowelDiacritic &&
-				secondToken.vowelDiacritic === secondVowelDiacritic &&
-				!isIgnoredVowelPair( state, i )
-			) {
-				return i;
-			}
-		}
-
-		return -1;
+		return findVowelPair( state, {
+			firstBase: 'u',
+			secondBase: 'o',
+			firstVowelDiacritic: firstVowelDiacritic,
+			secondVowelDiacritic: secondVowelDiacritic
+		} );
 	}
 
 	function findUnmarkedUaPair( state ) {
-		var i, firstToken, secondToken;
-
-		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
-			firstToken = state.tokens[ i ];
-			secondToken = state.tokens[ i + 1 ];
-
-			if (
-				firstToken.isVowel &&
-				secondToken.isVowel &&
-				firstToken.base.toLowerCase() === 'u' &&
-				secondToken.base.toLowerCase() === 'a' &&
-				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				!isIgnoredVowelPair( state, i )
-			) {
-				return i;
-			}
-		}
-
-		return -1;
+		return findVowelPair( state, {
+			firstBase: 'u',
+			secondBase: 'a',
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.NONE,
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.NONE
+		} );
 	}
 
 	function findUnmarkedOaPair( state ) {
-		var i, firstToken, secondToken;
-
-		for ( i = state.tokens.length - 2; i >= 0; i-- ) {
-			firstToken = state.tokens[ i ];
-			secondToken = state.tokens[ i + 1 ];
-
-			if (
-				firstToken.isVowel &&
-				secondToken.isVowel &&
-				firstToken.base.toLowerCase() === 'o' &&
-				secondToken.base.toLowerCase() === 'a' &&
-				firstToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				secondToken.vowelDiacritic === Vietnamese.VowelDiacritic.NONE &&
-				!isIgnoredVowelPair( state, i )
-			) {
-				return i;
-			}
-		}
-
-		return -1;
+		return findVowelPair( state, {
+			firstBase: 'o',
+			secondBase: 'a',
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.NONE,
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.NONE
+		} );
 	}
 
 	function applyHornToUo( state, tonePlacement ) {
-		var pairStart = findHornUoPair( state ),
-			nextState;
+		var pairStart = findHornUoPair( state );
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
-		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, {
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.HORN,
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.HORN
+		}, tonePlacement );
 	}
 
 	function applyHornToUa( state, tonePlacement ) {
-		var pairStart = findUnmarkedUaPair( state ),
-			nextState;
+		var pairStart = findUnmarkedUaPair( state );
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
-		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, {
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.HORN
+		}, tonePlacement );
 	}
 
 	function applyCircumflexToUa( state, tonePlacement ) {
-		var pairStart = findUnmarkedUaPair( state ),
-			nextState;
+		var pairStart = findUnmarkedUaPair( state );
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
-		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.CIRCUMFLEX;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, {
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.CIRCUMFLEX
+		}, tonePlacement );
 	}
 
 	function applyBreveToOa( state, tonePlacement ) {
-		var pairStart = findUnmarkedOaPair( state ),
-			nextState;
+		var pairStart = findUnmarkedOaPair( state );
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
-		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.BREVE;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, {
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.BREVE
+		}, tonePlacement );
 	}
 
 	function applyHornToCircumflexUo( state, tonePlacement ) {
@@ -1626,18 +1596,18 @@
 				Vietnamese.VowelDiacritic.NONE,
 				Vietnamese.VowelDiacritic.CIRCUMFLEX
 			),
-			nextState;
+			pair = {
+				secondVowelDiacritic: Vietnamese.VowelDiacritic.HORN
+			};
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
 		if ( state.structure && state.structure.rime !== 'uô' ) {
-			nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+			pair.firstVowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		}
-		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, pair, tonePlacement );
 	}
 
 	function applyCircumflexToHornUo( state, tonePlacement ) {
@@ -1645,17 +1615,16 @@
 				state,
 				Vietnamese.VowelDiacritic.HORN,
 				Vietnamese.VowelDiacritic.HORN
-			),
-			nextState;
+			);
 
 		if ( pairStart === -1 ) {
 			return null;
 		}
 
-		nextState = cloneState( state );
-		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.NONE;
-		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.CIRCUMFLEX;
-		return resultFromState( nextState, null, tonePlacement );
+		return applyVowelPairDiacritics( state, pairStart, {
+			firstVowelDiacritic: Vietnamese.VowelDiacritic.NONE,
+			secondVowelDiacritic: Vietnamese.VowelDiacritic.CIRCUMFLEX
+		}, tonePlacement );
 	}
 
 	function promoteUoFamilyContinuation( state, tonePlacement ) {
