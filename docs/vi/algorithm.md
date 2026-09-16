@@ -280,6 +280,7 @@ For circumflex commands, the covered precedence is:
 
 ```text
 ươ -> uô
+ua family -> uâ family
 same-base switch, such as ơ -> ô or ă -> â
 simple application, such as a -> â, e -> ê, or o -> ô
 ```
@@ -287,6 +288,7 @@ simple application, such as a -> â, e -> ê, or o -> ô
 For breve commands, the covered precedence is:
 
 ```text
+oa family -> oă family
 same-base switch, such as â -> ă
 simple application, such as a -> ă
 ```

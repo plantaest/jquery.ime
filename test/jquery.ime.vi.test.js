@@ -715,6 +715,28 @@
 			'HORN applies to the ua precursor as ưa'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'hoa', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.BREVE
+			} ),
+			{
+				handled: true,
+				output: 'hoă'
+			},
+			'BREVE applies to the oa precursor as oă'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'xua', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
+			} ),
+			{
+				handled: true,
+				output: 'xuâ'
+			},
+			'CIRCUMFLEX applies to the ua precursor as uâ'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'lôo', {
 				type: commandType.APPLY_VOWEL_DIACRITIC,
 				literal: '6',
@@ -1385,6 +1407,12 @@
 		[
 			[ 'vi-vni', 'to1an', 'toán' ],
 			[ 'vi-vni', 'hoa2n', 'hoàn' ],
+			[ 'vi-vni', 'xua6n', 'xuân' ],
+			[ 'vi-vni', 'xua61t', 'xuất' ],
+			[ 'vi-vni', 'xua6t1', 'xuất' ],
+			[ 'vi-vni', 'oa8m', 'oăm' ],
+			[ 'vi-vni', 'oa8n', 'oăn' ],
+			[ 'vi-vni', 'oa8ng', 'oăng' ],
 			[ 'vi-vni', 'd9ieu62', 'điều' ],
 			[ 'vi-vni', 'nghech61', 'nghếch' ],
 			[ 'vi-vni', 'huop617', 'hướp' ],
@@ -1403,6 +1431,14 @@
 			[ 'vi-telex', 'twoi', 'tươi' ],
 			[ 'vi-telex', 'twois', 'tưới' ],
 			[ 'vi-telex', 'thayas', 'thấy' ],
+			[ 'vi-telex', 'xuaan', 'xuân' ],
+			[ 'vi-telex', 'xuaats', 'xuất' ],
+			[ 'vi-telex', 'xuaast', 'xuất' ],
+			[ 'vi-telex', 'oawm', 'oăm' ],
+			[ 'vi-telex', 'oawn', 'oăn' ],
+			[ 'vi-telex', 'oawng', 'oăng' ],
+			[ 'vi-telex', 'oawc', 'oăc' ],
+			[ 'vi-telex', 'oawt', 'oăt' ],
 			[ 'vi-telex', 'thuongwf', 'thường' ],
 			[ 'vi-telex', 'huopwso', 'huốp' ],
 			[ 'vi-telex', 'nguowi', 'ngươi' ],
@@ -1422,11 +1458,20 @@
 			[ 'vi-telex-simple', 'ww', 'ww' ],
 			[ 'vi-telex-simple', 'tw', 'tw' ],
 			[ 'vi-telex-simple', 'thayw', 'thayw' ],
+			[ 'vi-telex-simple', 'xuaan', 'xuân' ],
+			[ 'vi-telex-simple', 'xuaats', 'xuất' ],
+			[ 'vi-telex-simple', 'oawm', 'oăm' ],
+			[ 'vi-telex-simple', 'oawn', 'oăn' ],
 			[ 'vi-telex-simple', 'thuongwf', 'thường' ],
 			[ 'vi-telex-simple', 'nguowif', 'người' ],
 			[ 'vi-telex-simple', 'tuwoi', 'tươi' ],
 			[ 'vi-telex-simple', 'washington', 'washington' ],
 			[ 'vi-viqr', 'tie^\'ng', 'tiếng' ],
+			[ 'vi-viqr', 'xua^n', 'xuân' ],
+			[ 'vi-viqr', 'xua^\'t', 'xuất' ],
+			[ 'vi-viqr', 'xua^t\'', 'xuất' ],
+			[ 'vi-viqr', 'oa(m', 'oăm' ],
+			[ 'vi-viqr', 'oa(n', 'oăn' ],
 			[ 'vi-viqr', 'ddu+o+`ng', 'đường' ],
 			[ 'vi-viqr', 'nguo+i`', 'người' ],
 			[ 'vi-viqr', 'nguo+`i', 'người' ],
@@ -1438,7 +1483,9 @@
 			[ 'vi-viqr-star', 'tu*oi', 'tươi' ],
 			[ 'vi-viqr-star', 'o\\*', 'o*' ],
 			[ 'vi-vni-reformed', 'hoa2n', 'hoàn' ],
+			[ 'vi-telex-reformed', 'xuaats', 'xuất' ],
 			[ 'vi-telex-reformed', 'hoaf', 'hoà' ],
+			[ 'vi-telex-simple-reformed', 'xuaats', 'xuất' ],
 			[ 'vi-telex-simple-reformed', 'hoaf', 'hoà' ]
 		].forEach( ( testCase ) => {
 			assert.strictEqual(

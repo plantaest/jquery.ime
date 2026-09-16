@@ -144,6 +144,18 @@ uô
 ươ
 ```
 
+OĂ-family:
+
+```text
+oă
+```
+
+UÂ-family:
+
+```text
+uâ
+```
+
 Open `uơ` is distinct from `ươ`. The VNI sequence `huo7` should render `huơ`, not `hươ`, because the horn command applies to `o` alone when the rime is exactly `uo`.
 
 When an ending follows, `uo` can act as an unmarked precursor for the complex families:
@@ -170,6 +182,25 @@ The unmarked `ua` precursor can become `ưa` when horn is explicitly applied to 
 ```text
 hua7  -> hưa
 huaws -> hứa
+```
+
+The same unmarked `ua` source can become UÂ-family material when circumflex is
+explicitly applied before covered continuation:
+
+```text
+xua6n  -> xuân
+xua61t -> xuất
+xuaan  -> xuân
+xuaats -> xuất
+```
+
+The unmarked `oa` source can become OĂ-family material when breve is explicitly
+applied before covered continuation:
+
+```text
+oa8m -> oăm
+oawn -> oăn
+oawng -> oăng
 ```
 
 The engine also supports the narrow family switch between rendered `uô` and

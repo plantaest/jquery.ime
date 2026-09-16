@@ -154,6 +154,10 @@ thuongw  -> thương
 thuongwf -> thường
 huopwso  -> huốp
 huaws    -> hứa
+xuaan    -> xuân
+xuaats   -> xuất
+oawn     -> oăn
+oawm     -> oăm
 nguowi   -> ngươi
 nguowif  -> người
 nguowfi  -> người
@@ -399,6 +403,32 @@ huop71  -> hướp
 huop617 -> hướp
 huop716 -> huốp
 hua7    -> hưa
+```
+
+The engine supports `ua` as an intermediate source for UÂ-family composition
+when circumflex is explicitly applied before covered continuation:
+
+```text
+xua6n   -> xuân
+xua61t  -> xuất
+xua6t1  -> xuất
+xuaan   -> xuân
+xuaats  -> xuất
+xua^n   -> xuân
+xua^'t  -> xuất
+xua^t'  -> xuất
+```
+
+The engine supports `oa` as an intermediate source for OĂ-family composition
+when breve is explicitly applied before covered continuation:
+
+```text
+oa8m  -> oăm
+oa8n  -> oăn
+oawm  -> oăm
+oawn  -> oăn
+oa(m  -> oăm
+oa(n  -> oăn
 ```
 
 Open `uô` with no continuation SHOULD switch back to open `uơ` when horn is
