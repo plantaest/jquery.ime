@@ -172,11 +172,19 @@ hua7  -> hưa
 huaws -> hứa
 ```
 
-The engine also supports the narrow family switch between rendered `uô` and `ươ` while preserving tone:
+The engine also supports the narrow family switch between rendered `uô` and
+`ươ` while preserving tone when a covered continuation is present:
 
 ```text
 hướp6 -> huốp
 huốp7 -> hướp
+```
+
+Open `uô` is treated like the open `uo` source and switches back to open `uơ`
+when horn is applied:
+
+```text
+huô7 -> huơ
 ```
 
 The engine supports narrow same-base vowel-diacritic switches while preserving tone:

@@ -391,7 +391,7 @@ hớp6 -> hốp
 
 Broad replacement among unrelated vowel-diacritic forms remains UNRESOLVED. Do not implement arbitrary replacement behavior until the rule is specified with examples.
 
-The engine supports the narrow `uô <-> ươ` family switch needed for equivalent composition order:
+The engine supports the narrow `uô <-> ươ` family switch needed for equivalent composition order when a covered continuation is present:
 
 ```text
 huop61  -> huốp
@@ -399,6 +399,14 @@ huop71  -> hướp
 huop617 -> hướp
 huop716 -> huốp
 hua7    -> hưa
+```
+
+Open `uô` with no continuation SHOULD switch back to open `uơ` when horn is
+applied:
+
+```text
+huo67 -> huơ
+huô7  -> huơ
 ```
 
 Open `uơ` MUST remain distinct from `ươ` when no continuation follows:

@@ -1581,7 +1581,9 @@
 		}
 
 		nextState = cloneState( state );
-		nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		if ( state.structure && state.structure.rime !== 'uô' ) {
+			nextState.tokens[ pairStart ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
+		}
 		nextState.tokens[ pairStart + 1 ].vowelDiacritic = Vietnamese.VowelDiacritic.HORN;
 		return resultFromState( nextState, null, tonePlacement );
 	}

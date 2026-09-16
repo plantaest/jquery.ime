@@ -33,6 +33,7 @@ testFixtures.push( {
 		{ input: 'hua71', output: 'hứa', description: 'Vietnamese VNI ua plus horn and tone' },
 		{ input: 'huop61', output: 'huốp', description: 'Vietnamese VNI uop plus circumflex and tone' },
 		{ input: 'huop71', output: 'hướp', description: 'Vietnamese VNI uop plus horn and tone' },
+		{ input: 'huo67', output: 'huơ', description: 'Vietnamese VNI open uô changes back to uơ' },
 		{ input: 'huop617', output: 'hướp', description: 'Vietnamese VNI uô changes to ươ' },
 		{ input: 'huop716', output: 'huốp', description: 'Vietnamese VNI ươ changes to uô' },
 		{ input: 'huya1', output: 'huýa', description: 'Vietnamese VNI rare uya tone placement' },

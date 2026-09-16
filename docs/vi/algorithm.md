@@ -268,7 +268,8 @@ substitution table.
 For horn commands, the covered precedence is:
 
 ```text
-uô -> ươ
+open uô -> uơ
+covered uô family -> ươ
 unmarked uo family -> ươ
 ua -> ưa
 same-base switch, such as ô -> ơ

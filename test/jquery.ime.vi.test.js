@@ -738,6 +738,17 @@
 			'HORN changes uô to ươ while preserving tone'
 		);
 		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'huô', {
+				type: commandType.APPLY_VOWEL_DIACRITIC,
+				vowelDiacritic: vowelDiacritic.HORN
+			} ),
+			{
+				handled: true,
+				output: 'huơ'
+			},
+			'HORN changes open uô back to open uơ'
+		);
+		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'hướp', {
 				type: commandType.APPLY_VOWEL_DIACRITIC,
 				vowelDiacritic: vowelDiacritic.CIRCUMFLEX
@@ -1378,6 +1389,7 @@
 			[ 'vi-vni', 'nghech61', 'nghếch' ],
 			[ 'vi-vni', 'huop617', 'hướp' ],
 			[ 'vi-vni', 'huop716', 'huốp' ],
+			[ 'vi-vni', 'huo67', 'huơ' ],
 			[ 'vi-vni', 'lo6o62ng', 'lôồng' ],
 			[ 'vi-vni', 'nguo7i2', 'người' ],
 			[ 'vi-vni', 'nguo72i', 'người' ],
@@ -1536,6 +1548,14 @@
 				output: 'hướp'
 			},
 			'VNI horn changes rendered uô to ươ'
+		);
+		assert.deepEqual(
+			$.ime.inputmethods[ 'vi-vni' ].patterns( 'huô7', '' ),
+			{
+				noop: false,
+				output: 'huơ'
+			},
+			'VNI horn changes open rendered uô back to uơ'
 		);
 		assert.deepEqual(
 			$.ime.inputmethods[ 'vi-vni' ].patterns( 'hướp6', '' ),
