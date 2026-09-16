@@ -1380,10 +1380,10 @@
 			return false;
 		}
 
-		return !(state.structure &&
+		return !( state.structure &&
 			state.structure.checked &&
 			tone !== Vietnamese.Tone.ACUTE &&
-			tone !== Vietnamese.Tone.DOT);
+			tone !== Vietnamese.Tone.DOT );
 	}
 
 	function applyTone( state, command, tonePlacement ) {
@@ -1772,6 +1772,8 @@
 			target = resolveTonePlacement( state ),
 			vowelDiacritic = command.vowelDiacritic;
 
+		// Repeated command keys escape only after another eligible vowel has a
+		// chance to receive the same vowel diacritic.
 		if (
 			target !== -1 &&
 			state.tokens[ target ].vowelDiacritic === vowelDiacritic &&
@@ -1790,6 +1792,8 @@
 			return removeVowelDiacritic( state, target, command.literal, tonePlacement );
 		}
 
+		// Family transitions run before same-base switches and simple one-token
+		// application because complex rimes can share visible source letters.
 		if ( vowelDiacritic === Vietnamese.VowelDiacritic.HORN ) {
 			return applyHornToCircumflexUo( state, tonePlacement ) ||
 				applyHornToUo( state, tonePlacement ) ||
