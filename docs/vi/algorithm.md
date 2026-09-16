@@ -52,6 +52,56 @@ VIQR dd    -> apply d-stroke
 Vietnamese parsing, tone placement, vowel-diacritic handling, validation, and
 rendering are shared by all methods.
 
+## Implementation map
+
+`rules/vi/vi.js` uses numbered top-level sections so the implementation can be
+read in roughly the same order as the pipeline above.
+
+```text
+[1] Namespace constants and lookup tables
+    Shared command, tone, vowel-diacritic, state, rime, and placement enums.
+
+[2] General utilities
+[3] Semantic command factories
+[4] Telex quick-key helpers
+
+[5] Input method command decoders
+    VNI, Telex, Simple Telex, VIQR, and VIQR* keys
+        -> shared semantic commands or adapter-level literal output.
+
+[6] Adapter side candidate helpers
+[7] Candidate extraction
+    jQuery.IME input window
+        -> unchanged prefix + Vietnamese candidate + command key.
+
+[8] Tokenization and Unicode helpers
+[9] Finite rime recognizer
+[10] Orthographic structure analysis
+[11] Candidate parsing and rendering
+    rendered candidate
+        -> semantic tokens
+        -> onset/rime structure
+        -> structural classification
+        -> NFC output.
+
+[12] Semantic transformations
+    semantic command + parsed state
+        -> transformed state
+        -> post-transform structural validation.
+
+[13] Shared engine boundary
+    engine.transformCandidate()
+    engine.reflowCandidate()
+
+[14] jQuery.IME adapter and registration helpers
+[15] Test-facing namespace exports
+[16] Input method registration
+```
+
+The section numbers are navigational aids, not API stability guarantees. The
+stable architectural boundary is still the adapter plus shared engine contract
+described in `architecture.md`.
+
 ## jQuery.IME boundary
 
 Each Vietnamese input method registers a functional `patterns` rule. jQuery.IME
@@ -219,6 +269,38 @@ The engine accepts semantic commands, not direct string substitutions:
 Each command operates on the parsed state and returns a new state plus any
 literal suffix needed for escape behavior.
 
+The semantic-command path is:
+
+```text
+patterns(input, context)
+    -> decodeCommand(input, context, options)
+        -> semantic command
+    -> extractCandidate(input, decoded.key)
+    -> engine.transformCandidate(candidate, command, options)
+        -> parseCandidate(candidate, tonePlacement)
+            -> createToken()
+            -> addCombiningMarkToToken()
+            -> prepareState()
+                -> analyzeStructure()
+                    -> resolveOnset()
+                    -> collectEligibleVowels()
+                    -> findEnding()
+                    -> recognizeRime()
+                    -> findToneTarget()
+                -> classifyStructure()
+        -> transformState(state, command, tonePlacement)
+            -> applyTone()
+            -> removeTone()
+            -> applyVowelDiacritic()
+            -> applyDStroke()
+        -> resultFromState()
+            -> prepareState()
+        -> renderCandidate()
+            -> resolveTonePlacement()
+            -> renderToken()
+    -> adapter returns { noop: false, output: prefix + result.output }
+```
+
 There are two structural gates:
 
 ```text
@@ -264,6 +346,34 @@ tone commands pass through rather than rendering nonstandard checked-tone forms.
 Vowel-diacritic commands target eligible vowels according to the parsed
 structure. The engine uses ordered semantic precedence rather than a broad
 substitution table.
+
+The central dispatcher is:
+
+```text
+applyVowelDiacritic(state, command, tonePlacement)
+    -> repeated-key escape?
+        -> resolveAdditionalVowelDiacriticTarget()
+        -> removeHornFromUo()
+        -> removeVowelDiacritic()
+
+    -> if HORN:
+        -> applyHornToCircumflexUo()
+        -> applyHornToUo()
+        -> applyHornToUa()
+        -> applySameBaseVowelDiacriticSwitch()
+        -> applySimpleVowelDiacritic()
+
+    -> if CIRCUMFLEX:
+        -> applyCircumflexToHornUo()
+        -> applyCircumflexToUa()
+        -> applySameBaseVowelDiacriticSwitch()
+        -> applySimpleVowelDiacritic()
+
+    -> if BREVE:
+        -> applyBreveToOa()
+        -> applySameBaseVowelDiacriticSwitch()
+        -> applySimpleVowelDiacritic()
+```
 
 For horn commands, the covered precedence is:
 
@@ -375,6 +485,19 @@ the candidate. Reflow handles two narrow cases:
 
 If rendering would not change the text, the engine reports `handled: false`.
 
+The reflow path is:
+
+```text
+patterns(input, context)
+    -> decodeCommand(...) returns null
+    -> extractCandidate(input, "")
+    -> engine.reflowCandidate(candidate, options)
+        -> parseCandidate(candidate)
+        -> promoteUoFamilyContinuation()
+            -> renderCandidate() if promotion changes output
+        -> renderCandidate() if semantic tone reflows to a new target
+```
+
 This covers ordinary extension after an early tone command:
 
 ```text
@@ -407,6 +530,33 @@ commands. VIME exposes two Telex profiles:
 * `Simple Telex` keeps standalone `w` literal.
 
 Both profiles leave `[` and `]` literal.
+
+At the decoder level, Telex follows this shape:
+
+```text
+decodeTelexCommand()
+    -> decodeTelexCommandWithOptions(input, context, options, telexOptions)
+        -> tone key?
+            -> createToneCommand()
+        -> z?
+            -> createRemoveToneCommand()
+        -> dd?
+            -> createDStrokeCommand()
+        -> delayed-command literal-run guard? a / e / o / w
+            -> candidateHasLiteralRepeatedKeyRun()
+        -> repeated vowel command?
+            -> createVowelDiacriticCommand()
+        -> single d after candidate?
+            -> createDStrokeCommand()
+        -> delayed-command transform checks? a / e / o / w
+            -> candidateHasTargetVowelDiacritic()
+            -> candidateHasRecognizedLiteralStructure()
+            -> candidateCanReceiveTargetVowelDiacritic()
+        -> default-Telex quick w?
+            -> getTelexQuickWRepeatCommandKey()
+            -> candidateCanUseTelexQuickW()
+            -> createVowelDiacriticCommandWithFallback()
+```
 
 VIME resolves the shared delayed-command cases in this order:
 
