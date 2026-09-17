@@ -23,14 +23,14 @@ input-method path is needed.
 Before changing Vietnamese-specific behavior, architecture, tests, or
 documentation, read:
 
-* `docs/vi/README.md`
-* `docs/vi/status.md`
-* `docs/vi/requirements.md`
-* `docs/vi/architecture.md`
-* `docs/vi/algorithm.md`
-* `docs/vi/orthographic-model.md`
-* `docs/vi/testing.md`
-* `docs/vi/terminology.md`
+* `rules/vi/docs/README.md`
+* `rules/vi/docs/status.md`
+* `rules/vi/docs/requirements.md`
+* `rules/vi/docs/architecture.md`
+* `rules/vi/docs/algorithm.md`
+* `rules/vi/docs/orthographic-model.md`
+* `rules/vi/docs/testing.md`
+* `rules/vi/docs/terminology.md`
 
 These documents define the intended project model. When implementation and
 documentation disagree, do not silently choose one. Identify the discrepancy,
@@ -128,21 +128,18 @@ vi-viqr-star-reformed
 
 all pointing to that source.
 
-Keep this packaging until tests or implementation size prove that a split is
-worth the additional loader complexity.
-
 ## Testing rules
 
 Keep VIME-specific unit and adapter tests in:
 
 ```text
-test/jquery.ime.vi.test.js
+rules/vi/vi.test.js
 ```
 
-Keep VIME-specific fixture data in:
+Keep VIME-specific fixture data in the shared fixture file:
 
 ```text
-test/jquery.ime.vi.test.fixtures.js
+test/jquery.ime.test.fixtures.js
 ```
 
 Use pure engine tests for parser behavior, transformations, validation, tone
@@ -155,19 +152,11 @@ DOM typing when direct engine tests are sufficient.
 A confirmed bug should receive a deterministic automated regression test. Prefer
 the smallest test that reproduces the actual failure.
 
-Before a substantial change is considered complete, run focused Vietnamese
-tests:
-
-```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
-```
+Before a substantial change is considered complete, run the focused Vietnamese
+test workflow documented in `rules/vi/docs/testing.md`.
 
 Before milestones or broad integration changes, run the full relevant
-repository suite:
-
-```bash
-npx grunt test
-```
+repository suite as documented in `rules/vi/docs/testing.md`.
 
 If the full suite fails because of unrelated pre-existing issues, keep
 touched-file checks clean and document the broader failure.
@@ -179,7 +168,7 @@ requirements merely because the current implementation is difficult.
 
 For non-trivial work:
 
-1. read the relevant `docs/vi` files;
+1. read the relevant `rules/vi/docs` files;
 2. inspect current jQuery.IME conventions before changing architecture;
 3. identify the smallest affected layer;
 4. add or update focused tests;
@@ -195,7 +184,7 @@ dependency requires a small additional change.
 
 ## Terminology
 
-Use the canonical terms in `docs/vi/terminology.md`.
+Use the canonical terms in `rules/vi/docs/terminology.md`.
 
 Important terms:
 
@@ -206,7 +195,8 @@ Important terms:
 * use `traditional tone placement` and `reformed tone placement`, not `old
   style` and `new style`.
 
-Do not introduce competing terminology without updating `docs/vi/terminology.md`.
+Do not introduce competing terminology without updating
+`rules/vi/docs/terminology.md`.
 
 ## Documentation maintenance
 

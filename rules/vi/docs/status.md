@@ -5,10 +5,9 @@ place for milestone state, known limits, and deferred work. Normative behavior
 belongs in `requirements.md`; the current engine algorithm belongs in
 `algorithm.md`.
 
-## Current milestone
+## Current status
 
-Phase 5 – engine hardening and documentation is complete for the initial
-jQuery.IME-hosted VIME stage.
+The initial VIME implementation is complete and ready for upstream review.
 
 This means:
 
@@ -113,7 +112,7 @@ Phase 5 hardened the shared engine and documented the current algorithm:
 * foreign-like Telex pass-through for structurally impossible candidates;
 * recognized-literal disambiguation for Telex delayed commands;
 * inventory audit tests and regression fixtures;
-* documentation ownership split across README, requirements, architecture,
+* documentation ownership model across README, requirements, architecture,
   orthographic model, algorithm, testing, terminology, and status.
 
 ## Current boundary
@@ -126,9 +125,7 @@ The engine is not:
 * a dictionary;
 * a broad foreign-word detector;
 * a minority-language orthography model;
-* a historical spelling model;
-* a standalone npm package;
-* an upstream submission package.
+* a historical spelling model.
 
 Those may become future project directions, but they are outside this initial
 Phase 5 closure.
@@ -148,33 +145,12 @@ quick-key escape. Other Vietnamese behavior still prefers documented structural
 behavior and repeated-key escape rather than persistent raw-key history or a
 user-visible spell-check option.
 
-The current implementation is intentionally packaged as one jQuery.IME rule
-file. A later standalone VIME package could split source files once loader and
-distribution constraints are different.
-
-## Deferred work
+## Possible follow-up topics
 
 Future work may include:
 
-* a standalone VIME package outside the jQuery.IME tree;
 * broader rime inventory review with additional external references;
-* deeper manual typing smoke coverage in real host surfaces;
-* optional source split once packaging changes justify it;
-* source simplification around tone-target and vowel-transition internals;
-* upstream submission preparation if the project direction returns to that path.
+* support for rare, dialectal, historical, or specialized spellings when backed
+  by examples and tests.
 
-These are not required to close the current jQuery.IME-hosted Phase 5.
-
-## Verification commands
-
-Focused Vietnamese tests:
-
-```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
-```
-
-Full repository suite:
-
-```bash
-npx grunt test
-```
+These are outside the current upstreamable scope.

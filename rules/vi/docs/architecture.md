@@ -102,9 +102,6 @@ oriented around input methods, not arbitrary shared helper modules. A single
 shared Vietnamese source is the smallest compatible package that preserves one
 engine.
 
-If `vi.js` becomes too large, a later split may be considered only after proving
-how those files will be loaded in examples, tests, and distribution builds.
-
 ## Layer responsibilities
 
 ### jQuery.IME host
@@ -364,9 +361,9 @@ Normal Vietnamese work should touch only:
 ```text
 src/jquery.ime.inputmethods.js
 rules/vi/vi.js
-test/jquery.ime.vi.test.js
-test/jquery.ime.vi.test.fixtures.js
-docs/vi/*.md
+rules/vi/vi.test.js
+test/jquery.ime.test.fixtures.js
+rules/vi/docs/*.md
 ```
 
 jQuery.IME core changes should be treated as blockers requiring a documented

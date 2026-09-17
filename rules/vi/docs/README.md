@@ -30,6 +30,12 @@ The Vietnamese implementation currently lives in one shared rule source:
 rules/vi/vi.js
 ```
 
+VIME-specific documentation lives beside that source in:
+
+```text
+rules/vi/docs/
+```
+
 All Vietnamese input-method metadata entries point to that file:
 
 ```text
@@ -48,8 +54,8 @@ vi-viqr-star-reformed
 The main test files are:
 
 ```text
-test/jquery.ime.vi.test.js
-test/jquery.ime.vi.test.fixtures.js
+test/jquery.ime.test.fixtures.js
+rules/vi/vi.test.js
 ```
 
 ## Design guardrails
@@ -79,6 +85,7 @@ Read the docs by purpose:
 | `testing.md` | Test layout, coverage strategy, and commands. |
 | `terminology.md` | Canonical project vocabulary. |
 | `status.md` | Phase history, current boundary, known limits, and deferred work. |
+| `AGENTS.md` | Contributor guidance for VIME-specific work. |
 
 ## Current boundary
 
@@ -86,20 +93,9 @@ The current engine is a hardened composition engine for covered modern
 Vietnamese typing behavior in jQuery.IME.
 
 It is not a dictionary, broad foreign-word detector, minority-language
-orthography model, historical spelling model, standalone package, or upstream
-submission package. Those directions may be considered later, but they are not
-part of the closed initial scope.
+orthography model, or historical spelling model. Those directions may be
+considered later, but they are not part of the closed initial scope.
 
 ## Verification
 
-Focused Vietnamese tests:
-
-```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
-```
-
-Full repository suite:
-
-```bash
-npx grunt test
-```
+For focused and full verification commands, see `testing.md`.

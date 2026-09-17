@@ -50,7 +50,8 @@ typing behavior.
 
 VIME MUST NOT be described as a Vietnamese spell checker, a dictionary-backed
 validator, a broad foreign-word detector, a minority-language orthography model,
-or an upstream-ready package. Those scopes require explicit future design work.
+or a historical spelling model. Those scopes require explicit future design
+work.
 
 ## Core composition behavior
 

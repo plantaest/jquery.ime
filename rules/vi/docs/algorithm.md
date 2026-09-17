@@ -670,7 +670,3 @@ explicit structural discussion and tests before they are added.
 Some Telex ambiguity is inherent without a raw-key history or a user-facing
 spell-check option. The current strategy is to accept covered Vietnamese
 composition behavior while passing through structurally impossible candidates.
-
-The current jQuery.IME-hosted package keeps all Vietnamese implementation in
-`rules/vi/vi.js`. A later standalone VIME package may split data, parser,
-engine, and adapters differently.

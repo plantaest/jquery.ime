@@ -10,27 +10,24 @@ generic jQuery.IME rule tests more than necessary.
 VIME-specific tests live in:
 
 ```text
-test/jquery.ime.vi.test.js
+rules/vi/vi.test.js
 ```
 
-VIME-specific integration fixtures live in:
+VIME-specific integration fixtures live in the shared jQuery.IME fixture file:
 
 ```text
-test/jquery.ime.vi.test.fixtures.js
+test/jquery.ime.test.fixtures.js
 ```
 
-`test/index.html` loads the generic fixture file first, then the VIME fixture
-file, then the VIME QUnit test file:
+`test/index.html` loads the shared fixture file, then the VIME QUnit test file:
 
 ```html
 <script src="jquery.ime.test.fixtures.js"></script>
-<script src="jquery.ime.vi.test.fixtures.js"></script>
-<script src="jquery.ime.vi.test.js"></script>
+<script src="../rules/vi/vi.test.js"></script>
 ```
 
-The VIME fixture file appends to the shared `testFixtures` array. The generic
-input-method fixture runner in `test/jquery.ime.test.js` then executes those
-fixtures through the normal jQuery.IME typing simulation.
+The generic input-method fixture runner in `test/jquery.ime.test.js` executes
+the VIME fixture entries through the normal jQuery.IME typing simulation.
 
 ## Testing layers
 
@@ -61,7 +58,6 @@ Use adapter tests for:
 * prefix preservation;
 * pass-through objects;
 * tone-placement policy forwarding;
-* VIQR `patterns_shift` bridge behavior;
 * adapter calls to `engine.transformCandidate` and `engine.reflowCandidate`.
 
 Adapter tests may use small fake engine objects when the boundary behavior is
@@ -79,6 +75,7 @@ Good fixture cases include:
 * traditional and reformed tone-placement examples;
 * delayed command examples;
 * repeated-key escape examples;
+* shifted VIQR punctuation examples;
 * representative structural-validation regressions.
 
 ## Current QUnit modules
@@ -86,7 +83,7 @@ Good fixture cases include:
 The current VIME modules are:
 
 ```text
-VIME – Phase 1 integration spike
+VIME – Registration and loading
 VIME – Unicode
 VIME – Parser
 VIME – Transform
@@ -98,15 +95,15 @@ VIME – VIQR adapter
 VIME – VIQR* adapter
 ```
 
-The first module name is historical. It remains as a stable QUnit module name
-for registration and loader behavior.
+The registration module covers input-method metadata and shared-source loading
+behavior.
 
 ## Focused workflow
 
 Run focused Vietnamese tests with:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Phase 1 integration spike,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Registration and loading,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
 Run the full relevant repository suite before closing milestones or broad
