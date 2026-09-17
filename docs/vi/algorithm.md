@@ -556,6 +556,8 @@ decodeTelexCommand()
             -> getTelexQuickWRepeatCommandKey()
             -> candidateCanUseTelexQuickW()
             -> createVowelDiacriticCommandWithFallback()
+        -> remaining w?
+            -> createVowelDiacriticCommand(HORN)
 ```
 
 VIME resolves the shared delayed-command cases in this order:
