@@ -145,9 +145,9 @@ When `noop` is false, jQuery.IME replaces the whole input window. For that
 reason VIME preserves any unchanged prefix and replaces only the extracted
 Vietnamese candidate within that window.
 
-VIQR and VIQR* also expose a small `patterns_shift` bridge. jQuery.IME gives
-`patterns_shift` priority when Shift is pressed, and shifted VIQR punctuation
-needs to delegate back into the same functional adapter.
+Input methods with shifted command keys expose a small `patterns_shift` bridge.
+jQuery.IME gives `patterns_shift` priority when Shift is pressed, and the
+array-based bridge delegates those keys back into the same functional adapter.
 
 ## Candidate extraction
 

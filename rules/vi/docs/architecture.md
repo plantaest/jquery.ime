@@ -65,7 +65,7 @@ only the transformed candidate.
 
 When Shift is pressed, jQuery.IME gives `patterns_shift` priority before
 ordinary `patterns`. In the current core, `patterns_shift` is array-based, so
-VIQR-family shifted punctuation uses a small bridge that delegates back to the
+Vietnamese shifted command keys use a small bridge that delegates back to the
 same functional Vietnamese adapter.
 
 `maxKeyLength` controls how many JavaScript string code units before the caret

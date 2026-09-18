@@ -117,6 +117,12 @@ The default `Telex` profile also maps standalone `w` to visible `ư` when the
 current candidate cannot otherwise receive `w` and is either empty or still an
 onset-only prefix.
 
+Physical Shift SHOULD preserve the same command semantics while rendering the
+uppercase target where applicable. Examples include `DD -> Đ`, `OO -> Ô`,
+`AW -> Ă`, and `AS -> Á`. Default Telex also accepts `W -> Ư`, while Simple
+Telex keeps standalone `W` literal for the same reason it keeps standalone `w`
+literal.
+
 Basic examples:
 
 ```text
@@ -308,7 +314,7 @@ tan\?     -> tan?
 toan'0    -> toan
 ```
 
-VIQR punctuation commands MUST work through functional `patterns` and through the `patterns_shift` bridge used by physical shifted keys such as `?`, `~`, `^`, `(`, and `+`.
+VIQR punctuation commands MUST work through functional `patterns` and through the `patterns_shift` bridge used by physical shifted keys such as `?`, `~`, `^`, `(`, and `+`. Shifted `DD` SHOULD also apply uppercase `Đ`.
 
 VIQR delayed `d`-stroke SHOULD work after later rime material has already been typed when the current rendered candidate identifies an initial `d` target, such as `dacd' -> đác`. This does not add repeated-key escape for VIQR `d`; VIQR's escape behavior remains backslash-based for covered command punctuation.
 
@@ -328,6 +334,7 @@ o\*       -> o*
 ```
 
 VIQR* MUST use the same shifted-key bridge for `?`, `~`, `^`, `(`, and `*`.
+Shifted `DD` SHOULD also apply uppercase `Đ`.
 
 ## Tone behavior
 

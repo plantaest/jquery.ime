@@ -75,7 +75,7 @@ Good fixture cases include:
 * traditional and reformed tone-placement examples;
 * delayed command examples;
 * repeated-key escape examples;
-* shifted VIQR punctuation examples;
+* shifted command-key examples;
 * representative structural-validation regressions.
 
 ## Current QUnit modules
@@ -255,7 +255,7 @@ Simple Telex: ww -> ww
 VIQR-family tests should cover:
 
 * unshifted command keys;
-* shifted punctuation through `patterns_shift`;
+* shifted punctuation and `D`-stroke through `patterns_shift`;
 * backslash escape for covered command keys;
 * VIQR* `*` horn behavior;
 * delayed d-stroke near rime material;

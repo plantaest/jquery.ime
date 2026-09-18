@@ -65,7 +65,7 @@ The spike confirmed the viable jQuery.IME extension path:
 * input methods are registered from rule files through metadata in
   `src/jquery.ime.inputmethods.js`;
 * functional `patterns` rules can call a shared engine boundary;
-* `patterns_shift` needs an array bridge for shifted VIQR punctuation;
+* `patterns_shift` needs an array bridge for shifted command keys;
 * `maxKeyLength` provides the rendered input window;
 * `contextLength` should not become the main Vietnamese composition state;
 * one shared Vietnamese source file is the smallest compatible package.
@@ -97,7 +97,7 @@ Phase 4 added the remaining adapters over the shared engine:
   input;
 * VIQR command decoding and backslash escape;
 * VIQR* horn mapping;
-* shifted VIQR punctuation bridge;
+* shifted command-key bridge;
 * adapter fixtures for all input methods.
 
 ### Phase 5 – engine hardening and documentation

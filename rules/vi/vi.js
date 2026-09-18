@@ -4,6 +4,9 @@
 	var DEFAULT_CONTEXT_LENGTH = 0,
 		TELEX_QUICK_CONTEXT_LENGTH = 2,
 		DEFAULT_MAX_KEY_LENGTH = 16,
+		TELEX_SHIFTED_KEYS = [ 'A', 'E', 'O', 'W', 'D', 'S', 'F', 'R', 'X', 'J', 'Z' ],
+		VIQR_SHIFTED_KEYS = [ '?', '~', '^', '(', '+', 'D' ],
+		VIQR_STAR_SHIFTED_KEYS = [ '?', '~', '^', '(', '*', 'D' ],
 		COMBINING_ACUTE = '\u0301',
 		COMBINING_GRAVE = '\u0300',
 		COMBINING_HOOK = '\u0309',
@@ -2894,8 +2897,8 @@
 	 * Create array-based shifted patterns that delegate back to an adapter.
 	 *
 	 * jQuery.IME gives array `patterns_shift` priority while Shift is pressed.
-	 * Vietnamese adapters use functional `patterns`, so VIQR-family shifted
-	 * punctuation needs this bridge to keep using the shared engine.
+	 * Vietnamese adapters use functional `patterns`, so shifted command keys
+	 * need this bridge to keep using the shared engine.
 	 *
 	 * @param {Function} adapter Functional Vietnamese patterns adapter.
 	 * @param {string[]} shiftedKeys Shifted command characters handled by adapter.
@@ -2908,7 +2911,7 @@
 			[
 				'[\\s\\S]*[' + shiftedKeyPattern + ']',
 				function ( input ) {
-					var result = adapter( input, '' );
+					var result = adapter( input, input.slice( -2 ) );
 
 					return result.noop ? input : result.output;
 				}
@@ -2987,13 +2990,15 @@
 		name: 'Telex',
 		description: 'Vietnamese Telex input method',
 		decodeCommand: decodeTelexCommand,
+		shiftedKeys: TELEX_SHIFTED_KEYS,
 		contextLength: TELEX_QUICK_CONTEXT_LENGTH
 	} );
 	registerInputMethod( {
 		id: 'vi-telex-simple',
 		name: 'Simple Telex',
 		description: 'Vietnamese Simple Telex input method',
-		decodeCommand: decodeSimpleTelexCommand
+		decodeCommand: decodeSimpleTelexCommand,
+		shiftedKeys: TELEX_SHIFTED_KEYS
 	} );
 	registerInputMethod( {
 		id: 'vi-vni',
@@ -3006,20 +3011,21 @@
 		name: 'VIQR',
 		description: 'Vietnamese VIQR input method',
 		decodeCommand: decodeVIQRCommand,
-		shiftedKeys: [ '?', '~', '^', '(', '+' ]
+		shiftedKeys: VIQR_SHIFTED_KEYS
 	} );
 	registerInputMethod( {
 		id: 'vi-viqr-star',
 		name: 'VIQR*',
 		description: 'Vietnamese VIQR* input method',
 		decodeCommand: decodeVIQRStarCommand,
-		shiftedKeys: [ '?', '~', '^', '(', '*' ]
+		shiftedKeys: VIQR_STAR_SHIFTED_KEYS
 	} );
 	registerInputMethod( {
 		id: 'vi-telex-reformed',
 		name: 'Telex (đặt dấu kiểu mới)',
 		description: 'Vietnamese Telex input method with reformed tone placement',
 		decodeCommand: decodeTelexCommand,
+		shiftedKeys: TELEX_SHIFTED_KEYS,
 		tonePlacement: Vietnamese.TonePlacement.REFORMED,
 		contextLength: TELEX_QUICK_CONTEXT_LENGTH
 	} );
@@ -3028,6 +3034,7 @@
 		name: 'Simple Telex (đặt dấu kiểu mới)',
 		description: 'Vietnamese Simple Telex input method with reformed tone placement',
 		decodeCommand: decodeSimpleTelexCommand,
+		shiftedKeys: TELEX_SHIFTED_KEYS,
 		tonePlacement: Vietnamese.TonePlacement.REFORMED
 	} );
 	registerInputMethod( {
@@ -3042,7 +3049,7 @@
 		name: 'VIQR (đặt dấu kiểu mới)',
 		description: 'Vietnamese VIQR input method with reformed tone placement',
 		decodeCommand: decodeVIQRCommand,
-		shiftedKeys: [ '?', '~', '^', '(', '+' ],
+		shiftedKeys: VIQR_SHIFTED_KEYS,
 		tonePlacement: Vietnamese.TonePlacement.REFORMED
 	} );
 	registerInputMethod( {
@@ -3050,7 +3057,7 @@
 		name: 'VIQR* (đặt dấu kiểu mới)',
 		description: 'Vietnamese VIQR* input method with reformed tone placement',
 		decodeCommand: decodeVIQRStarCommand,
-		shiftedKeys: [ '?', '~', '^', '(', '*' ],
+		shiftedKeys: VIQR_STAR_SHIFTED_KEYS,
 		tonePlacement: Vietnamese.TonePlacement.REFORMED
 	} );
 }( jQuery ) );
