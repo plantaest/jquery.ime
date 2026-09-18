@@ -55,15 +55,15 @@ Do not place major architectural decisions only in source comments.
 
 ## Core architectural constraints
 
-Use one shared Vietnamese engine. Do not implement VNI, Telex, VIQR, and VIQR*
+Use one shared Vietnamese engine. Do not implement Telex, VNI, VIQR, and VIQR*
 as independent transformation systems.
 
 Input-method-specific code should primarily translate input keys into shared
 semantic commands:
 
 ```text
-VNI 1
 Telex s
+VNI 1
 VIQR '
 VIQR* '
     -> apply tone acute

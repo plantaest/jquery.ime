@@ -1006,7 +1006,7 @@
 		before: loadVietnameseSource
 	} );
 
-	QUnit.test( 'Vietnamese engine resolves Phase 3 tone-placement regressions', ( assert ) => {
+	QUnit.test( 'Vietnamese engine resolves tone-placement regressions', ( assert ) => {
 		var tone = $.ime.vi.Tone,
 			commandType = $.ime.vi.CommandType;
 

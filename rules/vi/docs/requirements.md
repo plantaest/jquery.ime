@@ -14,19 +14,8 @@ the current engine flow.
 
 ## Supported input methods
 
-The implementation MUST support:
-
-* Telex
-* Simple Telex
-* VNI
-* VIQR
-
-The implementation also supports:
-
-* VIQR* as a VIQR variant using `*` for horn
-* reformed tone-placement variants for VNI, Telex, VIQR, and VIQR*
-
-The Vietnamese selector SHOULD show concise method names in this order:
+The implementation MUST support these Vietnamese input-method entries, shown
+with concise selector labels in this order:
 
 ```text
 Telex
@@ -40,6 +29,9 @@ VNI (đặt dấu kiểu mới)
 VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
 ```
+
+`VIQR*` is a VIQR variant that uses `*` for horn. The `(đặt dấu kiểu mới)`
+variants change only tone-placement policy.
 
 All Vietnamese input methods MUST use one shared Vietnamese composition engine. They may decode keys differently, but once a key becomes a semantic command, Vietnamese parsing, transformation, tone placement, validation, and rendering must be shared.
 

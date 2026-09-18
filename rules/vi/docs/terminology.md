@@ -93,7 +93,7 @@ A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + A
 | `intermediate state` | A candidate that is not complete final spelling yet, but can still develop into valid Vietnamese through more commands. |
 | `unrecognized` | A candidate the Vietnamese engine should leave unchanged. |
 | `semantic command` | A method-independent command such as `APPLY_TONE(ACUTE)`. |
-| `input command` | A method-specific key or sequence, such as VNI `1`, Telex `s`, or VIQR `'`. |
+| `input command` | A method-specific key or sequence, such as Telex `s`, VNI `1`, or VIQR `'`. |
 | `adapter` | The input-method-specific layer that decodes input commands and calls the shared engine. |
 | `engine` | The shared Vietnamese implementation for parsing, transforming, validating, tone placement, and rendering. |
 | `escape behavior` | Behavior that lets users type literal command characters. |

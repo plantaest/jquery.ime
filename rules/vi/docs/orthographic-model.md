@@ -333,8 +333,9 @@ The default policy is traditional tone placement.
 VIME exposes reformed placement as separate input-method variants:
 
 ```text
-vi-vni-reformed
 vi-telex-reformed
+vi-telex-simple-reformed
+vi-vni-reformed
 vi-viqr-reformed
 vi-viqr-star-reformed
 ```
@@ -376,9 +377,9 @@ ngoạn
 huynh
 ```
 
-Therefore the engine must not use a simple string rule such as "tone on `o` whenever the spelling contains `oa`".
+Therefore, the engine must not use a simple string rule such as "tone on `o` whenever the spelling contains `oa`".
 
-Tone-placement policy must remain independent from VNI, Telex, and VIQR key mapping.
+Tone-placement policy must remain independent of Telex, VNI, and VIQR key mapping.
 
 ## Onsets
 

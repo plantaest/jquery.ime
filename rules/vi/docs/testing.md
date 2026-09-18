@@ -71,7 +71,7 @@ become the main place for large grammar inventories.
 
 Good fixture cases include:
 
-* common VNI, Telex, VIQR, and VIQR* typing sequences;
+* common Telex, Simple Telex, VNI, VIQR, and VIQR* typing sequences;
 * traditional and reformed tone-placement examples;
 * delayed command examples;
 * repeated-key escape examples;

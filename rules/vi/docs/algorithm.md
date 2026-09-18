@@ -40,12 +40,12 @@ The adapters are intentionally thin. They translate method-specific keys into
 semantic commands such as:
 
 ```text
-VNI 1      -> apply tone acute
 Telex s    -> apply tone acute
+VNI 1      -> apply tone acute
 VIQR '     -> apply tone acute
 VIQR* '    -> apply tone acute
-VNI 9      -> apply d-stroke
 Telex dd   -> apply d-stroke
+VNI 9      -> apply d-stroke
 VIQR dd    -> apply d-stroke
 ```
 

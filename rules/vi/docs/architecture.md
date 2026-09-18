@@ -286,7 +286,7 @@ tonePlacement:
 ```
 
 `contextLength = 0` keeps raw key history out of the main composition model for
-VNI, VIQR, VIQR*, and Simple Telex.
+Simple Telex, VNI, VIQR, and VIQR*.
 
 Default Telex keeps `contextLength = 2` for the narrow standalone quick-`w`
 escape distinction. This lets the adapter distinguish `ww -> w` from

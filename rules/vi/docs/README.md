@@ -2,7 +2,7 @@
 
 VIME is the Vietnamese Input Method Engine being developed inside jQuery.IME.
 It provides Vietnamese input methods through one shared composition engine
-rather than separate VNI, Telex, and VIQR implementations.
+rather than separate Telex, VNI, and VIQR implementations.
 
 The current jQuery.IME-hosted implementation supports:
 
