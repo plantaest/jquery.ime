@@ -1,8 +1,6 @@
 # VIME
 
-VIME is the Vietnamese Input Method Engine being developed inside jQuery.IME.
-It provides Vietnamese input methods through one shared composition engine
-rather than separate Telex, VNI, and VIQR implementations.
+VIME is the Vietnamese Input Method Engine being developed inside jQuery.IME. It provides Vietnamese input methods through one shared composition engine rather than separate Telex, VNI, and VIQR implementations.
 
 The current jQuery.IME-hosted implementation supports:
 
@@ -16,9 +14,7 @@ The current jQuery.IME-hosted implementation supports:
 
 ## Current status
 
-The initial jQuery.IME-hosted VIME implementation is complete for the supported
-scope. The engine can be exercised in `examples/index.html` and has focused
-QUnit coverage for that scope.
+The initial jQuery.IME-hosted VIME implementation is complete for the supported scope. The engine can be exercised in `examples/index.html` and has focused QUnit coverage for that scope.
 
 See `status.md` for the phase history, known limitations, and deferred work.
 
@@ -67,8 +63,7 @@ VIME follows these constraints:
 * model commands semantically;
 * reconstruct composition state from rendered text near the caret;
 * keep tone independent from the visible Unicode tone mark;
-* distinguish recognized complete structures, composition intermediates, and
-  unrecognized input;
+* distinguish recognized complete structures, composition intermediates, and unrecognized input;
 * validate structure without introducing a dictionary;
 * avoid jQuery.IME core changes unless a concrete blocker is proven.
 
@@ -89,12 +84,9 @@ Read the docs by purpose:
 
 ## Current boundary
 
-The current engine is a hardened composition engine for covered modern
-Vietnamese typing behavior in jQuery.IME.
+The current engine is a hardened composition engine for covered modern Vietnamese typing behavior in jQuery.IME.
 
-It is not a dictionary, broad foreign-word detector, minority-language
-orthography model, or historical spelling model. Those directions may be
-considered later, but they are not part of the closed initial scope.
+It is not a dictionary, broad foreign-word detector, minority-language orthography model, or historical spelling model. Those directions may be considered later, but they are not part of the closed initial scope.
 
 ## Verification
 

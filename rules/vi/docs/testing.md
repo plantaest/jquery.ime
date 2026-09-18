@@ -2,8 +2,7 @@
 
 This document describes how VIME behavior is tested inside jQuery.IME.
 
-The testing goal is to keep Vietnamese behavior covered without modifying the
-generic jQuery.IME rule tests more than necessary.
+The testing goal is to keep Vietnamese behavior covered without modifying the generic jQuery.IME rule tests more than necessary.
 
 ## File layout
 
@@ -26,8 +25,7 @@ test/jquery.ime.test.fixtures.js
 <script src="../rules/vi/vi.test.js"></script>
 ```
 
-The generic input-method fixture runner in `test/jquery.ime.test.js` executes
-the VIME fixture entries through the normal jQuery.IME typing simulation.
+The generic input-method fixture runner in `test/jquery.ime.test.js` executes the VIME fixture entries through the normal jQuery.IME typing simulation.
 
 ## Testing layers
 
@@ -46,8 +44,7 @@ Use pure QUnit tests for:
 * post-transform validation;
 * inventory audits.
 
-These tests should call `$.ime.vi` seams directly and should not simulate DOM
-typing.
+These tests should call `$.ime.vi` seams directly and should not simulate DOM typing.
 
 ### Adapter-boundary tests
 
@@ -60,14 +57,11 @@ Use adapter tests for:
 * tone-placement policy forwarding;
 * adapter calls to `engine.transformCandidate` and `engine.reflowCandidate`.
 
-Adapter tests may use small fake engine objects when the boundary behavior is
-the thing being tested.
+Adapter tests may use small fake engine objects when the boundary behavior is the thing being tested.
 
 ### Integration fixtures
 
-Use fixture tests for representative full typing sequences in each input
-method. Fixtures should cover the user-visible host boundary but should not
-become the main place for large grammar inventories.
+Use fixture tests for representative full typing sequences in each input method. Fixtures should cover the user-visible host boundary but should not become the main place for large grammar inventories.
 
 Good fixture cases include:
 
@@ -95,8 +89,7 @@ VIME – VIQR adapter
 VIME – VIQR* adapter
 ```
 
-The registration module covers input-method metadata and shared-source loading
-behavior.
+The registration module covers input-method metadata and shared-source loading behavior.
 
 ## Focused workflow
 
@@ -106,15 +99,13 @@ Run focused Vietnamese tests with:
 npx grunt connect qunit --modules="VIME – Registration and loading,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
 ```
 
-Run the full relevant repository suite before closing milestones or broad
-integration changes:
+Run the full relevant repository suite before closing milestones or broad integration changes:
 
 ```bash
 npx grunt test
 ```
 
-If the full suite fails for an unrelated pre-existing reason, keep touched files
-clean where possible and record the broader failure in the work summary.
+If the full suite fails for an unrelated pre-existing reason, keep touched files clean where possible and record the broader failure in the work summary.
 
 ## Behavior coverage
 
@@ -122,8 +113,7 @@ Keep coverage organized by behavior rather than by implementation phase.
 
 ### Registration and metadata
 
-Tests should assert that Vietnamese methods are registered with the expected
-display labels and metadata:
+Tests should assert that Vietnamese methods are registered with the expected display labels and metadata:
 
 ```text
 Telex
@@ -138,8 +128,7 @@ VIQR (đặt dấu kiểu mới)
 VIQR* (đặt dấu kiểu mới)
 ```
 
-They should also verify that all methods share the same source and expose the
-expected `maxKeyLength`, `contextLength`, and tone-placement policy.
+They should also verify that all methods share the same source and expose the expected `maxKeyLength`, `contextLength`, and tone-placement policy.
 
 ### Parser and recognizer
 
@@ -155,8 +144,7 @@ Parser and recognizer tests should cover:
 * prefix states;
 * unrecognized states.
 
-Inventory audits may use grouped complete rimes from the current Hieu
-Thi-based coverage set, but they should remain pure engine tests.
+Inventory audits may use grouped complete rimes from the current Hieu Thi-based coverage set, but they should remain pure engine tests.
 
 ### Semantic transforms
 
@@ -199,8 +187,7 @@ huynh2 -> huỳnh
 
 ### Candidate reflow
 
-Candidate reflow should be tested through both pure engine tests and
-representative fixtures:
+Candidate reflow should be tested through both pure engine tests and representative fixtures:
 
 ```text
 to1an -> toán
@@ -209,13 +196,11 @@ nguowfi -> người
 tu7oi -> tươi
 ```
 
-Pure engine tests should assert that reflow does not report handled when
-rendering would not change the candidate.
+Pure engine tests should assert that reflow does not report handled when rendering would not change the candidate.
 
 ### Telex ambiguity
 
-Telex tests should keep paired cases for foreign-like pass-through that does
-not depend on standalone quick `w`, and nearby Vietnamese composition:
+Telex tests should keep paired cases for foreign-like pass-through that does not depend on standalone quick `w`, and nearby Vietnamese composition:
 
 ```text
 droid -> droid
@@ -228,8 +213,7 @@ quocos -> quốc
 gienges -> giếng
 ```
 
-Simple Telex should additionally cover `washington -> washington`. Default
-Telex may transform initial `w` by design.
+Simple Telex should additionally cover `washington -> washington`. Default Telex may transform initial `w` by design.
 
 Tests should also cover recognized literal structures:
 
@@ -240,8 +224,7 @@ thayw -> thayw
 huaws -> hứa
 ```
 
-Default Telex and Simple Telex should be paired where standalone quick `w`
-changes behavior:
+Default Telex and Simple Telex should be paired where standalone quick `w` changes behavior:
 
 ```text
 Telex:        w  -> ư
@@ -263,20 +246,14 @@ VIQR-family tests should cover:
 
 ## Regression policy
 
-A confirmed bug should get a deterministic regression test. Prefer the smallest
-test that reproduces the actual failure.
+A confirmed bug should get a deterministic regression test. Prefer the smallest test that reproduces the actual failure.
 
-Do not remove unrelated assertions, skip failing VIME tests, or relax expected
-Vietnamese behavior because the current implementation is difficult.
+Do not remove unrelated assertions, skip failing VIME tests, or relax expected Vietnamese behavior because the current implementation is difficult.
 
-If a test and the specification genuinely disagree, update the relevant doc and
-make the behavioral decision explicit.
+If a test and the specification genuinely disagree, update the relevant doc and make the behavioral decision explicit.
 
 ## Manual smoke testing
 
-Manual testing in `examples/index.html` is useful for typing feel and host
-integration. It should be treated as smoke coverage, not as a replacement for
-QUnit regressions.
+Manual testing in `examples/index.html` is useful for typing feel and host integration. It should be treated as smoke coverage, not as a replacement for QUnit regressions.
 
-When manual testing finds a bug, add a focused automated regression before
-considering it fixed.
+When manual testing finds a bug, add a focused automated regression before considering it fixed.
