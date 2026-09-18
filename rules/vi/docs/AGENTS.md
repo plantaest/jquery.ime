@@ -207,6 +207,10 @@ Do not duplicate large feature inventories across docs. Put current project
 status in `status.md`, user-visible rules in `requirements.md`, algorithmic
 flow in `algorithm.md`, and software boundaries in `architecture.md`.
 
+For Markdown prose, prefer hard wrapping around 88–100 characters. Do not force
+wrap code blocks, tables, long commands, URLs, or lines where wrapping would
+make the source harder to read.
+
 ## Integration mindset
 
 Keep the implementation understandable to future jQuery.IME maintainers and

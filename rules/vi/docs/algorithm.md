@@ -338,8 +338,9 @@ letters in the same run stay literal. This keeps long `o` sequences usable for
 foreign text and rare literal spellings instead of turning them back into
 extended circumflex composition.
 
-Checked syllables accept only acute (`sắc`) and dot (`nặng`) tone commands. Incompatible checked
-tone commands pass through rather than rendering nonstandard checked-tone forms.
+Checked syllables accept only acute (`sắc`) and dot (`nặng`) tone commands.
+Incompatible checked tone commands pass through rather than rendering
+nonstandard checked-tone forms.
 
 ## Vowel-diacritic behavior
 

@@ -1,14 +1,18 @@
 # VIME terminology
 
-This document defines the canonical terms used in code, tests, and developer documentation. It is not a full linguistic description of Vietnamese.
+This document defines the canonical terms used in code, tests, and developer
+documentation. It is not a full linguistic description of Vietnamese.
 
-Use the English terms here for source identifiers and test names. Vietnamese notes are included only to clarify meaning.
+Use the English terms here for source identifiers and test names. Vietnamese
+notes are included only to clarify meaning.
 
 ## Core rule
 
 VIME models written Vietnamese orthography, not full Vietnamese phonology.
 
-The terms below are engineering terms for parsing and rendering Quốc Ngữ input. If a linguistic analysis and a simpler written-text model disagree, prefer the model that correctly describes the visible input behavior and can be tested.
+The terms below are engineering terms for parsing and rendering Quốc Ngữ input.
+If a linguistic analysis and a simpler written-text model disagree, prefer the
+model that correctly describes the visible input behavior and can be tested.
 
 ## Structural terms
 
@@ -29,7 +33,10 @@ The terms below are engineering terms for parsing and rendering Quốc Ngữ inp
 
 Use `rime`, not `rhyme`.
 
-Use `onset`, `rime`, `nucleus`, and `ending` in implementation code when modeling Vietnamese structure. Do not use vague names such as `prefix`, `suffix`, or `main vowel` for these concepts unless the value is literally a string prefix or suffix at a lower layer.
+Use `onset`, `rime`, `nucleus`, and `ending` in implementation code when
+modeling Vietnamese structure. Do not use vague names such as `prefix`,
+`suffix`, or `main vowel` for these concepts unless the value is literally a
+string prefix or suffix at a lower layer.
 
 ## Tone terms
 
@@ -54,7 +61,8 @@ DOT
 
 Use `tone`, not `accent`.
 
-Use `tone mark` when referring to the visible mark. Do not use `mark` by itself when the distinction matters.
+Use `tone mark` when referring to the visible mark. Do not use `mark` by itself
+when the distinction matters.
 
 ## Vowel terms
 
@@ -81,7 +89,8 @@ o + HORN       -> ơ
 u + HORN       -> ư
 ```
 
-A vowel diacritic is not a tone mark. For example, `ấ` is conceptually `â + ACUTE`, not one undifferentiated accented character.
+A vowel diacritic is not a tone mark. For example, `ấ` is conceptually
+`â + ACUTE`, not one undifferentiated accented character.
 
 ## Composition terms
 
@@ -177,8 +186,10 @@ Avoid `accent` for Vietnamese tone.
 
 Avoid `main vowel` in code. Use `nucleus` or `tone target`, depending on the meaning.
 
-Avoid `valid word` when discussing composition. Use `structurally valid`, `complete`, `intermediate`, or `lexically valid`.
+Avoid `valid word` when discussing composition. Use `structurally valid`,
+`complete`, `intermediate`, or `lexically valid`.
 
 Avoid `old style` and `new style`. Use `traditional tone placement` and `reformed tone placement`.
 
-For Vietnamese user-facing selector labels, `đặt dấu kiểu mới` may be used as the readable label for `reformed tone placement`.
+For Vietnamese user-facing selector labels, `đặt dấu kiểu mới` may be used as
+the readable label for `reformed tone placement`.
