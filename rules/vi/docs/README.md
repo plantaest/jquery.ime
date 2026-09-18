@@ -16,9 +16,9 @@ The current jQuery.IME-hosted implementation supports:
 
 ## Current status
 
-Phase 0 through Phase 5 are complete for the initial jQuery.IME-hosted VIME
-stage. The engine is stable enough for focused manual evaluation in
-`examples/index.html` and has focused QUnit coverage for the current scope.
+The initial jQuery.IME-hosted VIME implementation is complete for the supported
+scope. The engine can be exercised in `examples/index.html` and has focused
+QUnit coverage for that scope.
 
 See `status.md` for the phase history, known limitations, and deferred work.
 

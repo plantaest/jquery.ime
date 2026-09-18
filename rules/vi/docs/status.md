@@ -7,7 +7,7 @@ belongs in `requirements.md`; the current engine algorithm belongs in
 
 ## Current status
 
-The initial VIME implementation is complete and ready for upstream review.
+The initial VIME implementation is complete for the supported jQuery.IME scope.
 
 This means:
 
@@ -127,8 +127,8 @@ The engine is not:
 * a minority-language orthography model;
 * a historical spelling model.
 
-Those may become future project directions, but they are outside this initial
-Phase 5 closure.
+Those may become future project directions, but they are outside the initial
+supported scope.
 
 ## Known limitations
 
@@ -153,4 +153,4 @@ Future work may include:
 * support for rare, dialectal, historical, or specialized spellings when backed
   by examples and tests.
 
-These are outside the current upstreamable scope.
+These are outside the current supported scope.

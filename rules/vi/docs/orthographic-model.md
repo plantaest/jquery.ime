@@ -626,7 +626,7 @@ Current external references used by the model include:
 
 ## Possible modeling follow-ups
 
-These topics may be revisited after the current upstreamable scope:
+These topics may be revisited outside the current supported scope:
 
 * whether the finite composition inventory should be expanded further;
 * how strict structural validation should become beyond the current covered
