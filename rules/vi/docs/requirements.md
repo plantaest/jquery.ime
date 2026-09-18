@@ -717,34 +717,12 @@ Vietnamese support SHOULD be implemented through existing jQuery.IME extension m
 
 Vietnamese behavior MUST NOT break existing jQuery.IME input methods.
 
-A jQuery.IME core change may be considered only when:
-
-1. a concrete Vietnamese requirement cannot be implemented through existing extension points;
-2. the limitation is reproduced by a focused test or manual case;
-3. the blocker is documented before a workaround is built.
+Architecture-level constraints for jQuery.IME integration are documented in
+`architecture.md`.
 
 ## Testing requirements
 
 Every stable Vietnamese behavior MUST have automated tests.
 
-Core engine behavior SHOULD be tested without DOM keyboard simulation.
-
-jQuery.IME integration fixtures MUST cover representative complete typing sequences for all supported Vietnamese input methods.
-
-Tests MUST cover at least:
-
-* tone application and replacement;
-* tone removal;
-* vowel-diacritic application;
-* tone preservation during vowel changes;
-* `d`/`đ`;
-* flexible command placement;
-* repeated-key escape;
-* uppercase;
-* `qu`;
-* `gi`;
-* checked-syllable constraints;
-* Unicode normalization;
-* pass-through behavior for unrecognized input.
-
-Before closing a milestone, the complete relevant repository test suite must pass.
+Detailed test layers, coverage expectations, and verification commands are
+documented in `testing.md`.

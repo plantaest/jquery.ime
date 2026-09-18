@@ -624,14 +624,4 @@ Current external references used by the model include:
 * established Vietnamese input-method behavior for VNI repeated-key escape;
 * [Luong Hieu Thi's orthography-based onset and rime inventory](https://www.hieuthi.com/blog/2017/03/21/all-vietnamese-syllables.html) as a coverage reference, not as a runtime dictionary.
 
-## Possible modeling follow-ups
-
-These topics may be revisited outside the current supported scope:
-
-* whether the finite composition inventory should be expanded further;
-* how strict structural validation should become beyond the current covered
-  model;
-* how to treat rare, borrowed, dialectal, minority-language, historical, and
-  expressive spellings;
-* whether future ambiguity handling needs information beyond orthographic
-  structure.
+For current follow-up topics, see `status.md`.
