@@ -1,6 +1,8 @@
 # VIME status
 
-This document records the current project status and phase history. It is the place for milestone state, known limits, and deferred work. Normative behavior belongs in `requirements.md`; the current engine algorithm belongs in `algorithm.md`.
+This document records the current project status and phase history.
+It is the place for milestone state, known limits, and deferred work.
+Normative behavior belongs in `requirements.md`; the current engine algorithm belongs in `algorithm.md`.
 
 ## Current status
 
@@ -39,7 +41,8 @@ All ten input-method ids load the same source file:
 rules/vi/vi.js
 ```
 
-The `-reformed` variants change only tone-placement policy. They do not fork the parser, transformer, renderer, or adapter logic.
+The `-reformed` variants change only tone-placement policy.
+They do not fork the parser, transformer, renderer, or adapter logic.
 
 ## Phase history
 
@@ -114,11 +117,14 @@ Those may become future project directions, but they are outside the initial sup
 
 ## Known limitations
 
-The recognizer validates written structure, not lexical existence. A Vietnamese-shaped nonce syllable can still be accepted if its structure is in the covered model.
+The recognizer validates written structure, not lexical existence.
+A Vietnamese-shaped nonce syllable can still be accepted if its structure is in the covered model.
 
 Rare, dialectal, minority-language, historical, and specialized spellings may need new structural examples and tests before the recognizer should accept them.
 
-Some Telex ambiguity remains inherent in a rendered-text-first jQuery.IME adapter. Full Telex uses a narrow raw-key context only for standalone `w` quick-key escape. Other Vietnamese behavior still prefers documented structural behavior and repeated-key escape rather than persistent raw-key history or a user-visible spell-check option.
+Some Telex ambiguity remains inherent in a rendered-text-first jQuery.IME adapter.
+Full Telex uses a narrow raw-key context only for standalone `w` quick-key escape.
+Other Vietnamese behavior still prefers documented structural behavior and repeated-key escape rather than persistent raw-key history or a user-visible spell-check option.
 
 ## Possible follow-up topics
 

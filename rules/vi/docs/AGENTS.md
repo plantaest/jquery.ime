@@ -12,7 +12,9 @@ The supported Vietnamese input methods are:
 * VIQR;
 * VIQR* as a VIQR variant using `*` for horn.
 
-All Vietnamese input methods must share one Vietnamese composition engine. User-facing method order is Telex, Simple Telex, VNI, VIQR, then VIQR*. VNI may remain the preferred profile for detailed development examples when only one input-method path is needed.
+All Vietnamese input methods must share one Vietnamese composition engine.
+User-facing method order is Telex, Simple Telex, VNI, VIQR, then VIQR*.
+VNI may remain the preferred profile for detailed development examples when only one input-method path is needed.
 
 ## Required reading
 
@@ -27,7 +29,9 @@ Before changing Vietnamese-specific behavior, architecture, tests, or documentat
 * `rules/vi/docs/testing.md`
 * `rules/vi/docs/terminology.md`
 
-These documents define the intended project model. When implementation and documentation disagree, do not silently choose one. Identify the discrepancy, update the right document, and keep code, tests, and docs aligned.
+These documents define the intended project model.
+When implementation and documentation disagree, do not silently choose one.
+Identify the discrepancy, update the right document, and keep code, tests, and docs aligned.
 
 ## Source-of-truth map
 
@@ -46,7 +50,8 @@ Do not place major architectural decisions only in source comments.
 
 ## Core architectural constraints
 
-Use one shared Vietnamese engine. Do not implement Telex, VNI, VIQR, and VIQR* as independent transformation systems.
+Use one shared Vietnamese engine.
+Do not implement Telex, VNI, VIQR, and VIQR* as independent transformation systems.
 
 Input-method-specific code should primarily translate input keys into shared semantic commands:
 
@@ -60,11 +65,15 @@ VIQR* '
 
 The shared engine owns Vietnamese parsing, structural validation, tone placement, vowel-diacritic behavior, `qu`, `gi`, Unicode rendering, and post-transform validation.
 
-Keep the engine host-independent. Core Vietnamese logic must not depend on DOM APIs, jQuery selectors, keyboard events, caret manipulation, or editable elements.
+Keep the engine host-independent.
+Core Vietnamese logic must not depend on DOM APIs, jQuery selectors, keyboard events, caret manipulation, or editable elements.
 
-Use rendered text near the caret as the main composition state. Do not rely on persistent raw-key history unless a specific behavior demonstrably requires it and has focused tests.
+Use rendered text near the caret as the main composition state.
+Do not rely on persistent raw-key history unless a specific behavior demonstrably requires it and has focused tests.
 
-Treat tone semantically. Do not implement tone relocation as a fundamental operation. Parse the current structure, preserve the semantic tone, update the structure, recalculate tone placement, then render.
+Treat tone semantically.
+Do not implement tone relocation as a fundamental operation.
+Parse the current structure, preserve the semantic tone, update the structure, recalculate tone placement, then render.
 
 Distinguish:
 
@@ -72,11 +81,13 @@ Distinguish:
 * valid intermediate composition states;
 * unrecognized input.
 
-Keep structural and lexical validity separate. VIME is not a dictionary or lexical spell checker.
+Keep structural and lexical validity separate.
+VIME is not a dictionary or lexical spell checker.
 
 ## jQuery.IME integration constraints
 
-Avoid modifying jQuery.IME core. A core change should only be considered when:
+Avoid modifying jQuery.IME core.
+A core change should only be considered when:
 
 1. a concrete Vietnamese requirement cannot be implemented correctly through existing extension mechanisms;
 2. the limitation can be demonstrated with a minimal reproducible case;
@@ -122,9 +133,11 @@ test/jquery.ime.test.fixtures.js
 
 Use pure engine tests for parser behavior, transformations, validation, tone placement, Unicode handling, rendering, and recognizer inventory audits.
 
-Use jQuery.IME integration fixtures for the host boundary and representative complete typing sequences. Do not run large grammar corpora through simulated DOM typing when direct engine tests are sufficient.
+Use jQuery.IME integration fixtures for the host boundary and representative complete typing sequences.
+Do not run large grammar corpora through simulated DOM typing when direct engine tests are sufficient.
 
-A confirmed bug should receive a deterministic automated regression test. Prefer the smallest test that reproduces the actual failure.
+A confirmed bug should receive a deterministic automated regression test.
+Prefer the smallest test that reproduces the actual failure.
 
 Before a substantial change is considered complete, run the focused Vietnamese test workflow documented in `rules/vi/docs/testing.md`.
 
@@ -169,9 +182,12 @@ Do not introduce competing terminology without updating `rules/vi/docs/terminolo
 
 Update documentation when an implementation decision changes documented architecture or behavior.
 
-Do not duplicate large feature inventories across docs. Put current project status in `status.md`, user-visible rules in `requirements.md`, algorithmic flow in `algorithm.md`, and software boundaries in `architecture.md`.
+Do not duplicate large feature inventories across docs.
+Put current project status in `status.md`, user-visible rules in `requirements.md`, algorithmic flow in `algorithm.md`, and software boundaries in `architecture.md`.
 
-For Markdown prose, prefer soft wrapping: keep each ordinary paragraph or list item on one logical line. Do not reflow code blocks, tables, long commands, URLs, or lines where wrapping would make the source harder to read.
+For Markdown prose, prefer sentence-per-line semantic breaks.
+Keep each ordinary sentence on its own line, including sentences inside list items.
+Do not reflow code blocks, tables, long commands, URLs, or lines where wrapping would make the source harder to read.
 
 ## Integration mindset
 

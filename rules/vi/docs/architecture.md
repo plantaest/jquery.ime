@@ -1,6 +1,7 @@
 # VIME architecture
 
-This document defines the software boundaries for Vietnamese input methods in jQuery.IME. For the step-by-step engine algorithm, see `algorithm.md`.
+This document defines the software boundaries for Vietnamese input methods in jQuery.IME.
+For the step-by-step engine algorithm, see `algorithm.md`.
 
 The important boundary is:
 
@@ -26,9 +27,12 @@ VIME must:
 
 ## jQuery.IME facts
 
-Input methods are listed in `src/jquery.ime.inputmethods.js` under `$.ime.sources`. Each source entry names a rule file.
+Input methods are listed in `src/jquery.ime.inputmethods.js` under `$.ime.sources`.
+Each source entry names a rule file.
 
-jQuery.IME loads a rule file through `$.ime.load( inputMethodId )`. A loaded rule file calls `$.ime.register( ... )`.
+jQuery.IME loads a rule file through `$.ime.load( inputMethodId )`.
+A loaded rule file calls `$.ime.register( ...
+)`.
 
 An input method may define `patterns` as a function:
 
@@ -56,13 +60,16 @@ or pass-through:
 }
 ```
 
-When `noop` is false, jQuery.IME replaces the whole `input` window before the caret. Vietnamese adapters therefore preserve unchanged prefix text and replace only the transformed candidate.
+When `noop` is false, jQuery.IME replaces the whole `input` window before the caret.
+Vietnamese adapters therefore preserve unchanged prefix text and replace only the transformed candidate.
 
-When Shift is pressed, jQuery.IME gives `patterns_shift` priority before ordinary `patterns`. In the current core, `patterns_shift` is array-based, so Vietnamese shifted command keys use a small bridge that delegates back to the same functional Vietnamese adapter.
+When Shift is pressed, jQuery.IME gives `patterns_shift` priority before ordinary `patterns`.
+In the current core, `patterns_shift` is array-based, so Vietnamese shifted command keys use a small bridge that delegates back to the same functional Vietnamese adapter.
 
 `maxKeyLength` controls how many JavaScript string code units before the caret are included in `input` before the newest key is appended.
 
-`contextLength` controls raw input-key history. It is not the same thing as rendered text before the caret.
+`contextLength` controls raw input-key history.
+It is not the same thing as rendered text before the caret.
 
 ## Packaging
 
@@ -87,7 +94,9 @@ vi-viqr-reformed           -> rules/vi/vi.js
 vi-viqr-star-reformed      -> rules/vi/vi.js
 ```
 
-Reason: jQuery.IME has a simple rule-file loader. Its dependency support is oriented around input methods, not arbitrary shared helper modules. A single shared Vietnamese source is the smallest compatible package that preserves one engine.
+Reason: jQuery.IME has a simple rule-file loader.
+Its dependency support is oriented around input methods, not arbitrary shared helper modules.
+A single shared Vietnamese source is the smallest compatible package that preserves one engine.
 
 ## Layer responsibilities
 
@@ -127,7 +136,9 @@ Adapters also own the jQuery.IME `patterns` boundary, candidate extraction at th
 
 Adapters must not contain Vietnamese tone-placement rules, parser logic, `qu` handling, `gi` handling, or Unicode rendering tables beyond command decoding.
 
-Telex has delayed-command ambiguity because ordinary letters can also be commands. The adapter may ask shared engine helpers whether a candidate is a recognized literal structure or can receive a semantic command. The actual transformation and validation still belong to the shared engine.
+Telex has delayed-command ambiguity because ordinary letters can also be commands.
+The adapter may ask shared engine helpers whether a candidate is a recognized literal structure or can receive a semantic command.
+The actual transformation and validation still belong to the shared engine.
 
 ### Shared Vietnamese engine
 
@@ -157,7 +168,8 @@ createAdapter( {
 } )
 ```
 
-`tonePlacement` defaults to `TonePlacement.TRADITIONAL`. Reformed input methods reuse the same adapters and pass `TonePlacement.REFORMED`.
+`tonePlacement` defaults to `TonePlacement.TRADITIONAL`.
+Reformed input methods reuse the same adapters and pass `TonePlacement.REFORMED`.
 
 `decodeCommand( input, context, options )` returns one of three forms.
 
@@ -183,7 +195,8 @@ An adapter-level literal replacement:
 }
 ```
 
-Or `null`, meaning the newest key is not a semantic command. In that case the adapter may ask the engine to reflow the rendered candidate.
+Or `null`, meaning the newest key is not a semantic command.
+In that case the adapter may ask the engine to reflow the rendered candidate.
 
 ## Engine contract
 
@@ -264,9 +277,12 @@ tonePlacement:
 
 `contextLength = 0` keeps raw key history out of the main composition model for Simple Telex, VNI, VIQR, and VIQR*.
 
-Default Telex keeps `contextLength = 2` for the narrow standalone quick-`w` escape distinction. This lets the adapter distinguish `ww -> w` from `uww -> uw` after both first steps have rendered as `ư`. The engine still uses rendered text near the caret as its main composition state.
+Default Telex keeps `contextLength = 2` for the narrow standalone quick-`w` escape distinction.
+This lets the adapter distinguish `ww -> w` from `uww -> uw` after both first steps have rendered as `ư`.
+The engine still uses rendered text near the caret as its main composition state.
 
-`maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese candidates plus a command key while keeping replacement scope bounded. Because this is JavaScript string length, decomposed Unicode may consume more code units than precomposed text.
+`maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese candidates plus a command key while keeping replacement scope bounded.
+Because this is JavaScript string length, decomposed Unicode may consume more code units than precomposed text.
 
 If tests prove `16` too small or unnecessarily large, update this document and the implementation constant together.
 
@@ -304,7 +320,8 @@ Do not implement Vietnamese composition as a large ordered regex grammar whose c
 
 The product surface is the jQuery.IME input methods, not a general-purpose Vietnamese library.
 
-Pure engine pieces may be exposed under the small test-facing `$.ime.vi` namespace when they are useful for deterministic QUnit tests. Keep this namespace modest and document any new seam in `testing.md`.
+Pure engine pieces may be exposed under the small test-facing `$.ime.vi` namespace when they are useful for deterministic QUnit tests.
+Keep this namespace modest and document any new seam in `testing.md`.
 
 Current test-facing seams include:
 
@@ -335,6 +352,7 @@ jQuery.IME core changes should be treated as blockers requiring a documented des
 
 ## Examples and manual evaluation
 
-`examples/index.html` loads jQuery.IME metadata and rule files through the same loader used by the rest of the project. Once the dev server is running, changing `rules/vi/vi.js` is normally visible after reloading the example page.
+`examples/index.html` loads jQuery.IME metadata and rule files through the same loader used by the rest of the project.
+Once the dev server is running, changing `rules/vi/vi.js` is normally visible after reloading the example page.
 
 Manual example testing is useful for typing feel, but automated regression tests remain required for confirmed bugs.

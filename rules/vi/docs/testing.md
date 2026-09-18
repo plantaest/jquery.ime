@@ -61,7 +61,8 @@ Adapter tests may use small fake engine objects when the boundary behavior is th
 
 ### Integration fixtures
 
-Use fixture tests for representative full typing sequences in each input method. Fixtures should cover the user-visible host boundary but should not become the main place for large grammar inventories.
+Use fixture tests for representative full typing sequences in each input method.
+Fixtures should cover the user-visible host boundary but should not become the main place for large grammar inventories.
 
 Good fixture cases include:
 
@@ -213,7 +214,8 @@ quocos -> quốc
 gienges -> giếng
 ```
 
-Simple Telex should additionally cover `washington -> washington`. Default Telex may transform initial `w` by design.
+Simple Telex should additionally cover `washington -> washington`.
+Default Telex may transform initial `w` by design.
 
 Tests should also cover recognized literal structures:
 
@@ -246,7 +248,8 @@ VIQR-family tests should cover:
 
 ## Regression policy
 
-A confirmed bug should get a deterministic regression test. Prefer the smallest test that reproduces the actual failure.
+A confirmed bug should get a deterministic regression test.
+Prefer the smallest test that reproduces the actual failure.
 
 Do not remove unrelated assertions, skip failing VIME tests, or relax expected Vietnamese behavior because the current implementation is difficult.
 
@@ -254,6 +257,7 @@ If a test and the specification genuinely disagree, update the relevant doc and 
 
 ## Manual smoke testing
 
-Manual testing in `examples/index.html` is useful for typing feel and host integration. It should be treated as smoke coverage, not as a replacement for QUnit regressions.
+Manual testing in `examples/index.html` is useful for typing feel and host integration.
+It should be treated as smoke coverage, not as a replacement for QUnit regressions.
 
 When manual testing finds a bug, add a focused automated regression before considering it fixed.

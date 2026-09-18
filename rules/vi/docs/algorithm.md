@@ -1,8 +1,10 @@
 # VIME engine algorithm
 
-This document describes how the current VIME engine works from a jQuery.IME input window to rendered Vietnamese output. It is descriptive of the current implementation, not a proposal for a different engine.
+This document describes how the current VIME engine works from a jQuery.IME input window to rendered Vietnamese output.
+It is descriptive of the current implementation, not a proposal for a different engine.
 
-The goal is to make `rules/vi/vi.js` understandable without turning every implementation detail into a public API. Exhaustive rime data belongs in code and focused tests, not in this document.
+The goal is to make `rules/vi/vi.js` understandable without turning every implementation detail into a public API.
+Exhaustive rime data belongs in code and focused tests, not in this document.
 
 ## Pipeline
 
@@ -32,7 +34,8 @@ jQuery.IME input window
                 -> render NFC output if candidate reflow changes the text
 ```
 
-The adapters are intentionally thin. They translate method-specific keys into semantic commands such as:
+The adapters are intentionally thin.
+They translate method-specific keys into semantic commands such as:
 
 ```text
 Telex s    -> apply tone acute
@@ -91,21 +94,27 @@ Vietnamese parsing, tone placement, vowel-diacritic handling, validation, and re
 [16] Input method registration
 ```
 
-The section numbers are navigational aids, not API stability guarantees. The stable architectural boundary is still the adapter plus shared engine contract described in `architecture.md`.
+The section numbers are navigational aids, not API stability guarantees.
+The stable architectural boundary is still the adapter plus shared engine contract described in `architecture.md`.
 
 ## jQuery.IME boundary
 
-Each Vietnamese input method registers a functional `patterns` rule. jQuery.IME calls it as:
+Each Vietnamese input method registers a functional `patterns` rule.
+jQuery.IME calls it as:
 
 ```javascript
 patterns( input, context )
 ```
 
-`input` is the text window before the caret plus the latest key. Its length is bounded by `maxKeyLength`. VIME sets this to `16` for the Vietnamese methods.
+`input` is the text window before the caret plus the latest key.
+Its length is bounded by `maxKeyLength`.
+VIME sets this to `16` for the Vietnamese methods.
 
-`context` is raw key context. VIME keeps `contextLength = 0` for VNI, VIQR, VIQR*, and Simple Telex, because ordinary Vietnamese composition is reconstructed from rendered text near the caret rather than from persistent raw key history.
+`context` is raw key context.
+VIME keeps `contextLength = 0` for VNI, VIQR, VIQR*, and Simple Telex, because ordinary Vietnamese composition is reconstructed from rendered text near the caret rather than from persistent raw key history.
 
-Default Telex uses `contextLength = 2` only for standalone quick-`w` escape. After the first key, both raw `w` and raw `uw` can render as `ư`; the small raw context lets the adapter distinguish `ww -> w` from `uww -> uw`.
+Default Telex uses `contextLength = 2` only for standalone quick-`w` escape.
+After the first key, both raw `w` and raw `uw` can render as `ư`; the small raw context lets the adapter distinguish `ww -> w` from `uww -> uw`.
 
 The adapter returns either a replacement object:
 
@@ -125,9 +134,11 @@ or pass-through:
 }
 ```
 
-When `noop` is false, jQuery.IME replaces the whole input window. For that reason VIME preserves any unchanged prefix and replaces only the extracted Vietnamese candidate within that window.
+When `noop` is false, jQuery.IME replaces the whole input window.
+For that reason VIME preserves any unchanged prefix and replaces only the extracted Vietnamese candidate within that window.
 
-Input methods with shifted command keys expose a small `patterns_shift` bridge. jQuery.IME gives `patterns_shift` priority when Shift is pressed, and the array-based bridge delegates those keys back into the same functional adapter.
+Input methods with shifted command keys expose a small `patterns_shift` bridge.
+jQuery.IME gives `patterns_shift` priority when Shift is pressed, and the array-based bridge delegates those keys back into the same functional adapter.
 
 ## Candidate extraction
 
@@ -143,13 +154,15 @@ The candidate scan walks left from the command key while characters are candidat
 * precomposed Vietnamese Latin characters in the covered Unicode range;
 * combining marks.
 
-Text outside that run remains prefix text and is copied through unchanged. This lets an input window such as `foo toán1` transform only `toán` while preserving `foo `.
+Text outside that run remains prefix text and is copied through unchanged.
+This lets an input window such as `foo toán1` transform only `toán` while preserving `foo `.
 
 For ordinary letter extension with no decoded command, the adapter extracts the candidate with an empty command key and asks the engine whether tone placement should be reflowed.
 
 ## Semantic state
 
-The parser normalizes the candidate to NFD, then builds tokens. A token stores the semantic parts of a rendered character:
+The parser normalizes the candidate to NFD, then builds tokens.
+A token stores the semantic parts of a rendered character:
 
 * base letter;
 * whether the token is a vowel;
@@ -157,7 +170,9 @@ The parser normalizes the candidate to NFD, then builds tokens. A token stores t
 * vowel diacritic, if any;
 * tone, if this rendered surface already carries a tone mark.
 
-Tone is also stored on the candidate state as a semantic value. Rendering later decides which token should visibly carry the tone mark. This is why VIME can change `tóan` to `toán` without treating “move tone mark” as a primary command.
+Tone is also stored on the candidate state as a semantic value.
+Rendering later decides which token should visibly carry the tone mark.
+This is why VIME can change `tóan` to `toán` without treating “move tone mark” as a primary command.
 
 After tokenization, the parser analyzes the written structure:
 
@@ -180,7 +195,8 @@ Special onset handling keeps `qu` and `gi` from behaving like ordinary vowel mat
 
 ## Finite rime recognizer
 
-The recognizer is a structural gate, not a dictionary and not a foreign-language detector. It answers whether the current rime shape is covered by the Vietnamese composition model.
+The recognizer is a structural gate, not a dictionary and not a foreign-language detector.
+It answers whether the current rime shape is covered by the Vietnamese composition model.
 
 The current inventory has two explicit sets:
 
@@ -189,7 +205,8 @@ The current inventory has two explicit sets:
 | `complete` | Rimes recognized as complete structures in the current VIME composition model. |
 | `composable` | Source spellings accepted only as intermediate composition precursors. |
 
-Prefix statuses are derived from both inventories. For example, a shorter rime can be accepted as a prefix of a longer covered rime while the user is still typing.
+Prefix statuses are derived from both inventories.
+For example, a shorter rime can be accepted as a prefix of a longer covered rime while the user is still typing.
 
 The recognizer returns these statuses:
 
@@ -201,7 +218,8 @@ The recognizer returns these statuses:
 | `PREFIX` | `INTERMEDIATE` | The rime is a prefix of a covered longer rime. |
 | `INVALID` | `UNRECOGNIZED` | The rime is outside the current model. |
 
-This split is important for Telex. Literal delayed-command disambiguation should prefer a newly typed letter when the whole candidate is already `STRUCTURALLY_VALID`, but semantic transforms may still operate on `INTERMEDIATE` candidates.
+This split is important for Telex.
+Literal delayed-command disambiguation should prefer a newly typed letter when the whole candidate is already `STRUCTURALLY_VALID`, but semantic transforms may still operate on `INTERMEDIATE` candidates.
 
 Example:
 
@@ -217,7 +235,8 @@ Example:
 thuongwf -> thường
 ```
 
-The source rime `uong` is a composition precursor. It can still receive a later horn command and render as `ương`.
+The source rime `uong` is a composition precursor.
+It can still receive a later horn command and render as `ương`.
 
 ## Semantic commands
 
@@ -272,25 +291,33 @@ post-transform:
     transformed semantic state must not become UNRECOGNIZED
 ```
 
-The post-transform gate re-analyzes and reclassifies the transformed semantic state before rendering it. It does not render output and then parse that output again.
+The post-transform gate re-analyzes and reclassifies the transformed semantic state before rendering it.
+It does not render output and then parse that output again.
 
-Repeated-key escape is handled semantically. If a command repeats an already present value, the engine can remove the value and append the command key literally. This keeps escape behavior method-specific at the key layer but shared at the state layer.
+Repeated-key escape is handled semantically.
+If a command repeats an already present value, the engine can remove the value and append the command key literally.
+This keeps escape behavior method-specific at the key layer but shared at the state layer.
 
-For vowel-diacritic commands, repeated-key escape is delayed while the same command can still apply to another eligible unmarked vowel in the candidate. This preserves explicit multi-vowel spellings such as:
+For vowel-diacritic commands, repeated-key escape is delayed while the same command can still apply to another eligible unmarked vowel in the candidate.
+This preserves explicit multi-vowel spellings such as:
 
 ```text
 lo6o62ng -> lôồng
 ```
 
-For Telex delayed vowel-diacritic letters, escape from an already rendered vowel diacritic is checked before recognized literal structure. This lets `ooo -> oo` and `booong -> boong` work even though `ôo` and related extended rimes are recognized structures in the composition inventory.
+For Telex delayed vowel-diacritic letters, escape from an already rendered vowel diacritic is checked before recognized literal structure.
+This lets `ooo -> oo` and `booong -> boong` work even though `ôo` and related extended rimes are recognized structures in the composition inventory.
 
-After that escape has produced a literal repeated-vowel run, later Telex letters in the same run stay literal. This keeps long `o` sequences usable for foreign text and rare literal spellings instead of turning them back into extended circumflex composition.
+After that escape has produced a literal repeated-vowel run, later Telex letters in the same run stay literal.
+This keeps long `o` sequences usable for foreign text and rare literal spellings instead of turning them back into extended circumflex composition.
 
-Checked syllables accept only acute (`sắc`) and dot (`nặng`) tone commands. Incompatible checked tone commands pass through rather than rendering nonstandard checked-tone forms.
+Checked syllables accept only acute (`sắc`) and dot (`nặng`) tone commands.
+Incompatible checked tone commands pass through rather than rendering nonstandard checked-tone forms.
 
 ## Vowel-diacritic behavior
 
-Vowel-diacritic commands target eligible vowels according to the parsed structure. The engine uses ordered semantic precedence rather than a broad substitution table.
+Vowel-diacritic commands target eligible vowels according to the parsed structure.
+The engine uses ordered semantic precedence rather than a broad substitution table.
 
 The central dispatcher is:
 
@@ -348,11 +375,14 @@ same-base switch, such as â -> ă
 simple application, such as a -> ă
 ```
 
-The precedence matters because several visible results can share letters but represent different composition structures. Every accepted transformation is still re-analyzed and reclassified before rendering. If the resulting semantic state is unrecognized, the adapter passes the original input through.
+The precedence matters because several visible results can share letters but represent different composition structures.
+Every accepted transformation is still re-analyzed and reclassified before rendering.
+If the resulting semantic state is unrecognized, the adapter passes the original input through.
 
 ## Tone placement
 
-Tone placement is a rendering policy. The engine keeps the semantic tone independent from the visible mark and recalculates the mark position whenever it renders the state.
+Tone placement is a rendering policy.
+The engine keeps the semantic tone independent from the visible mark and recalculates the mark position whenever it renders the state.
 
 The default policy is traditional tone placement:
 
@@ -370,7 +400,8 @@ xoá
 huỷ
 ```
 
-The policy difference is visible mainly for open `oa`, `oe`, and `uy` rimes. Rimes with endings usually converge because the ending changes the tone target.
+The policy difference is visible mainly for open `oa`, `oe`, and `uy` rimes.
+Rimes with endings usually converge because the ending changes the tone target.
 
 Tone-target resolution is an ordered resolver:
 
@@ -394,7 +425,8 @@ otherwise
     -> last eligible vowel
 ```
 
-The open `oa`, `oe`, and `uy` policy branch comes before the general family and off-glide branches. This is what lets traditional and reformed placement differ only where the policy intentionally differs.
+The open `oa`, `oe`, and `uy` policy branch comes before the general family and off-glide branches.
+This is what lets traditional and reformed placement differ only where the policy intentionally differs.
 
 ## Rendering
 
@@ -407,11 +439,13 @@ semantic state
     -> normalize NFC
 ```
 
-Case is preserved from the original token bases. `D` with d-stroke renders as `Đ`; `d` with d-stroke renders as `đ`.
+Case is preserved from the original token bases.
+`D` with d-stroke renders as `Đ`; `d` with d-stroke renders as `đ`.
 
 ## Candidate reflow
 
-When the adapter decodes no command, it may still ask the engine to re-render the candidate. Reflow handles two narrow cases:
+When the adapter decodes no command, it may still ask the engine to re-render the candidate.
+Reflow handles two narrow cases:
 
 * tone reflow for candidates that already have a semantic tone;
 * structural promotion from narrow `uơ`/`ưo` precursors into covered ƯƠ-family rimes.
@@ -450,11 +484,13 @@ tu7o    -> tưo
 tu7oi   -> tươi
 ```
 
-The same mechanism is structural rather than lexical. It does not decide whether a word exists; it only re-renders a recognized candidate whose tone target or narrow ƯƠ-family precursor changes after more letters are typed.
+The same mechanism is structural rather than lexical.
+It does not decide whether a word exists; it only re-renders a recognized candidate whose tone target or narrow ƯƠ-family precursor changes after more letters are typed.
 
 ## Telex disambiguation
 
-Telex has more ambiguity than VNI and VIQR because ordinary letters can also be commands. VIME exposes two Telex profiles:
+Telex has more ambiguity than VNI and VIQR because ordinary letters can also be commands.
+VIME exposes two Telex profiles:
 
 * `Telex` supports standalone quick `w -> ư`;
 * `Simple Telex` keeps standalone `w` literal.
@@ -533,7 +569,9 @@ ww -> ww
 tw -> tw
 ```
 
-The recognizer is doing structural work here. It is not hard-coding words such as `droid`. Apart from the two-character context used for default Telex quick-`w` escape, it is not maintaining persistent raw key history.
+The recognizer is doing structural work here.
+It is not hard-coding words such as `droid`.
+Apart from the two-character context used for default Telex quick-`w` escape, it is not maintaining persistent raw key history.
 
 ## Worked examples
 
@@ -580,6 +618,8 @@ The recognizer is doing structural work here. It is not hard-coding words such a
 
 VIME is not a dictionary and does not validate whether a Vietnamese-looking word is lexically real.
 
-The finite recognizer covers the current tested composition inventory. Rare, historical, dialectal, minority-language, or specialized spellings may need explicit structural discussion and tests before they are added.
+The finite recognizer covers the current tested composition inventory.
+Rare, historical, dialectal, minority-language, or specialized spellings may need explicit structural discussion and tests before they are added.
 
-Some Telex ambiguity is inherent without a raw-key history or a user-facing spell-check option. The current strategy is to accept covered Vietnamese composition behavior while passing through structurally impossible candidates.
+Some Telex ambiguity is inherent without a raw-key history or a user-facing spell-check option.
+The current strategy is to accept covered Vietnamese composition behavior while passing through structurally impossible candidates.
