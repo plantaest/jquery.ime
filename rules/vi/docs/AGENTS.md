@@ -189,6 +189,14 @@ For Markdown prose, prefer sentence-per-line semantic breaks.
 Keep each ordinary sentence on its own line, including sentences inside list items.
 Do not reflow code blocks, tables, long commands, URLs, or lines where wrapping would make the source harder to read.
 
+## Commit message suggestions
+
+When asked for a commit message, use Conventional Commits.
+Keep the subject on one line.
+For the optional body, hard-wrap prose in the usual Git commit-message style.
+Do not hard-wrap code blocks, long commands, URLs, or literal examples where wrapping would make copying harder.
+Prefer a short body of one to three sentences unless the change genuinely needs more context.
+
 ## Integration mindset
 
 Keep the implementation understandable to future jQuery.IME maintainers and VIME contributors who may not know Vietnamese.
