@@ -65,6 +65,7 @@ Vietnamese adapters therefore preserve unchanged prefix text and replace only th
 
 When Shift is pressed, jQuery.IME gives `patterns_shift` priority before ordinary `patterns`.
 In the current core, `patterns_shift` is array-based, so Vietnamese shifted command keys use a small bridge that delegates back to the same functional Vietnamese adapter.
+VIME also uses `patterns_shift` to consume Shift+Space as an invisible composition boundary.
 
 `maxKeyLength` controls how many JavaScript string code units before the caret are included in `input` before the newest key is appended.
 
@@ -133,6 +134,7 @@ VIQR* '  -> apply tone acute
 ```
 
 Adapters also own the jQuery.IME `patterns` boundary, candidate extraction at that boundary, and narrow method-level literal behavior such as VIQR escape.
+They also own composition-boundary state for Shift+Space, because this is an input-method lifecycle concern rather than a Vietnamese orthographic transform.
 
 Adapters must not contain Vietnamese tone-placement rules, parser logic, `qu` handling, `gi` handling, or Unicode rendering tables beyond command decoding.
 
@@ -280,6 +282,10 @@ tonePlacement:
 Default Telex keeps `contextLength = 2` for the narrow standalone quick-`w` escape distinction.
 This lets the adapter distinguish `ww -> w` from `uww -> uw` after both first steps have rendered as `ư`.
 The engine still uses rendered text near the caret as its main composition state.
+
+Shift+Space composition-boundary state is stored by the Vietnamese adapter, not in raw `context`.
+The state records a bounded rendered suffix and self-invalidates if the next input window no longer matches it.
+This bounded-state approach is necessary because the current array-based `patterns_shift` bridge does not expose DOM-instance storage to individual shifted-key rules.
 
 `maxKeyLength = 16` gives the adapter enough room for ordinary Vietnamese candidates plus a command key while keeping replacement scope bounded.
 Because this is JavaScript string length, decomposed Unicode may consume more code units than precomposed text.

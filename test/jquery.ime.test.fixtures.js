@@ -22424,6 +22424,27 @@ var palochkaVariants = {
 			{ input: 'oa8m', output: 'oăm', description: 'Vietnamese VNI composes oă before final m' },
 			{ input: 'oa8n', output: 'oăn', description: 'Vietnamese VNI composes oă before final n' },
 			{ input: 'oa8ng', output: 'oăng', description: 'Vietnamese VNI composes oă before final ng' },
+			{ input: 'ki lo6 met1', output: 'ki lô mét', description: 'Vietnamese VNI regular space keeps visible syllable separators' },
+			{
+				input: [
+					[ 'k' ], [ 'i' ],
+					[ ' ', false, true ],
+					[ 'l' ], [ 'o' ], [ '6' ],
+					[ ' ', false, true ],
+					[ 'm' ], [ 'e' ], [ 't' ], [ '1' ]
+				],
+				output: 'kilômét',
+				description: 'Vietnamese VNI Shift+Space starts an invisible composition boundary'
+			},
+			{
+				input: [
+					[ 'v' ], [ 'e' ], [ '1' ], [ 'c' ],
+					[ ' ', false, true ],
+					[ 't' ], [ 'o' ], [ '7' ]
+				],
+				output: 'véctơ',
+				description: 'Vietnamese VNI Shift+Space composes a loanword suffix'
+			},
 			{ input: 'huy3', output: 'hủy', description: 'Vietnamese VNI traditional open uy placement' },
 			{ input: 'huynh2', output: 'huỳnh', description: 'Vietnamese VNI uy plus ending placement' },
 			{ input: 'quyu1', output: 'quýu', description: 'Vietnamese VNI q plus uyu rime placement' },
@@ -22497,6 +22518,13 @@ var palochkaVariants = {
 			{ input: 'ww', output: 'w', description: 'Vietnamese Telex repeated standalone w escape' },
 			{ input: [ [ 'W', false, true ] ], output: 'Ư', description: 'Vietnamese Telex shifted W -> Ư' },
 			{ input: [ [ 'W', false, true ], [ 'W', false, true ] ], output: 'W', description: 'Vietnamese Telex shifted WW escape' },
+			{
+				input: [
+					[ 'a' ], [ ' ', false, true ], [ 's' ], [ 'k' ]
+				],
+				output: 'ask',
+				description: 'Vietnamese Telex Shift+Space keeps the next syllable separate'
+			},
 			{ input: 'tw', output: 'tư', description: 'Vietnamese Telex quick w after an onset prefix' },
 			{ input: 'tww', output: 'tw', description: 'Vietnamese Telex repeated quick w after an onset prefix' },
 			{ input: 'quw', output: 'quw', description: 'Vietnamese Telex keeps w literal after qu onset' },
@@ -22539,6 +22567,17 @@ var palochkaVariants = {
 			{ input: 'twoi', output: 'tươi', description: 'Vietnamese Telex quick w plus oi promotes to ươi' },
 			{ input: 'twois', output: 'tưới', description: 'Vietnamese Telex quick w plus oi before tone' },
 			{ input: 'khuyur', output: 'khuỷu', description: 'Vietnamese Telex applies tone to uyu rime' },
+			{
+				input: [
+					[ 'k' ], [ 'i' ],
+					[ ' ', false, true ],
+					[ 'l' ], [ 'o' ], [ 'o' ],
+					[ ' ', false, true ],
+					[ 'm' ], [ 'e' ], [ 't' ], [ 's' ]
+				],
+				output: 'kilômét',
+				description: 'Vietnamese Telex Shift+Space composes a loanword suffix'
+			},
 			{ input: 'quynhs', output: 'quýnh', description: 'Vietnamese Telex q plus uynh rime placement' },
 			{ input: 'hoaf', output: 'hòa', description: 'Vietnamese Telex traditional tone placement' },
 			{ input: 'quoco', output: 'quôc', description: 'Vietnamese Telex delayed o with qu before tone' },

@@ -272,6 +272,60 @@
 		);
 	} );
 
+	QUnit.test( 'Vietnamese adapter scopes transforms after a composition boundary', ( assert ) => {
+		var adapter, result, transformCalls = 0;
+
+		adapter = $.ime.vi.createAdapter( {
+			inputMethodId: 'vi-vni',
+			decodeCommand: function ( input ) {
+				if ( input.slice( -1 ) !== '1' ) {
+					return null;
+				}
+
+				return {
+					key: '1',
+					command: {
+						type: $.ime.vi.CommandType.APPLY_TONE,
+						tone: $.ime.vi.Tone.ACUTE
+					}
+				};
+			},
+			engine: {
+				reflowCandidate: function () {
+					return { handled: false };
+				},
+				transformCandidate: function ( candidate ) {
+					transformCalls++;
+					assert.strictEqual(
+						candidate,
+						'met',
+						'Adapter passes only the suffix after the composition boundary to the engine'
+					);
+
+					return { handled: true, output: 'mét' };
+				}
+			}
+		} );
+
+		adapter.setCompositionBoundary( 'kilô' );
+		assert.deepEqual(
+			adapter( 'kilôm', '' ),
+			{ noop: true, output: 'kilôm' },
+			'Adapter lets ordinary suffix letters pass through after the boundary'
+		);
+		adapter( 'kilôme', '' );
+		adapter( 'kilômet', '' );
+
+		result = adapter( 'kilômet1', '' );
+
+		assert.deepEqual(
+			result,
+			{ noop: false, output: 'kilômét' },
+			'Adapter preserves the frozen prefix and replaces only the active suffix'
+		);
+		assert.strictEqual( transformCalls, 1, 'Adapter transforms the scoped suffix once' );
+	} );
+
 	QUnit.test( 'Vietnamese adapters keep the expected input-window settings', ( assert ) => {
 		[
 			'vi-vni',

@@ -139,6 +139,13 @@ For that reason VIME preserves any unchanged prefix and replaces only the extrac
 
 Input methods with shifted command keys expose a small `patterns_shift` bridge.
 jQuery.IME gives `patterns_shift` priority when Shift is pressed, and the array-based bridge delegates those keys back into the same functional adapter.
+Shift+Space is also handled through `patterns_shift`.
+It is consumed without inserting visible whitespace and records an invisible composition boundary for the Vietnamese adapter.
+
+When a composition boundary is active, the adapter scopes later input to the rendered suffix after that boundary before calling candidate extraction.
+The frozen prefix is copied through unchanged.
+The boundary state stores the bounded rendered text before the caret and the active suffix.
+If the next input window no longer matches that state, VIME clears the boundary and processes the full input normally.
 
 ## Candidate extraction
 
@@ -158,6 +165,17 @@ Text outside that run remains prefix text and is copied through unchanged.
 This lets an input window such as `foo toán1` transform only `toán` while preserving `foo `.
 
 For ordinary letter extension with no decoded command, the adapter extracts the candidate with an empty command key and asks the engine whether tone placement should be reflowed.
+
+With a composition boundary, this extraction happens only on the active suffix:
+
+```text
+ki Shift+Space loo Shift+Space mets
+        frozen prefix: ki
+        active suffix: loo -> lô
+        frozen prefix: kilô
+        active suffix: mets -> mét
+        final output: kilômét
+```
 
 ## Semantic state
 

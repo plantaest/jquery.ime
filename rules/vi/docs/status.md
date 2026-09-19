@@ -14,6 +14,7 @@ This means:
 * the finite rime recognizer is used for covered structural validation;
 * tone reflow, post-transform validation, repeated-key escape, and Telex delayed-command disambiguation are documented and tested for the current scope;
 * open `uơ` remains distinct but promotes to covered ƯƠ-family rimes when later continuation makes that structure available;
+* Shift+Space provides an invisible composition boundary for covered multi-syllable loanword and respelling workflows;
 * the project has enough documentation for a contributor to understand the current algorithm without reverse-engineering `rules/vi/vi.js` from scratch.
 
 It does not mean VIME is a dictionary-backed Vietnamese spell checker or a complete model of every Vietnamese-related orthography.
@@ -96,6 +97,7 @@ Phase 5 hardened the shared engine and documented the current algorithm:
 * post-transform structural validation;
 * tone reflow after ordinary letter extension;
 * `uơ` continuation promotion into covered ƯƠ-family rimes;
+* Shift+Space composition-boundary support in the Vietnamese adapter;
 * traditional and reformed tone-placement variants;
 * foreign-like Telex pass-through for structurally impossible candidates;
 * recognized-literal disambiguation for Telex delayed commands;

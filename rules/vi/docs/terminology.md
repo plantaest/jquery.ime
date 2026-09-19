@@ -109,6 +109,7 @@ For example, `ấ` is conceptually `â + ACUTE`, not one undifferentiated accent
 | `delayed command` | A command key typed after more rime material, such as Telex `thayas -> thấy` or VNI `dac91 -> đác`. |
 | `recognized literal structure` | A candidate that already parses as a complete structure in the current composition model, so an ambiguous Telex key may remain literal. |
 | `post-transform validation` | Re-analyzing and reclassifying the transformed semantic state before rendering it. If the result is unrecognized, the adapter passes the original input through. |
+| `composition boundary` | An invisible input-method boundary that prevents later keys from transforming text before the boundary. VIME uses Shift+Space for this behavior. |
 
 ## Unicode terms
 

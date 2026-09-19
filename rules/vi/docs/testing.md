@@ -71,6 +71,7 @@ Good fixture cases include:
 * delayed command examples;
 * repeated-key escape examples;
 * shifted command-key examples;
+* Shift+Space composition-boundary examples;
 * representative structural-validation regressions.
 
 ## Current QUnit modules
@@ -197,6 +198,20 @@ tu7oi -> tươi
 ```
 
 Pure engine tests should assert that reflow does not report handled when rendering would not change the candidate.
+
+### Composition boundary
+
+Composition-boundary tests should cover Shift+Space through integration fixtures because the behavior depends on jQuery.IME shifted-key handling.
+
+Representative cases:
+
+```text
+Telex: a Shift+Space s k -> ask
+VNI:   ki Shift+Space lo6 Shift+Space met1 -> kilômét
+Telex: ki Shift+Space loo Shift+Space mets -> kilômét
+```
+
+Adapter-boundary unit tests may use `createAdapter()` directly to assert that the engine receives only the suffix after the boundary.
 
 ### Telex ambiguity
 

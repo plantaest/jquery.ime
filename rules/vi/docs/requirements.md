@@ -567,6 +567,33 @@ This reflow MUST still respect the current parsed structure: `thay1 -> tháy` re
 
 The exact maximum editable range is constrained by jQuery.IME `maxKeyLength` and must be covered by tests.
 
+## Composition boundary
+
+Vietnamese input methods SHOULD treat Shift+Space as an invisible composition boundary.
+Shift+Space MUST NOT insert visible whitespace.
+It tells VIME that later keys may transform only the suffix typed after the boundary.
+
+This is useful for Vietnamese respellings and loanwords written as several logical syllables without visible separators.
+It is also a practical way to type literal Telex command letters after a completed preceding candidate.
+
+Examples:
+
+```text
+Telex: a Shift+Space s k -> ask
+VNI:   ki Shift+Space lo6 Shift+Space met1 -> kilômét
+Telex: ki Shift+Space loo Shift+Space mets -> kilômét
+VNI:   ve1c Shift+Space to7 -> véctơ
+```
+
+Regular Space MUST continue to insert visible whitespace:
+
+```text
+ki lo6 met1 -> ki lô mét
+```
+
+The boundary is an input-method lifecycle feature.
+It must not be implemented as a visible sentinel character in the document.
+
 ## Repeated-key escape
 
 Users MUST have a practical way to enter literal characters that would otherwise be interpreted as input commands.
