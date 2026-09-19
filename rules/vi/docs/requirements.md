@@ -120,6 +120,7 @@ w   -> ư
 ww  -> w
 tw  -> tư
 tww -> tw
+quw -> quw
 [   -> [
 ]   -> ]
 ```
@@ -689,6 +690,9 @@ thayas  -> thấy
 quocos  -> quốc
 gienges -> giếng
 ```
+
+The current structural model does not enforce contextual onset spelling pairs such as `c/k`.
+For example, `cys -> cý`, `coaf -> còa`, `coef -> còe`, and `cuyf -> cùy` are accepted because their rimes are covered and VIME has no user-visible spell-check mode.
 
 VIME does not attempt to infer user intent when a raw Telex sequence is structurally ambiguous.
 For example, `bar` and `gas` may still compose because `ba` and `ga` are Vietnamese candidates before the final Telex tone key.

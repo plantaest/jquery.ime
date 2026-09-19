@@ -524,7 +524,9 @@
 		}
 
 		return state.status !== Vietnamese.StateType.UNRECOGNIZED &&
-			state.structure.vowels.indices.length === 0;
+			state.structure.vowels.indices.length === 0 &&
+			// In `qu`, the `u` belongs to the onset and should not trigger quick `w`.
+			state.structure.onset.toLowerCase() !== 'qu';
 	}
 
 	/**
