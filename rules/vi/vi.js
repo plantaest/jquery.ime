@@ -1362,6 +1362,26 @@
 	}
 
 	/**
+	 * Check whether the written `u` after `q` starts a recognized `uy...` rime.
+	 *
+	 * Most `qu` spellings treat the `u` as onset material, but forms such as
+	 * `quynh` need the same `uynh` rime analysis as `huynh`.
+	 *
+	 * @param {string} lowerText Lowercase candidate text.
+	 * @return {boolean} True if `q` should be the onset and `u` should remain in the rime.
+	 */
+	function shouldKeepQuUInRime( lowerText ) {
+		var rimeStatus;
+
+		if ( lowerText.indexOf( 'quy' ) !== 0 ) {
+			return false;
+		}
+
+		rimeStatus = recognizeRime( lowerText.slice( 1 ) ).status;
+		return rimeStatus !== Vietnamese.RimeStatus.INVALID;
+	}
+
+	/**
 	 * Check whether text is a prefix of any supported Vietnamese onset.
 	 *
 	 * Onset prefixes are accepted as intermediate states while users are still
@@ -1394,6 +1414,14 @@
 	 */
 	function resolveOnset( state, lowerText ) {
 		var i;
+
+		if ( shouldKeepQuUInRime( lowerText ) ) {
+			return {
+				end: 1,
+				ignoredVowelIndices: {},
+				text: 'q'
+			};
+		}
 
 		if ( lowerText.indexOf( 'qu' ) === 0 ) {
 			return {

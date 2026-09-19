@@ -135,6 +135,7 @@ thangws  -> thắng
 haamw    -> hăm
 hoposw   -> hớp
 quocos   -> quốc
+quynhs   -> quýnh
 gienges  -> giếng
 thuongw  -> thương
 thuongwf -> thường
@@ -530,6 +531,7 @@ VNI examples:
 thay61 -> thấy
 thay16 -> thấy
 quoc61 -> quốc
+quynh1 -> quýnh
 gieng61 -> giếng
 dac91  -> đác
 huop617 -> hướp

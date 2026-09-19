@@ -416,6 +416,8 @@ quên
 
 VIME models `qu` as a special onset.
 The written `u` in this onset is ignored for ordinary tone-target and vowel-diacritic selection.
+When the text after `q` forms a recognized `uy...` rime, VIME keeps that `u` inside the rime instead.
+This lets structures such as `quynh`, `quych`, `quyt`, and `quyp` use the same covered rime inventory as `huynh`, `huych`, `huyt`, and `huyp`.
 
 ## Special `gi`
 

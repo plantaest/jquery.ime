@@ -355,6 +355,7 @@
 
 	QUnit.test( 'Vietnamese parser identifies onset, rime, and checked endings', ( assert ) => {
 		var parsedQuoc = $.ime.vi.parseCandidate( 'quoc' ),
+			parsedQuynh = $.ime.vi.parseCandidate( 'quynh' ),
 			parsedGieng = $.ime.vi.parseCandidate( 'gieng' ),
 			parsedKhuay = $.ime.vi.parseCandidate( 'khuay' ),
 			parsedHuya = $.ime.vi.parseCandidate( 'huya' ),
@@ -363,6 +364,10 @@
 		assert.strictEqual( parsedQuoc.structure.onset, 'qu', 'qu is represented as a special onset' );
 		assert.strictEqual( parsedQuoc.structure.rime, 'oc', 'The u in qu is not part of the rime' );
 		assert.strictEqual( parsedQuoc.structure.toneTargetIndex, 2, 'quoc places tone on o' );
+
+		assert.strictEqual( parsedQuynh.structure.onset, 'q', 'q is the onset before covered uy-family rimes' );
+		assert.strictEqual( parsedQuynh.structure.rime, 'uynh', 'The u after q remains part of the uynh rime' );
+		assert.strictEqual( parsedQuynh.structure.toneTargetIndex, 2, 'quynh places tone on y' );
 
 		assert.strictEqual( parsedGieng.structure.onset, 'gi', 'gi is represented as a special onset before another vowel' );
 		assert.strictEqual( parsedGieng.structure.rime, 'eng', 'The i in gi is not part of the rime before another vowel' );
