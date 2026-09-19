@@ -86,7 +86,6 @@ VIME – Tone placement
 VIME – Adapter
 VIME – Telex adapter
 VIME – Simple Telex adapter
-VIME – VIQR adapter
 VIME – VIQR* adapter
 ```
 
@@ -97,7 +96,7 @@ The registration module covers input-method metadata and shared-source loading b
 Run focused Vietnamese tests with:
 
 ```bash
-npx grunt connect qunit --modules="VIME – Registration and loading,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR adapter,VIME – VIQR* adapter"
+npx grunt connect qunit --modules="VIME – Registration and loading,VIME – Unicode,VIME – Parser,VIME – Transform,VIME – Tone placement,VIME – Adapter,VIME – Telex adapter,VIME – Simple Telex adapter,VIME – VIQR* adapter"
 ```
 
 Run the full relevant repository suite before closing milestones or broad integration changes:

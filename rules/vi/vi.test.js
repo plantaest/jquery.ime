@@ -1201,20 +1201,6 @@
 		);
 	} );
 
-	QUnit.module( 'VIME – VIQR adapter', {
-		before: loadVietnameseSource
-	} );
-
-	QUnit.test( 'VIQR adapter preserves pass-through object shape', ( assert ) => {
-		var viqr = $.ime.inputmethods[ 'vi-viqr' ].patterns;
-
-		assert.deepEqual(
-			viqr( 'đd', '' ),
-			{ noop: true, output: 'đd' },
-			'VIQR delayed d-stroke does not add repeated-key escape'
-		);
-	} );
-
 	QUnit.module( 'VIME – VIQR* adapter', {
 		before: loadVietnameseSource
 	} );

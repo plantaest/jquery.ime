@@ -289,6 +289,7 @@ a^        -> â
 a(        -> ă
 o+        -> ơ
 dd        -> đ
+ddd       -> dd
 dacd'     -> đác
 tie^'ng   -> tiếng
 Vie^.t    -> Việt
@@ -302,7 +303,9 @@ VIQR punctuation commands MUST work through functional `patterns` and through th
 Shifted `DD` SHOULD also apply uppercase `Đ`.
 
 VIQR delayed `d`-stroke SHOULD work after later rime material has already been typed when the current rendered candidate identifies an initial `d` target, such as `dacd' -> đác`.
-This does not add repeated-key escape for VIQR `d`; VIQR's escape behavior remains backslash-based for covered command punctuation.
+VIQR `d`-stroke commands SHOULD use repeated-key escape, matching the shared `d`-stroke behavior.
+For example, `đd -> dd`, `ĐD -> DD`, and `dacdd -> dacd`.
+VIQR's escape behavior for covered command punctuation remains backslash-based.
 
 ## VIQR* mapping
 

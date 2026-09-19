@@ -22669,8 +22669,13 @@ var palochkaVariants = {
 			{ input: 'o+', output: 'ơ', description: 'Vietnamese VIQR plus applies horn' },
 			{ input: 'truong+', output: 'trương', description: 'Vietnamese VIQR applies horn to uo before final ng' },
 			{ input: 'dd', output: 'đ', description: 'Vietnamese VIQR dd applies d-stroke' },
+			{ input: 'ddd', output: 'dd', description: 'Vietnamese VIQR repeated d-stroke key escape' },
 			{ input: [ [ 'D', false, true ], [ 'D', false, true ] ], output: 'Đ', description: 'Vietnamese VIQR shifted DD applies d-stroke' },
+			{ input: [ [ 'D', false, true ], [ 'D', false, true ], [ 'D', false, true ] ], output: 'DD', description: 'Vietnamese VIQR shifted DDD escapes d-stroke' },
+			{ input: [ [ 'D', false, true ], [ 'D', false, true ], [ 'd', false ] ], output: 'Dd', description: 'Vietnamese VIQR shifted DD followed by d escapes d-stroke' },
+			{ input: [ [ 'd', false ], [ 'd', false ], [ 'D', false, true ] ], output: 'dD', description: 'Vietnamese VIQR dd followed by shifted D escapes d-stroke' },
 			{ input: 'dacd', output: 'đac', description: 'Vietnamese VIQR delayed d-stroke without tone' },
+			{ input: 'dacdd', output: 'dacd', description: 'Vietnamese VIQR delayed d-stroke repeated-key escape' },
 			{ input: 'xua^n', output: 'xuân', description: 'Vietnamese VIQR composes uâ before final n' },
 			{ input: 'xua^\'t', output: 'xuất', description: 'Vietnamese VIQR composes uâ before checked final t' },
 			{ input: 'xua^t\'', output: 'xuất', description: 'Vietnamese VIQR composes uâ before tone after checked final t' },
@@ -22694,7 +22699,7 @@ var palochkaVariants = {
 			{ input: 'tan?', output: 'tản', description: 'Vietnamese VIQR question-mark tone' },
 			{ input: 'tan\\?', output: 'tan?', description: 'Vietnamese VIQR backslash escapes question mark' },
 			{ input: 'a\\^', output: 'a^', description: 'Vietnamese VIQR backslash escapes circumflex' },
-			{ input: 'đd', output: 'đd', description: 'Vietnamese VIQR delayed d-stroke has no repeated-key escape' },
+			{ input: 'đd', output: 'dd', description: 'Vietnamese VIQR rendered d-stroke repeated-key escape' },
 			{
 				input: [
 					[ 'a', false ],
@@ -22766,8 +22771,10 @@ var palochkaVariants = {
 		tests: [
 			{ input: 'ddu*o*`ng', output: 'đường', description: 'Vietnamese VIQR* ddu*o*`ng -> đường' },
 			{ input: 'dacd', output: 'đac', description: 'Vietnamese VIQR* delayed d-stroke without tone' },
+			{ input: 'dacdd', output: 'dacd', description: 'Vietnamese VIQR* delayed d-stroke repeated-key escape' },
 			{ input: 'dacd\'', output: 'đác', description: 'Vietnamese VIQR* delayed d-stroke before tone' },
 			{ input: [ [ 'D', false, true ], [ 'D', false, true ] ], output: 'Đ', description: 'Vietnamese VIQR* shifted DD applies d-stroke' },
+			{ input: [ [ 'D', false, true ], [ 'D', false, true ], [ 'D', false, true ] ], output: 'DD', description: 'Vietnamese VIQR* shifted DDD escapes d-stroke' },
 			{ input: 'tu*oi', output: 'tươi', description: 'Vietnamese VIQR* promotes ưo plus i to ươi' },
 			{ input: 'u*', output: 'ư', description: 'Vietnamese VIQR* u* -> ư' },
 			{ input: 'o*', output: 'ơ', description: 'Vietnamese VIQR* o* -> ơ' },

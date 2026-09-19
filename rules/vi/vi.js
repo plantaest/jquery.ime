@@ -361,21 +361,6 @@
 	}
 
 	/**
-	 * Build a d-stroke command that cannot escape back to literal input.
-	 *
-	 * @param {string} key Input-method command key.
-	 * @return {DecodedCommand} Decoded semantic command.
-	 */
-	function createOneWayDStrokeCommand( key ) {
-		return {
-			key: key,
-			command: {
-				type: Vietnamese.CommandType.APPLY_D_STROKE
-			}
-		};
-	}
-
-	/**
 	 * Build an adapter-level literal replacement that bypasses engine transform.
 	 *
 	 * @param {string} key Input-method command key.
@@ -747,7 +732,7 @@
 		}
 
 		if ( key === 'd' || key === 'D' ) {
-			return createOneWayDStrokeCommand( key );
+			return createDStrokeCommand( key );
 		}
 
 		if ( toneCommands[ key ] ) {
