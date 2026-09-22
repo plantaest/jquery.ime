@@ -22447,6 +22447,7 @@ var palochkaVariants = {
 			},
 			{ input: 'huy3', output: 'hủy', description: 'Vietnamese VNI traditional open uy placement' },
 			{ input: 'huynh2', output: 'huỳnh', description: 'Vietnamese VNI uy plus ending placement' },
+			{ input: 'quy1', output: 'quý', description: 'Vietnamese VNI open quy places tone on y' },
 			{ input: 'quyu1', output: 'quýu', description: 'Vietnamese VNI q plus uyu rime placement' },
 			{ input: 'quyn1', output: 'quýn', description: 'Vietnamese VNI q plus uyn rime placement' },
 			{ input: 'quynh1', output: 'quýnh', description: 'Vietnamese VNI q plus uynh rime placement' },
@@ -22578,6 +22579,7 @@ var palochkaVariants = {
 				output: 'kilômét',
 				description: 'Vietnamese Telex Shift+Space composes a loanword suffix'
 			},
+			{ input: 'quys', output: 'quý', description: 'Vietnamese Telex open quy places tone on y' },
 			{ input: 'quynhs', output: 'quýnh', description: 'Vietnamese Telex q plus uynh rime placement' },
 			{ input: 'hoaf', output: 'hòa', description: 'Vietnamese Telex traditional tone placement' },
 			{ input: 'quoco', output: 'quôc', description: 'Vietnamese Telex delayed o with qu before tone' },
@@ -22738,6 +22740,7 @@ var palochkaVariants = {
 			{ input: 'gya.', output: 'gỵa', description: 'Vietnamese VIQR accepts rare gya spelling with dot tone' },
 			{ input: 'khuya\'', output: 'khuýa', description: 'Vietnamese VIQR applies acute tone to rare uya rime' },
 			{ input: 'khuyu?', output: 'khuỷu', description: 'Vietnamese VIQR applies hook tone to uyu rime' },
+			{ input: 'quy\'', output: 'quý', description: 'Vietnamese VIQR open quy places tone on y' },
 			{ input: 'queo.', output: 'quẹo', description: 'Vietnamese VIQR applies dot tone after qu onset' },
 			{ input: 'queue.', output: 'queue.', description: 'Vietnamese VIQR keeps foreign-like queue literal' },
 			{ input: 'zi`', output: 'zi`', description: 'Vietnamese VIQR keeps structurally impossible zi literal' },

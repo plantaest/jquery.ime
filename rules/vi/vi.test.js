@@ -409,6 +409,7 @@
 
 	QUnit.test( 'Vietnamese parser identifies onset, rime, and checked endings', ( assert ) => {
 		var parsedQuoc = $.ime.vi.parseCandidate( 'quoc' ),
+			parsedQuy = $.ime.vi.parseCandidate( 'quy' ),
 			parsedQuynh = $.ime.vi.parseCandidate( 'quynh' ),
 			parsedGieng = $.ime.vi.parseCandidate( 'gieng' ),
 			parsedKhuay = $.ime.vi.parseCandidate( 'khuay' ),
@@ -418,6 +419,10 @@
 		assert.strictEqual( parsedQuoc.structure.onset, 'qu', 'qu is represented as a special onset' );
 		assert.strictEqual( parsedQuoc.structure.rime, 'oc', 'The u in qu is not part of the rime' );
 		assert.strictEqual( parsedQuoc.structure.toneTargetIndex, 2, 'quoc places tone on o' );
+
+		assert.strictEqual( parsedQuy.structure.onset, 'qu', 'open quy keeps qu as the onset' );
+		assert.strictEqual( parsedQuy.structure.rime, 'y', 'open quy uses y as the rime' );
+		assert.strictEqual( parsedQuy.structure.toneTargetIndex, 2, 'open quy places tone on y' );
 
 		assert.strictEqual( parsedQuynh.structure.onset, 'q', 'q is the onset before covered uy-family rimes' );
 		assert.strictEqual( parsedQuynh.structure.rime, 'uynh', 'The u after q remains part of the uynh rime' );
@@ -1116,6 +1121,14 @@
 			} ),
 			{ handled: true, output: 'hủy' },
 			'Open uy keeps traditional tone placement on u'
+		);
+		assert.deepEqual(
+			$.ime.vi.engine.transformCandidate( 'quy', {
+				type: commandType.APPLY_TONE,
+				tone: tone.ACUTE
+			} ),
+			{ handled: true, output: 'quý' },
+			'Open quy treats u as part of the qu onset and places tone on y'
 		);
 		assert.deepEqual(
 			$.ime.vi.engine.transformCandidate( 'huynh', {

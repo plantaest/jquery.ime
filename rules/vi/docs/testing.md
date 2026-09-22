@@ -27,6 +27,15 @@ test/jquery.ime.test.fixtures.js
 
 The generic input-method fixture runner in `test/jquery.ime.test.js` executes the VIME fixture entries through the normal jQuery.IME typing simulation.
 
+Optional corpus audit tooling lives in:
+
+```text
+rules/vi/vi.test.corpus.js
+```
+
+This script reads external corpus files and is not part of the default QUnit or Grunt suite.
+The corpus itself is not vendored in this repository.
+
 ## Testing layers
 
 Use the lightest layer that proves the behavior.
@@ -107,6 +116,30 @@ npx grunt test
 ```
 
 If the full suite fails for an unrelated pre-existing reason, keep touched files clean where possible and record the broader failure in the work summary.
+
+## Optional corpus audit
+
+The corpus audit script can measure broad composition coverage against external word lists:
+
+```bash
+node rules/vi/vi.test.corpus.js --traditional path/to/vi-DauCu.dic --reformed path/to/vi-DauMoi.dic
+```
+
+It bootstraps `rules/vi/vi.js` in Node with a minimal jQuery.IME stub, generates canonical keystrokes for Telex, Simple Telex, VNI, VIQR, and VIQR*, then types those keys through the registered adapters.
+The key generator follows the same broad strategy as AVIM's corpus test: convert each Unicode word to a VIQR-like intermediate form, keep base letters first, then append the generated tone and vowel-diacritic commands.
+
+This means the audit checks one canonical typing order per word, not every possible composition order.
+For example, `xuất` may be audited as `xuat61` for VNI, but the corpus audit does not automatically try variants such as `xua6t1` or `xua61t`.
+Known flexible-order behavior should stay covered by focused unit tests or integration fixtures.
+
+The script is an audit tool, not a normative dictionary test.
+Failures should be triaged before they become required regression tests because a corpus may include acronyms, loanwords, historical spellings, rare place names, or entries outside the current VIME composition scope.
+
+Use method filters when investigating one input path:
+
+```bash
+node rules/vi/vi.test.corpus.js --traditional path/to/vi-DauCu.dic --no-reformed --methods=vni
+```
 
 ## Behavior coverage
 
